@@ -1,57 +1,83 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { progress } from '../../progress/progress.svelte';
 	import { achievements, earned } from '../../progress/achievements';
 	import Icon from '../Icon.svelte';
 
-	/** Achievements as hexagonal medals: struck in gold once earned, outlined with progress until then. */
-	let showAll = $state(false);
+	/**
+	 * Achievements as hexagonal medals. `summary` (the dashboard) shows what is earned
+	 * as a compact row plus the next three within reach; `full` (the You page) shows them all.
+	 */
+	let { mode = 'summary', fresh = [] }: { mode?: 'summary' | 'full'; fresh?: string[] } = $props();
 
 	const list = $derived(
 		achievements({ data: progress.data, unlockedCards: progress.unlockedCards.length, bestStreak: progress.bestStreak })
-			// Earned first, then the ones closest to done.
 			.map((a) => ({ ...a, won: earned(a), ratio: Math.min(1, a.have / a.need) }))
 			.sort((a, b) => Number(b.won) - Number(a.won) || b.ratio - a.ratio)
 	);
-	const won = $derived(list.filter((a) => a.won).length);
-	const shown = $derived(showAll ? list : list.slice(0, 8));
+	const won = $derived(list.filter((a) => a.won));
+	const next = $derived(list.filter((a) => !a.won).slice(0, 3));
 
 	// Flat-top hexagon on a 100 × 100 box.
 	const hex = '50,4 90,27 90,73 50,96 10,73 10,27';
+	const toGo = (a: { have: number; need: number }) => a.need - Math.min(a.have, a.need);
 </script>
 
-<section class="medals" aria-labelledby="medals-title">
+{#snippet medal(a: (typeof list)[number], size: 'sm' | 'lg')}
+	<span class="medal {size}" class:won={a.won} aria-hidden="true">
+		<svg viewBox="0 0 100 100">
+			<polygon class="base" points={hex} />
+			{#if !a.won}<polygon class="track" points={hex} pathLength="100" stroke-dasharray="{a.ratio * 100} 100" />{/if}
+		</svg>
+		<span class="ico"><Icon name={a.icon} size={size === 'sm' ? 22 : 30} stroke={2} /></span>
+	</span>
+{/snippet}
+
+<section class="medals" id="achievements" aria-labelledby="medals-title">
 	<div class="row-head">
 		<h2 id="medals-title">Achievements</h2>
-		<p class="count"><strong>{won}</strong> of {list.length} earned</p>
+		<p class="count"><strong>{won.length}</strong> of {list.length} earned</p>
 	</div>
 
-	<ul>
-		{#each shown as a (a.id)}
-			<li class:won={a.won}>
-				<span class="medal" aria-hidden="true">
-					<svg viewBox="0 0 100 100">
-						<polygon class="base" points={hex} />
-						{#if !a.won}
-							<!-- Progress runs round the edge of the hexagon. -->
-							<polygon class="track" points={hex} pathLength="100" stroke-dasharray="{a.ratio * 100} 100" />
-						{/if}
-					</svg>
-					<span class="ico"><Icon name={a.icon} size={30} stroke={2} /></span>
-				</span>
-				<span class="title">{a.title}</span>
-				<span class="goal">{a.goal}</span>
-				<span class="state">
-					{#if a.won}Earned{:else}{Math.min(a.have, a.need)} / {a.need}{/if}
-				</span>
-			</li>
-		{/each}
-	</ul>
-
-	{#if list.length > 8}
-		<button type="button" class="more" onclick={() => (showAll = !showAll)} aria-expanded={showAll}>
-			{showAll ? 'Show fewer' : `Show all ${list.length} achievements`}
-			<Icon name="chevron-right" size={18} stroke={2.5} />
-		</button>
+	{#if mode === 'summary'}
+		{#if won.length}
+			<ul class="earned" aria-label="Earned">
+				{#each won as a (a.id)}
+					<li class:fresh={fresh.includes(a.id)}>
+						{@render medal(a, 'sm')}
+						<span class="title">{a.title}</span>
+						{#if fresh.includes(a.id)}<span class="new">New</span>{/if}
+					</li>
+				{/each}
+			</ul>
+		{/if}
+		{#if next.length}
+			<h3>Within reach</h3>
+			<ul class="next">
+				{#each next as a (a.id)}
+					<li>
+						{@render medal(a, 'sm')}
+						<span class="text">
+							<span class="title">{a.title}</span>
+							<span class="goal">{a.goal}</span>
+							<span class="state">{Math.min(a.have, a.need)} / {a.need}{toGo(a) === 1 ? ' · one to go' : ''}</span>
+						</span>
+					</li>
+				{/each}
+			</ul>
+		{/if}
+		<a class="more" href="{resolve('/you')}#achievements">See all {list.length} achievements <Icon name="arrow-right" size={16} stroke={2.5} /></a>
+	{:else}
+		<ul class="all">
+			{#each list as a (a.id)}
+				<li class:won={a.won}>
+					{@render medal(a, 'lg')}
+					<span class="title">{a.title}</span>
+					<span class="goal">{a.goal}</span>
+					<span class="state">{a.won ? 'Earned' : `${Math.min(a.have, a.need)} / ${a.need}`}</span>
+				</li>
+			{/each}
+		</ul>
 	{/if}
 </section>
 
@@ -69,8 +95,14 @@
 		letter-spacing: -0.025em;
 	}
 
+	h3 {
+		margin-top: 1.4rem;
+		font-size: 1.12rem;
+		font-weight: 800;
+	}
+
 	.count {
-		color: var(--ink-3);
+		color: var(--ink-2);
 		font-weight: 700;
 	}
 
@@ -80,26 +112,21 @@
 		color: var(--gold);
 	}
 
-	ul {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 1.5rem 1rem;
-		margin-top: 1.1rem;
-	}
-
-	li {
-		display: grid;
-		justify-items: center;
-		gap: 0.25rem;
-		text-align: center;
-	}
-
+	/* Medals */
 	.medal {
 		position: relative;
 		display: grid;
 		place-items: center;
-		width: 5.5rem;
+		flex: none;
 		aspect-ratio: 1;
+	}
+
+	.medal.sm {
+		width: 3.5rem;
+	}
+
+	.medal.lg {
+		width: 5.5rem;
 		margin-bottom: 0.3rem;
 	}
 
@@ -144,30 +171,89 @@
 
 	.title {
 		font-family: var(--display);
-		font-size: 1.05rem;
 		font-weight: 800;
 		line-height: 1.15;
 	}
 
-	li:not(.won) .title {
+	.goal {
+		font-size: 0.95rem;
+		line-height: 1.4;
 		color: var(--ink-2);
 	}
 
-	.goal {
-		font-size: 0.88rem;
-		line-height: 1.35;
-		color: var(--ink-3);
-	}
-
 	.state {
-		font-size: 0.8rem;
+		font-size: 0.88rem;
 		font-weight: 800;
-		color: var(--ink-3);
+		color: var(--ink-2);
 		font-variant-numeric: tabular-nums;
 	}
 
-	.won .state {
-		color: var(--gold);
+	/* Summary: earned medals as a compact wrap of small medals with names. */
+	.earned {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem 1.25rem;
+		margin-top: 1rem;
+	}
+
+	.earned li {
+		position: relative;
+		display: grid;
+		justify-items: center;
+		gap: 0.3rem;
+		width: 5.5rem;
+		text-align: center;
+	}
+
+	.earned .title {
+		font-size: 0.95rem;
+	}
+
+	.earned li.fresh .medal {
+		animation: strike 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+	}
+
+	@keyframes strike {
+		from {
+			transform: scale(0.4) rotate(-30deg);
+			opacity: 0;
+		}
+	}
+
+	.new {
+		position: absolute;
+		top: -0.4rem;
+		right: 0;
+		padding: 0.1rem 0.45rem;
+		border-radius: 999px;
+		background: var(--gold);
+		color: #1d1400;
+		font-size: 0.8rem;
+		font-weight: 800;
+	}
+
+	.next {
+		display: grid;
+		gap: 0.2rem;
+		margin-top: 0.4rem;
+	}
+
+	.next li {
+		display: flex;
+		align-items: center;
+		gap: 0.9rem;
+		padding: 0.6rem 0;
+		border-bottom: 1px solid var(--rule);
+	}
+
+	.text {
+		display: grid;
+		gap: 0.1rem;
+	}
+
+	.next .title {
+		font-size: 1.05rem;
+		color: var(--ink);
 	}
 
 	.more {
@@ -175,22 +261,53 @@
 		align-items: center;
 		gap: 0.3rem;
 		min-height: 2.75rem;
-		margin-top: 1rem;
-		padding: 0;
-		border: 0;
-		background: none;
+		margin-top: 0.6rem;
 		color: var(--gold);
 		font-weight: 800;
-		cursor: pointer;
+		text-decoration: none;
 	}
 
-	.more[aria-expanded='true'] :global(svg) {
-		transform: rotate(-90deg);
+	.more:hover {
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+	}
+
+	/* Full gallery */
+	.all {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1.5rem 1rem;
+		margin-top: 1.1rem;
+	}
+
+	.all li {
+		display: grid;
+		justify-items: center;
+		gap: 0.25rem;
+		text-align: center;
+	}
+
+	.all .title {
+		font-size: 1.05rem;
+	}
+
+	.all li:not(.won) .title {
+		color: var(--ink-2);
+	}
+
+	.all .won .state {
+		color: var(--gold);
 	}
 
 	@media (min-width: 560px) {
-		ul {
-			grid-template-columns: repeat(4, minmax(0, 1fr));
+		.all {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.earned li.fresh .medal {
+			animation: none;
 		}
 	}
 </style>

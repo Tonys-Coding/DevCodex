@@ -30,7 +30,10 @@
 	const line = $derived.by(() => {
 		if (!ready || days.length === 0) return 'Start with the featured lesson. Every lesson you finish opens a pack of concept cards.';
 		const open = progress.inProgress.length;
-		if (progress.streak >= 2) return `You’re on a ${progress.streak}-day streak. One more lesson keeps it going.`;
+		if (progress.streak >= 2)
+			return days.includes(todayKey)
+				? `You’re on a ${progress.streak}-day streak, and today already counts.`
+				: `You’re on a ${progress.streak}-day streak. One lesson today keeps it going.`;
 		if (open) return `You have ${open} ${open === 1 ? 'lesson' : 'lessons'} in progress. Pick up right where you stopped.`;
 		return 'Ready for the next lesson on your path?';
 	});
@@ -53,7 +56,8 @@
 	}
 </script>
 
-<header class="greeting">
+<!-- The text fades in once progress has loaded. Everything below it appears at the same moment, so nothing jumps. -->
+<header class="greeting" class:ready>
 	<h1>
 		{hello}{#if name}, <span class="name">{name}</span>{/if}.
 	</h1>
@@ -69,15 +73,26 @@
 			</div>
 			<p class="note">Stored only on this device.</p>
 		</form>
-	{:else if progress.loaded}
+	{:else if progress.loaded && !name}
 		<button type="button" class="edit" onclick={edit}>
 			<Icon name="pencil" size={16} stroke={2} />
-			{name ? 'Change your name' : 'Add your name'}
+			Add your name
 		</button>
 	{/if}
 </header>
 
 <style>
+	h1,
+	.line {
+		opacity: 0;
+		transition: opacity 250ms ease-out;
+	}
+
+	.ready h1,
+	.ready .line {
+		opacity: 1;
+	}
+
 	h1 {
 		font-size: clamp(2.1rem, 7vw, 3.3rem);
 		font-weight: 800;
@@ -169,6 +184,13 @@
 		color: var(--ink-3);
 		font-weight: 700;
 		cursor: pointer;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		h1,
+		.line {
+			transition: none;
+		}
 	}
 
 	.note {
