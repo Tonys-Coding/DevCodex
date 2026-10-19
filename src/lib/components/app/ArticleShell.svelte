@@ -68,21 +68,21 @@
 <article class="read t-{meta.track}">
 	<a class="back" href={resolve('/learn')}><Icon name="arrow-left" size={18} stroke={2} /> Learn</a>
 	<header class="cover lv-{meta.level}">
-		<p class="tags">
+		<p class="tags meta-row">
 			<LevelTag level={meta.level} />
-			<span class="chip">{track.title}</span>
+			<span>{track.title}</span>
 		</p>
 		<h1>{meta.title}</h1>
 		<p class="dek">{meta.dek}</p>
 		<div class="facts">
 			<p class="assumes"><strong>Assumes:</strong> {meta.assumes}</p>
-			<p class="chips">
-				<span class="chip"><Icon name="clock" size={15} stroke={2} /> {meta.minutes} min</span>
-				<span class="chip">{toc.length} sections</span>
+			<p class="chips meta-row">
+				<span><Icon name="clock" size={16} stroke={2} /> {meta.minutes} min</span>
+				<span>{toc.length} sections</span>
 				{#if done}
-					<span class="chip done"><Icon name="check" size={15} stroke={2.5} /> Finished</span>
+					<span class="done"><Icon name="check" size={16} stroke={2.5} /> Finished</span>
 				{:else}
-					<span class="chip gold"><Icon name="cards" size={15} stroke={2} /> {pack.length} cards inside</span>
+					<span class="gold"><Icon name="cards" size={16} stroke={2} /> {pack.length} cards inside</span>
 				{/if}
 			</p>
 		</div>
@@ -286,9 +286,6 @@
 	}
 
 	.tags {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.45rem;
 		margin-bottom: 0.9rem;
 	}
 
@@ -318,9 +315,6 @@
 	}
 
 	.chips {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.45rem;
 		margin-top: 1rem;
 	}
 
@@ -328,28 +322,6 @@
 		margin-top: 2rem;
 	}
 
-	.chip {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.35rem;
-		padding: 0.3rem 0.75rem;
-		border-radius: 999px;
-		background: var(--ground);
-		border: 1px solid var(--rule);
-		font-size: 0.88rem;
-		font-weight: 700;
-		color: var(--ink-2);
-	}
-
-	.chip.gold {
-		color: var(--gold);
-		border-color: rgb(255 201 74 / 0.35);
-	}
-
-	.chip.done {
-		color: var(--structures);
-		border-color: rgb(31 207 169 / 0.35);
-	}
 
 	.packzone,
 	.practice {
@@ -555,9 +527,6 @@
 			grid-column: 2;
 			grid-row: 2 / span 2;
 			align-self: end;
-			padding: 1.1rem 1.2rem;
-			border-radius: 18px;
-			background: var(--ground);
 		}
 
 		.cover .assumes {

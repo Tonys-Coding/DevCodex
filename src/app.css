@@ -410,6 +410,36 @@ a {
 	}
 }
 
+/*
+ * Boxless metadata: facts set inline with icons and generous spacing between them,
+ * instead of outlined pills. Spacing, not separator dots, so a wrapped line never
+ * starts with a stray mark. Used for reading time, card counts, badges and status.
+ */
+.meta-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.35rem 1.25rem;
+	font-size: 0.95rem;
+	font-weight: 700;
+	line-height: 1.3;
+	color: var(--ink-2);
+}
+
+.meta-row > * {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+}
+
+.meta-row .gold {
+	color: var(--gold);
+}
+
+.meta-row .done {
+	color: var(--structures);
+}
+
 /* Syntax colours for highlighted samples (teach/highlight.ts). Same palette as the practice editor. */
 .tk-k {
 	color: #b9a3ff;

@@ -128,11 +128,8 @@
 	}
 
 	.diff {
-		padding: 0.15rem 0.6rem;
-		border-radius: 999px;
-		font-size: 0.8rem;
+		font-size: 0.88rem;
 		font-weight: 800;
-		background: var(--panel-2);
 		color: var(--ink-2);
 	}
 

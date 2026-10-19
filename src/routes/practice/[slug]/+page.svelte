@@ -96,10 +96,10 @@
 	<section class="brief" aria-labelledby="p-title">
 		<a class="back" href={resolve('/practice')}><Icon name="arrow-left" size={18} stroke={2} /> Practice</a>
 		<h1 id="p-title">{problem.title}</h1>
-		<p class="badges">
-			<span class="badge">{problem.pattern}</span>
-			<span class="badge plain {problem.difficulty.toLowerCase()}">{problem.difficulty}</span>
-			{#if progress.data.solved[problem.id]}<span class="badge solved"><Icon name="check" size={14} stroke={3} /> Solved</span>{/if}
+		<p class="badges meta-row">
+			<span class="pattern">{problem.pattern}</span>
+			<span class="{problem.difficulty.toLowerCase()}">{problem.difficulty}</span>
+			{#if progress.data.solved[problem.id]}<span class="gold"><Icon name="check" size={16} stroke={3} /> Solved</span>{/if}
 		</p>
 		<p class="statement">{problem.statement}</p>
 		<div class="examples">
@@ -216,40 +216,19 @@
 	}
 
 	.badges {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.4rem;
 		margin-top: 0.7rem;
 	}
 
-	.badge {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.3rem;
-		padding: 0.2rem 0.7rem;
-		border-radius: 999px;
-		background: var(--t);
-		color: var(--t-ink);
-		font-weight: 800;
-		font-size: 0.8rem;
+	.badges .pattern {
+		color: var(--t);
 	}
 
-	.badge.plain {
-		background: var(--panel-2);
-		color: var(--ink-2);
-	}
-
-	.badge.easy {
+	.badges .easy {
 		color: var(--entry);
 	}
 
-	.badge.medium {
+	.badges .medium {
 		color: var(--experienced);
-	}
-
-	.badge.solved {
-		background: var(--gold);
-		color: #1d1400;
 	}
 
 	.statement {
@@ -436,25 +415,21 @@
 		}
 	}
 
+	/* The run result, set as a headline-sized line rather than a pill. */
 	.score {
-		display: inline-flex;
+		display: flex;
 		align-items: center;
-		gap: 0.45rem;
-		padding: 0.4rem 0.95rem;
-		border-radius: 999px;
-		background: var(--panel-2);
+		gap: 0.5rem;
 		font-family: var(--display);
 		font-weight: 800;
-		font-size: 1.05rem;
+		font-size: 1.2rem;
 	}
 
 	.score.all {
-		background: rgb(31 207 169 / 0.16);
 		color: var(--structures);
 	}
 
 	.score.bad {
-		background: rgb(255 107 129 / 0.12);
 		color: var(--miss);
 	}
 

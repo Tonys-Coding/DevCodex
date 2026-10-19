@@ -2,7 +2,7 @@
 	import type { Level } from '../../content/types';
 	import { levelById } from '../../content/levels';
 
-	/** `solid` sits on a track-coloured surface, such as the home quest panel. */
+	/** `solid` sits on a track-coloured surface, such as the home quest panel: it takes that surface's ink. */
 	let { level, solid = false }: { level: Level; solid?: boolean } = $props();
 	const info = $derived(levelById(level));
 </script>
@@ -15,13 +15,11 @@
 </span>
 
 <style>
+	/* Boxless: level-coloured pips and label, no outline. */
 	.level {
 		display: inline-flex;
 		align-items: center;
 		gap: 0.45rem;
-		padding: 0.3rem 0.75rem 0.3rem 0.65rem;
-		border-radius: 999px;
-		border: 1.5px solid var(--lv);
 		color: var(--lv);
 		font-size: 0.88rem;
 		font-weight: 800;
@@ -30,7 +28,7 @@
 	}
 
 	.level.solid {
-		background: var(--lv-ink);
+		color: var(--t-ink);
 	}
 
 	.grade {

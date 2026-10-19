@@ -142,13 +142,13 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 0.45rem;
-		min-height: 2.6rem;
-		padding: 0 0.85rem;
-		border-radius: 999px;
-		background: var(--panel);
-		border: 1px solid var(--rule);
+		min-height: 2.75rem;
+		padding: 0 0.25rem;
 		color: var(--ink-2);
+		font-weight: 700;
 		text-decoration: none;
+		text-underline-offset: 0.3em;
+		text-decoration-thickness: 2px;
 		font-variant-numeric: tabular-nums;
 	}
 
@@ -158,7 +158,9 @@
 
 	.collected:hover,
 	.collected.active {
-		border-color: var(--gold);
+		color: var(--ink);
+		text-decoration-line: underline;
+		text-decoration-color: var(--gold);
 	}
 
 	main {
