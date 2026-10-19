@@ -54,17 +54,51 @@ const slug = (text: string) =>
 		.replace(/[^a-z0-9]+/g, '-')
 		.replace(/^-|-$/g, '');
 
-function addSections(code: string): string {
+/** The article's <h2> sections, with the ids the preprocessor gives them. */
+export function sectionsOf(code: string): TocEntry[] {
 	const toc: TocEntry[] = [];
 	const seen = new Set<string>();
-	const withIds = code.replace(/<h2>([\s\S]*?)<\/h2>/g, (_, inner: string) => {
+	for (const [, inner] of code.matchAll(/<h2>([\s\S]*?)<\/h2>/g)) {
 		const text = strip(inner);
 		let id = slug(text) || 'section';
 		for (let n = 2; seen.has(id); n++) id = `${slug(text)}-${n}`;
 		seen.add(id);
 		toc.push({ id, text });
-		return `<h2 id="${id}">${inner}</h2>`;
+	}
+	return toc;
+}
+
+/**
+ * Key terms per section: whatever the lesson sets in <strong>, <code> or <dt> between one
+ * <h2> and the next. Search uses them to find "ETag" or "preflight" inside a section.
+ */
+export function keywordsOf(code: string): Record<string, string[]> {
+	const toc = sectionsOf(code);
+	const parts = code.split(/<h2>[\s\S]*?<\/h2>/).slice(1);
+	return Object.fromEntries(
+		toc.map((t, i) => {
+			const words = new Set<string>();
+			for (const [, inner] of (parts[i] ?? '').matchAll(/<(?:strong|code|dt)>([\s\S]*?)<\/(?:strong|code|dt)>/g)) {
+				const word = strip(inner).replace(/^[“"]|[”".:]$/g, '');
+				if (word.length > 1 && word.length <= 40) words.add(word);
+			}
+			return [t.id, [...words]];
+		})
+	);
+}
+
+/** Every <Quiz> in the article: its title (default "Quick check") and number of questions. */
+export function quizzesOf(code: string, articleId: string) {
+	return [...code.matchAll(/<Quiz\b[\s\S]*?\n\/>/g)].map(([block]) => {
+		const title = block.match(/\btitle="([^"]+)"/)?.[1] ?? 'Quick check';
+		return { key: `${articleId}:${title}`, title, total: (block.match(/\bprompt:/g) ?? []).length };
 	});
+}
+
+function addSections(code: string): string {
+	const toc = sectionsOf(code);
+	let i = 0;
+	const withIds = code.replace(/<h2>([\s\S]*?)<\/h2>/g, (_, inner: string) => `<h2 id="${toc[i++].id}">${inner}</h2>`);
 	const exported = `\n\texport const toc = ${JSON.stringify(toc)};\n`;
 	const moduleScript = /<script lang="ts" module>/;
 	return moduleScript.test(withIds)
