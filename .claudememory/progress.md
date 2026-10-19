@@ -42,6 +42,10 @@
 
 - 2026-10-19: Binder dashboard revamp (greeting, metrics, featured, continue reading, lesson pockets, tracks, achievements, cards), with reading and quiz tracking. Tested end to end over CDP. Check, build and the detector are clean.
 
+- 2026-10-19: Dashboard UX pass built in full from a 17-point senior review: adaptive hero, phone fold, onboarding, backup reminder, wins since last visit, week streak, trimmed medals, sized review, binder rows by track, text-size floor, a level legend, no greeting jump, linked stats, removable in-progress, pocket actions, plus start level, weekly goal and card of the day. Tested new and returning users at 375 and 1440px.
+
+- 2026-10-19: Packs gated behind real reading (sections, active time, quick checks), and an interactive lesson star map beside the greeting. The gate was tested over CDP: jumping to the end, failing then passing the quiz, and the time requirement.
+
 ## Next checkpoint
 
 The user approves the first commit and push. Then Pages goes live at `https://tonys-coding.github.io/DevCodex/` and installs get tested on devices.

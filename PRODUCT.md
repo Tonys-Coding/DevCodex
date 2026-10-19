@@ -25,11 +25,12 @@ Learners may read a lesson in a longer desktop session or review a single concep
 ## Capabilities and Constraints
 
 - The intended learning loop is lesson → trivia → related deeper concept cards.
+- Packs are earned, not clicked: a lesson's pack opens only after most sections are read past, real time is spent (counted only while the tab is visible and the reader is active), and its quick checks are passed. All checks run on the device; there is no server to cheat against, so this is a guardrail for honest learners, not anti-tampering.
 - The short feed uses swipeable visual explainers and engineering scenarios, not video at launch.
 - Initial topics span web fundamentals, programming concepts, and basic data structures.
 - Coding practice is a smaller section: write and run Python (Pyodide) and JavaScript (Web Worker) solutions in the browser against tests; problems are written in our own words and link out to LeetCode/NeetCode.
 - No accounts at first: progress lives on the device with JSON export/import. Cross-device sync via Supabase is a later option.
-- The Binder home is the learner's dashboard: greeting (with an optional on-device name), key numbers, a featured lesson, lessons in progress (articles record where the reader stopped), collected lessons, tracks, achievements computed from progress, and cards.
+- The Binder home is the learner's dashboard. It leads with one next step (resume or start), then covers this week (streak dots, weekly goal), lessons in progress, the binder of collected lessons by track, a card of the day with a sized review, and achievements. New users get a how-it-works panel and pick where their path starts. Settings (name, start level, weekly goal), the full achievement gallery and backups live on the You page. Because progress is device-only and some browsers clear site data, the dashboard reminds uninstalled users to install or export.
 - GitHub Pages serves static files; it does not run a SvelteKit server.
 - The user wants no required purchases. Public email/password signup remains unresolved because Supabase's default sender is limited to development use.
 

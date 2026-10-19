@@ -310,14 +310,21 @@ Lit elements fill with the track colour, and message chips are ink pills with da
 - **Tools:** search is an underlined field, and the level filter is text tabs underlined in the chosen level's colour. Searching or filtering deals every topic with a match.
 
 ### Binder (the dashboard)
-- **Greeting:** a display-size line that changes with the visit: "Welcome to DevCodex" on a first visit, "Welcome back" when they have already learned today, otherwise good morning, afternoon or evening, and "Burning the midnight oil" late at night. The learner's optional name is set in gold. Below it is one line about their streak or lessons in progress, and a text button to add or change the name.
-- **Key numbers:** boxless big figures over small labels (lessons, cards, problems, day streak with a flame, minutes learned), under a hairline.
-- **Featured lesson:** the track-filled quest panel with fanned card backs. It features the next lesson on the path that hasn't been started.
-- **Pick up where you left off:** a plain list (hairline dividers, no boxes) of lessons opened but not finished, each with the section where the reader stopped and a progress line in the level colour.
-- **Lessons collected:** a binder page of clear pockets, one per lesson. A finished lesson sits in its pocket as a mini card (level frame, pips, art, title, a gold date stamp); empty pockets are dashed, with the lesson's name in faint ink.
-- **Tracks:** rows with one segment per lesson, filled in that lesson's level colour once finished, striped once started.
-- **Achievements:** hexagonal medals. Earned medals are struck in gold with a soft glow; locked ones are dashed, with progress drawn round the hexagon's edge and a "have / need" count. Earned first, then closest to done; eight show by default.
-- **Your cards:** a fanned hand of the latest cards beside the trivia prompt, and the full collection behind "Show all cards".
+The dashboard leads with one next step and keeps everything else quieter. It renders once stored progress and the device clock are known, and fades in together so nothing jumps.
+- **Greeting:** "Welcome to DevCodex" on a first visit, "Welcome back" after learning today, otherwise good morning, afternoon or evening, or "Burning the midnight oil" late at night. The optional name is set in gold. Below it is one line about the streak or open lessons. "Add your name" appears only until a name is set; changing it lives on the You page.
+- **Lesson map (desktop, beside the greeting):** every lesson as a star on a night-sky panel. Tracks run across (Web, Code, Data), and levels run left to right in dashed level-colour columns. Finished stars glow in their track colour and twinkle slowly; started ones draw a read-progress arc; the next step pulses gold; unvisited ones are dashed rings. Lines between a track's lessons light up once both ends are finished. Hover or focus shows a tooltip (title, level, status; it flips below for the top row), and each star links to its lesson. It is hidden on phones to keep the next step near the top, and pulse and twinkle stop under reduced motion.
+- **Notices:** dismissible lines between hairlines, never boxes. "Since your last visit you collected … and earned …" shows once per win. The backup reminder appears while progress exists only in an uninstalled browser with no backup in 14 days, and offers Install or Export.
+- **New users:** in place of the numbers, "How DevCodex works" (four boxless numbered steps) and "Where should your path start?" (three level choices underlined in the level colour).
+- **Key numbers:** links (Lessons → Learn, Cards → Trivia, Problems → Practice, Streak → This week, Minutes → You), as one swipeable row on phones.
+- **Hero:** the single loud, track-filled surface. It resumes a lesson read in the last three days (where you stopped, percent read, a progress bar) or offers the next unstarted lesson on the path, starting at the chosen level.
+- **This week:** Monday to Sunday dots (filled ember when learned, ringed for today, dashed for the future), the streak with an evening "learn today to keep it" nudge, and a gold weekly-goal ring with a stepper.
+- **Also in progress:** other open lessons as hairline rows, with where you stopped, when, a level-colour progress line, Resume, and Remove.
+- **Your binder:** one row of clear pockets per track, which also serves as track progress. A finished lesson is a mini card (level frame, pips, art, gold date stamp) and slides in with a gold glow the first time it's seen. Empty pockets show the lesson's name; started ones get a level-colour edge, a progress line and "Resume →"; on hover or focus (and always on touch) the pocket shows its action. A pip legend spells out the levels.
+- **Card of the day:** one unlocked card, face down until "Reveal the answer", then Knew it / Not yet grades it like Trivia. Below it is a sized invitation: "Review 10 cards · about 4 minutes".
+- **Achievements:** earned medals as a compact row (new ones strike in with a "New" tag), then "Within reach": the three locked medals closest to done, with counts. The full gallery is on the You page.
+
+### Pack checklist (end of every article)
+"Earn your pack" lists three requirements as plain rows, each with a round tick (teal when done), a status line and a thin gold progress line: read through the lesson (80% of sections read past), spend some time with it (active time, 30% of the estimate, between 1 and 5 minutes), and pass the quick checks (every check finished, 60% or better on multi-question ones). Until all three are done, the gold button is a muted "Pack locked" with a lock icon; then the heading becomes "Your pack is ready". A quick check passed earlier reopens on its best score.
 
 ### Navigation
 - Phone: a floating dock of five sections. The active item gets a gold pill behind its icon.

@@ -60,10 +60,16 @@ Phase 2 is built and verified. **Binder (direction C)** is the app. On 2026-10-1
 - No pills for facts anywhere: `.meta-row` in app.css replaces the chips (article cover, practice badges and score, header card count), and LevelTag is boxless.
 - Quiz is a one-question-at-a-time stepper with locked answers, Next question, and a final score with Try again.
 
-## Binder dashboard (2026-10-19)
+## Binder dashboard (2026-10-19, revised)
 
-- `/` is now a dashboard: `home/Greeting.svelte` (time-of-day greeting, optional name), key numbers, featured lesson, Pick up where you left off, `home/LessonBinder.svelte` (pockets), tracks with level-coloured segments, `home/Medals.svelte` (17 achievements from `src/lib/progress/achievements.ts`), and cards.
-- Progress gained optional `reading` (articleId → opened/last/percent/section), `quizzes` (best score per quick check) and `profile.name`. They are still version 1; older files load. ArticleShell records reading on scroll and provides the article id to Quiz via context (`devcodex:article`).
+- `/` (`src/routes/+page.svelte`) composes `src/lib/components/home/`: Greeting, Notices (wins since last visit, backup reminder), Onboarding (new users: how it works and start level), StatStrip (linked numbers), Hero (resume within 3 days, or next on the path), ThisWeek (week dots, streak, weekly goal ring), ContinueList (other in-progress, with Remove), LessonBinder (pockets per track, which replace the Tracks section), Review (card of the day with grading, sized review) and Medals (`summary` on the dashboard, `full` on You).
+- Helpers: `src/lib/progress/dashboard.ts` (path, hero, week, timeAgo, dueCards, cardOfDay, needsBackup, isInstalled, downloadBackup) and `achievements.ts`.
+- Progress (still version 1) gained optional `profile.level`, `profile.weeklyGoal`, `seen` (last dashboard snapshot, via `rememberDashboard`), `backup` (exported/dismissed), plus `forget(id)`. You page: settings, full medals, last backup date, `#install` and `#achievements` anchors.
+
+## Pack gate and lesson map (2026-10-19)
+
+- `src/lib/progress/requirements.ts` defines the pack requirements: 80% of sections, active time of 30% of the estimate (60–300 s), and every quick check passed (≥60% on multi-question ones). ArticleShell counts active time in 5 s ticks (visible tab, activity in the last 60 s) through `progress.readTime`. `progress.read` records `sections`. Quizzes register through the `devcodex:quizzes` context; a passed check reopens on its best score.
+- `home/LessonMap.svelte`: a star map of lessons beside the greeting (desktop only).
 
 ## Known quirks
 
