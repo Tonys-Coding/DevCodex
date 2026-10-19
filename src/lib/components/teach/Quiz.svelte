@@ -19,7 +19,12 @@
 	 * One question at a time. Answering locks the choice and shows feedback; the
 	 * learner moves on when ready, and the last step shows the score.
 	 */
-	let { questions, title = 'Quick check' }: { questions: QuizQuestion[]; title?: string } = $props();
+	/** `checkpoint`: a single mid-lesson question, set smaller than the end-of-lesson quick check. */
+	let {
+		questions,
+		title = 'Quick check',
+		variant = 'check'
+	}: { questions: QuizQuestion[]; title?: string; variant?: 'check' | 'checkpoint' } = $props();
 	const uid = $props.id();
 	let picks = $state<(number | null)[]>(untrack(() => questions.map(() => null)));
 	let at = $state(0);
@@ -76,9 +81,13 @@
 	}
 </script>
 
-<section class="quiz" aria-labelledby="{uid}-title">
+<section class="quiz" class:checkpoint={variant === 'checkpoint'} aria-labelledby="{uid}-title">
 	<div class="head">
-		<h2 id="{uid}-title">{title}</h2>
+		{#if variant === 'checkpoint'}
+			<h3 id="{uid}-title"><Icon name="flag" size={18} stroke={2} /> Checkpoint</h3>
+		{:else}
+			<h2 id="{uid}-title">{title}</h2>
+		{/if}
 		{#if many}
 			<span class="progress" aria-hidden="true">
 				{#each questions as question, i (i)}
@@ -156,6 +165,26 @@
 		font-size: 1.6rem;
 		font-weight: 800;
 		letter-spacing: -0.025em;
+	}
+
+	/* Checkpoint: a pause mid-lesson, set between hairlines rather than as a full section. */
+	.checkpoint {
+		margin: 2rem 0;
+		padding: 1rem 0 1.2rem;
+		border-block: 1px solid var(--rule);
+	}
+
+	h3 {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		font-size: 1.05rem;
+		font-weight: 800;
+		color: var(--gold);
+	}
+
+	.checkpoint .prompt {
+		font-size: 1.2rem;
 	}
 
 	.progress {

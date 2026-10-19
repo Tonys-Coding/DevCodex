@@ -3,6 +3,7 @@
 	import Quiz from '../../components/teach/Quiz.svelte';
 	import Note from '../../components/teach/Note.svelte';
 	import Code from '../../components/teach/Code.svelte';
+	import Term from '../../components/teach/Term.svelte';
 </script>
 
 <p>
@@ -67,11 +68,11 @@
 <p>You already know both from everyday life:</p>
 <ul>
 	<li>
-		A <strong>stack</strong> is a pile of plates. You put a clean plate on top, and when you need one, you take the top plate. The plate at the
+		A <strong><Term def="A collection where you only ever add to, or take from, the top.">stack</Term></strong> is a pile of plates. You put a clean plate on top, and when you need one, you take the top plate. The plate at the
 		bottom has been there longest, and it comes out last.
 	</li>
 	<li>
-		A <strong>queue</strong> is a line at a coffee counter. New people join at the back, and the person at the front is served next. Whoever has
+		A <strong><Term def="A collection where you add at the back and take from the front, like people waiting in line.">queue</Term></strong> is a line at a coffee counter. New people join at the back, and the person at the front is served next. Whoever has
 		waited longest goes first. That is the fair order.
 	</li>
 </ul>
@@ -92,7 +93,7 @@
 
 <h2>Try it</h2>
 <p>
-	This lab sends every item to both a stack and a queue at the same time. Add three or four, then remove them one at a time. Watch the two “came
+	This lab sends every <Term def="One thing stored in the structure: a number, a word, a task. Programmers also say element.">item</Term> to both a stack and a queue at the same time. Add three or four, then remove them one at a time. Watch the two “came
 	out” lines: one comes out in reverse order, the other in the original order.
 </p>
 
@@ -104,6 +105,20 @@
 	<li>Add A and B, remove one, then add C. Now the two hold different items. The order you mix adds and removes in changes everything.</li>
 	<li>Remove until both are empty, then press Remove once more. There is nothing to give back. Real code has to handle this case too.</li>
 </ol>
+
+
+<Quiz
+	variant="checkpoint"
+	title="Checkpoint 1"
+	questions={[
+		{
+			prompt: 'Add A, then B, then C to a stack, then remove one item. Which comes out?',
+			options: ['A', 'B', 'C'],
+			answer: 2,
+			explain: 'A stack is last in, first out: C went on last, so it comes off first.'
+		}
+	]}
+/>
 
 <h2>The operations, by name</h2>
 <p>Each structure has a small set of actions. Built properly, every one of them takes the same short time however many items are stored, which is what makes stacks and queues so handy.</p>
@@ -146,7 +161,7 @@ stack.pop();              // "B"
 stack.length;             // 1    only "A" is left`}
 />
 
-<p>Python’s list works the same way, with <code>append</code> in place of push:</p>
+<p>Python’s list works the same way, with <code>append</code> in place of <Term def="Adding an item to the top of a stack, and removing the top item.">push</Term>:</p>
 
 <Code
 	lang="py"
@@ -337,6 +352,20 @@ redo();   // text is "Hi there"`}
 	<li><strong>Searching nearest-first.</strong> To find the shortest route on a map, or friends-of-friends in a social network, programs check places in the order they discover them, using a queue. This is called breadth-first search.</li>
 </ul>
 
+
+<Quiz
+	variant="checkpoint"
+	title="Checkpoint 2"
+	questions={[
+		{
+			prompt: 'A printer prints jobs in the order they were sent. Which structure fits?',
+			options: ['A stack', 'A queue'],
+			answer: 1,
+			explain: 'First sent, first printed: that is first in, first out, which is a queue.'
+		}
+	]}
+/>
+
 <h2>Worked example: checking brackets</h2>
 <p>
 	Code editors underline a bracket that is never closed. A stack does that check in one pass from left to right, with one simple rule: an opening
@@ -394,8 +423,8 @@ redo();   // text is "Hi there"`}
 <h2>Recap</h2>
 <ul>
 	<li>A <strong>stack</strong> is last in, first out. Add and remove at the top with <strong>push</strong> and <strong>pop</strong>.</li>
-	<li>A <strong>queue</strong> is first in, first out. Add at the back with <strong>enqueue</strong> and remove from the front with <strong>dequeue</strong>.</li>
-	<li><strong>Peek</strong> looks at the next item without removing it. Always handle the empty case.</li>
+	<li>A <strong>queue</strong> is first in, first out. Add at the back with <strong><Term def="Adding an item to the back of a queue, and removing the item at the front. Said “en-cue” and “dee-cue”.">enqueue</Term></strong> and remove from the front with <strong>dequeue</strong>.</li>
+	<li><strong><Term def="Looking at the next item that would come out, without removing it.">Peek</Term></strong> looks at the next item without removing it. Always handle the empty case.</li>
 	<li>Stacks are for going back: undo, the back button, function calls, matching brackets.</li>
 	<li>Queues are for fairness: printing, key presses, event handling, background jobs, nearest-first search.</li>
 	<li>In Python, use a list as a stack and <code>deque</code> as a queue. In JavaScript, an array is a fine stack; a big queue needs more than <code>shift()</code>.</li>

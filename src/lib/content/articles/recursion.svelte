@@ -3,6 +3,7 @@
 	import Quiz from '../../components/teach/Quiz.svelte';
 	import Note from '../../components/teach/Note.svelte';
 	import Code from '../../components/teach/Code.svelte';
+	import Term from '../../components/teach/Term.svelte';
 
 	const code = `function factorial(n) {
   if (n === 1) {
@@ -134,7 +135,7 @@ console.log(factorial(3));`;
 </dl>
 
 <h2>The two rules</h2>
-<p>Every recursive function that works has exactly two parts. Leave either one out and it breaks.</p>
+<p>Every recursive <Term def="A named, reusable piece of code. You give it some inputs and it gives back a result, like a recipe that turns ingredients into a dish.">function</Term> that works has exactly two parts. Leave either one out and it breaks.</p>
 
 <div class="table-wrap">
 	<table>
@@ -157,9 +158,23 @@ console.log(factorial(3));`;
 </div>
 
 <p>
-	The word <em>smaller</em> matters. Each call has to move closer to the base case, or you never get there. Counting down from 3 reaches 0.
+	The word <em>smaller</em> matters. Each <Term def="Running a function. Writing factorial(3) calls the function named factorial with the input 3.">call</Term> has to move closer to the <Term def="The smallest version of the problem, answered directly without calling the function again. It is what makes recursion stop.">base case</Term>, or you never get there. Counting down from 3 reaches 0.
 	Counting up from 3 never does.
 </p>
+
+
+<Quiz
+	variant="checkpoint"
+	title="Checkpoint 1"
+	questions={[
+		{
+			prompt: 'What stops a recursive function from calling itself forever?',
+			options: ['The recursive case', 'The base case', 'The return keyword alone'],
+			answer: 1,
+			explain: 'The base case answers the smallest version directly, without another call, so the chain of calls ends.'
+		}
+	]}
+/>
 
 <h2>Your first recursive function</h2>
 <p>Here is a countdown that uses no loop at all. Read the two parts before reading the output.</p>
@@ -219,7 +234,7 @@ countdown(3)`}
 
 <p>The most important thing the lab shows is that the three calls are <strong>separate</strong>:</p>
 <ul>
-	<li>Each frame has its own <code>n</code>. Calling <code>factorial(2)</code> does not change the <code>n</code> of 3 in the frame below it.</li>
+	<li>Each <Term def="One note on the call stack. It remembers which call it is, its inputs, and where to carry on once the call it is waiting for returns.">frame</Term> has its own <code>n</code>. Calling <code>factorial(2)</code> does not change the <code>n</code> of 3 in the frame below it.</li>
 	<li>A paused frame remembers exactly where it stopped, in the middle of <code>n * …</code>, and carries on from there.</li>
 	<li>Only the top frame is ever running. The others wait their turn.</li>
 </ul>
@@ -265,7 +280,7 @@ broken(3);
 
 <p>
 	It calls itself with 2, then 1, 0, −1, −2, and on forever. Every call adds a frame, and the computer only sets aside a limited amount of memory
-	for the call stack. When that runs out, the program stops with a <strong>stack overflow</strong>. (Yes, that is where the website Stack
+	for the <Term def="The computer’s pile of unfinished calls. Each call adds a note to the top, and each return removes the top note.">call stack</Term>. When that runs out, the program stops with a <strong><Term def="The crash you get when the call stack grows too tall, usually because the recursion never reaches its base case.">stack overflow</Term></strong>. (Yes, that is where the website Stack
 	Overflow gets its name.) The message depends on where your code runs:
 </p>
 
@@ -298,8 +313,22 @@ broken(3);
 	Even correct recursion can overflow if the input is huge. Counting down from 100,000 one call at a time needs 100,000 frames, which is more than any of the limits above. For problems that go that deep, use a loop.
 </Note>
 
+
+<Quiz
+	variant="checkpoint"
+	title="Checkpoint 2"
+	questions={[
+		{
+			prompt: 'A recursive function never reaches its base case. What happens?',
+			options: ['It quietly returns nothing', 'It keeps calling until the call stack runs out: a stack overflow', 'The computer finds the answer anyway'],
+			answer: 1,
+			explain: 'Every call adds a frame to the call stack, and the stack has a limit. Run out and the program stops with a stack overflow.'
+		}
+	]}
+/>
+
 <h2>Recursion or a loop?</h2>
-<p>Anything you can write with recursion, you can also write with a loop. Here is factorial again, done the loop way:</p>
+<p>Anything you can write with <Term def="When a function calls itself to solve a smaller version of the same problem. A function that does this is called recursive.">recursion</Term>, you can also write with a loop. Here is factorial again, done the loop way:</p>
 
 <Code
 	lang="js"
@@ -439,7 +468,7 @@ fib(40);   // 102334155, in 79 calls instead of 331 million`}
 <h2>Recap</h2>
 <ul>
 	<li>A recursive function solves a problem by calling itself on a smaller version of it.</li>
-	<li>It needs a <strong>base case</strong> that stops, and a <strong>recursive case</strong> that moves closer to it on every call.</li>
+	<li>It needs a <strong>base case</strong> that stops, and a <strong><Term def="Every other version of the problem. It is answered by calling the function again on something smaller.">recursive case</Term></strong> that moves closer to it on every call.</li>
 	<li>Each call gets its own <strong>frame</strong> on the <strong>call stack</strong>. The stack grows on the way down and shrinks as answers come back up.</li>
 	<li>No base case, or one that is never reached, means a <strong>stack overflow</strong>.</li>
 	<li>Use recursion for nested data of unknown depth. Use a loop for long, flat sequences.</li>

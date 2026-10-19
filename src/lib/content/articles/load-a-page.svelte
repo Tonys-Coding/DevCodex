@@ -3,6 +3,7 @@
 	import Quiz from '../../components/teach/Quiz.svelte';
 	import Note from '../../components/teach/Note.svelte';
 	import Code from '../../components/teach/Code.svelte';
+	import Term from '../../components/teach/Term.svelte';
 	import Diagram from '../../components/teach/Diagram.svelte';
 
 	const tiles: FlowTile[] = [
@@ -117,9 +118,23 @@
 	</table>
 </div>
 
+
+<Quiz
+	variant="checkpoint"
+	title="Checkpoint 1"
+	questions={[
+		{
+			prompt: 'Which step turns example.com into a number like 203.0.113.7?',
+			options: ['Connect', 'Look up, using DNS', 'Draw'],
+			answer: 1,
+			explain: 'DNS is the internet’s phone book: the browser asks a resolver, and it answers with the IP address.'
+		}
+	]}
+/>
+
 <h2>What the messages actually say</h2>
 <p>
-	The request and the reply are plain, readable text. Here is roughly what your browser sends when it asks for the home page of
+	The request and the reply are plain, readable text. Here is roughly what your <Term def="The app you use to visit websites: Safari, Chrome, Firefox or Edge.">browser</Term> sends when it asks for the home page of
 	<code>example.com</code>:
 </p>
 
@@ -138,7 +153,7 @@ accept-language: en-US`}
 	<li><code>GET</code> is the <strong>method</strong>: what the browser wants to do. GET means “give me”. Sending a form usually uses POST, which means “take this”.</li>
 	<li><code>/</code> is the <strong>path</strong>: which page. A slash on its own means the home page. <code>/about</code> would be the about page.</li>
 	<li><code>HTTP/2</code> is the <strong>version</strong> of the format being used.</li>
-	<li>Every line after that is a <strong>header</strong>: a short note in the form <code>name: value</code>. Here the browser says which site it wants, which browser it is, and that it would like HTML in US English.</li>
+	<li>Every line after that is a <strong>header</strong>: a short note in the form <code>name: value</code>. Here the browser says which site it wants, which browser it is, and that it would like <Term def="The text format web pages are written in. It says what is on the page: headings, paragraphs, pictures and links.">HTML</Term> in US English.</li>
 </ul>
 
 <p>And here is the kind of reply that comes back:</p>
@@ -220,10 +235,24 @@ content-length: 312
 	placing and painting again. Just changing a colour can skip the placing.
 </p>
 
+
+<Quiz
+	variant="checkpoint"
+	title="Checkpoint 2"
+	questions={[
+		{
+			prompt: 'Which drawing step works out where every box on the page goes?',
+			options: ['Read', 'Place (layout)', 'Paint'],
+			answer: 1,
+			explain: 'Placing, also called layout, works out the size and position of every box. Painting fills in the pixels afterwards.'
+		}
+	]}
+/>
+
 <h2>Why the second visit is faster</h2>
 <p>Almost every step has a way to be skipped next time. Your browser and computer keep notes:</p>
 <ul>
-	<li><strong>The address is remembered.</strong> The DNS answer is kept for a set time, so the look-up is skipped.</li>
+	<li><strong>The address is remembered.</strong> The <Term def="The Domain Name System: the internet’s phone book, which turns names like example.com into IP addresses.">DNS</Term> answer is kept for a set time, so the look-up is skipped.</li>
 	<li><strong>The line stays open.</strong> The connection can be reused for more requests instead of saying hello all over again.</li>
 	<li><strong>Files are kept.</strong> Pictures, styles and scripts are saved on your device, and the browser can check “has this changed?” instead of downloading it again. This is called <strong>caching</strong>, and it has its own article.</li>
 </ul>
@@ -253,14 +282,14 @@ content-length: 312
 	</ul>
 	<p>
 		Open the <strong>Network</strong> tab and reload the page. Every row is one request. Click one and look at its timing: you will see the
-		same phases from this article, named things like DNS lookup, initial connection, waiting for the server, and download.
+		same phases from this article, named things like DNS lookup, initial connection, waiting for the <Term def="A computer, often in a big building full of computers, whose job is to hand out a website’s files to anyone who asks.">server</Term>, and download.
 	</p>
 </Note>
 
 <h2>Recap</h2>
 <ol>
-	<li><strong>Look up:</strong> DNS turns the name into an IP address.</li>
-	<li><strong>Connect:</strong> the browser opens a connection and, for HTTPS, agrees on secret codes (encryption keys) and checks the server’s certificate. This exchange is called the <strong>TLS handshake</strong>.</li>
+	<li><strong>Look up:</strong> DNS turns the name into an <Term def="The number that identifies a computer on the internet, such as 203.0.113.7. It works like a phone number.">IP address</Term>.</li>
+	<li><strong>Connect:</strong> the browser opens a connection and, for <Term def="The agreed format for “asking for a page” and “sending a page back”. The S stands for secure: the messages are scrambled so only the two ends can read them.">HTTPS</Term>, agrees on secret codes (encryption keys) and checks the server’s certificate. This exchange is called the <strong>TLS handshake</strong>.</li>
 	<li><strong>Ask:</strong> it sends a request with a method, a path, a version and headers.</li>
 	<li><strong>Answer:</strong> the server replies with a status code, headers and the page.</li>
 	<li><strong>Draw:</strong> the browser reads, styles, places and paints, fetching any extra files the page needs.</li>

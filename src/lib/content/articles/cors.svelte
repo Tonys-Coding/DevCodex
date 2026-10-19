@@ -44,6 +44,20 @@
 	<strong>preflight</strong>.
 </p>
 
+
+<Quiz
+	variant="checkpoint"
+	title="Checkpoint 1"
+	questions={[
+		{
+			prompt: 'What does the same-origin policy mainly stop a cross-origin script from doing?',
+			options: ['Sending a request', 'Reading the response', 'Opening a TCP connection'],
+			answer: 1,
+			explain: 'Simple cross-origin requests are still sent. What the browser withholds, unless CORS allows it, is the response.'
+		}
+	]}
+/>
+
 <h2>The headers</h2>
 
 <div class="table-wrap">
@@ -136,6 +150,20 @@
 	The only way to drop preflights entirely is to avoid cross-origin requests: serve the API from the page’s own origin, through a reverse proxy
 	path such as <code>/api</code>, or stay within the safelist.
 </p>
+
+
+<Quiz
+	variant="checkpoint"
+	title="Checkpoint 2"
+	questions={[
+		{
+			prompt: 'Which of these cross-origin fetches triggers a preflight?',
+			options: ['GET with no custom headers', 'POST with Content-Type: application/json', 'POST with Content-Type: text/plain'],
+			answer: 1,
+			explain: 'application/json is not a CORS-safelisted Content-Type, so the browser asks first with an OPTIONS preflight.'
+		}
+	]}
+/>
 
 <h2>Credentials</h2>
 <p>

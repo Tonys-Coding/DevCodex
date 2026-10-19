@@ -111,6 +111,20 @@ console.log("D");`;
 	<li><strong>Rendering only between tasks.</strong> No amount of DOM mutation inside one task shows intermediate states. The user sees the final result, or a frozen page while the task runs.</li>
 </ol>
 
+
+<Quiz
+	variant="checkpoint"
+	title="Checkpoint 1"
+	questions={[
+		{
+			prompt: 'One task has just finished. What runs before the loop takes the next task?',
+			options: ['Exactly one microtask', 'Every queued microtask, including ones queued meanwhile', 'A rendering update, always'],
+			answer: 1,
+			explain: 'The microtask checkpoint drains the whole queue, even microtasks added while it runs.'
+		}
+	]}
+/>
+
 <h2>Where each API’s callback goes</h2>
 
 <div class="table-wrap">
@@ -242,6 +256,20 @@ const width = box.offsetWidth;
 for (const el of items) {
   el.style.width = width + 'px';
 }`}
+/>
+
+
+<Quiz
+	variant="checkpoint"
+	title="Checkpoint 2"
+	questions={[
+		{
+			prompt: 'Timers nested more than five levels deep with a 0 ms delay run at least how far apart?',
+			options: ['0 ms', '4 ms', '16 ms'],
+			answer: 1,
+			explain: 'The HTML Standard clamps nested timer delays below 4 ms up to 4 ms.'
+		}
+	]}
 />
 
 <h2>Long tasks and responsiveness</h2>

@@ -88,6 +88,20 @@ fnv1a('daa') % 8;  // 5: order now matters`}
 	instead multiplies by ⌊2⁶⁴/φ⌋ and keeps the <em>top</em> bits, which mixes and reduces in one step.
 </p>
 
+
+<Quiz
+	variant="checkpoint"
+	title="Checkpoint 1"
+	questions={[
+		{
+			prompt: 'A power-of-two table picks the slot with h & (m − 1). Which bits of the hash decide the slot?',
+			options: ['The low bits', 'The high bits', 'All of them equally'],
+			answer: 0,
+			explain: 'The mask keeps only the low log₂ m bits, which is why weak low bits hurt and tables mix the high bits in first.'
+		}
+	]}
+/>
+
 <h2>Collision resolution</h2>
 
 <Choice
@@ -206,6 +220,20 @@ fnv1a('daa') % 8;  // 5: order now matters`}
             for k, v in bucket:
                 self._bucket(k).append((k, v))  # every index changes`}
 	caption="Production tables also cache each entry’s hash, so a resize never calls __hash__ again, and compare cached hashes before calling __eq__."
+/>
+
+
+<Quiz
+	variant="checkpoint"
+	title="Checkpoint 2"
+	questions={[
+		{
+			prompt: 'Doubling the table whenever it fills makes a single insert…',
+			options: ['O(1) in the worst case', 'O(1) amortised, with occasional O(n) pauses', 'O(log n) always'],
+			answer: 1,
+			explain: 'Each resize moves every entry once, but resizes get rarer as the table grows: amortised O(1), with a slow insert now and then.'
+		}
+	]}
 />
 
 <h2>What real implementations do</h2>

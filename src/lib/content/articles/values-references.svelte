@@ -153,6 +153,20 @@ console.log(team);     // still ["ada", "linus"]`}
 	new.
 </p>
 
+
+<Quiz
+	variant="checkpoint"
+	title="Checkpoint 1"
+	questions={[
+		{
+			prompt: 'const a = [1]; const b = a; b.push(2). What is a now?',
+			options: ['[1]', '[1, 2]'],
+			answer: 1,
+			explain: 'b and a point at the same array, so pushing through b changes the array a sees too.'
+		}
+	]}
+/>
+
 <h2>Python follows the same rule</h2>
 
 <Code
@@ -226,6 +240,20 @@ print(team)          # ['ada', 'linus']  (untouched)`}
 		<code>Array.from({'{'} length: 3 {'}'}, () =&gt; [])</code> in JavaScript.
 	</p>
 </Note>
+
+
+<Quiz
+	variant="checkpoint"
+	title="Checkpoint 2"
+	questions={[
+		{
+			prompt: 'a = [[1], [2]]. Which copy still shares the inner lists with a?',
+			options: ['[...a]', 'structuredClone(a)'],
+			answer: 0,
+			explain: 'Spread makes a new outer list but keeps pointing at the same inner lists. structuredClone copies all the way down.'
+		}
+	]}
+/>
 
 <h2>Functions get references too</h2>
 <p>

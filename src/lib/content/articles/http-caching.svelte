@@ -139,6 +139,20 @@
 	</table>
 </div>
 
+
+<Quiz
+	variant="checkpoint"
+	title="Checkpoint 1"
+	questions={[
+		{
+			prompt: 'A response has max-age=60 and arrived from the CDN with Age: 20. How long is it fresh in the browser?',
+			options: ['60 seconds', '40 seconds', '80 seconds'],
+			answer: 1,
+			explain: 'Age counts against the lifetime: 60 − 20 leaves 40 seconds of freshness.'
+		}
+	]}
+/>
+
 <h2>Validation: checking a stale copy cheaply</h2>
 <p>
 	A stale copy usually still matches what the server has. Instead of downloading it again, the cache sends a <strong>conditional request</strong>
@@ -230,6 +244,20 @@ etag: "v7-3f9a"`}
 			code: 'cache-control: no-store',
 			body: 'Nothing keeps a copy anywhere. Every view is a full download.',
 			verdict: 'Use for: account statements, one-time tokens and other sensitive responses.'
+		}
+	]}
+/>
+
+
+<Quiz
+	variant="checkpoint"
+	title="Checkpoint 2"
+	questions={[
+		{
+			prompt: 'Which directive keeps a response out of CDNs but still lets the browser cache it?',
+			options: ['no-store', 'private', 'public'],
+			answer: 1,
+			explain: 'private forbids shared caches from storing it; the browser’s own cache may still keep it.'
 		}
 	]}
 />

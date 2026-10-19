@@ -75,6 +75,20 @@
 	one-pass hash-map approach from the Pair Sum practice problem instead.
 </Note>
 
+
+<Quiz
+	variant="checkpoint"
+	title="Checkpoint 1"
+	questions={[
+		{
+			prompt: 'Target 16. The pointers sit on 2 and 18, summing to 20. Which pointer moves?',
+			options: ['The left one, rightwards', 'The right one, leftwards'],
+			answer: 1,
+			explain: 'The sum is too big, and 18 is too big even with the smallest value left, so the right pointer steps in.'
+		}
+	]}
+/>
+
 <h2>Comparing the approaches</h2>
 
 <div class="table-wrap">
@@ -179,6 +193,20 @@
                     i += 1       # same second element as last time
     return out`}
 	caption="three_sum([-1, 0, 1, 2, -1, -4]) returns [[-1, -1, 2], [-1, 0, 1]]."
+/>
+
+
+<Quiz
+	variant="checkpoint"
+	title="Checkpoint 2"
+	questions={[
+		{
+			prompt: 'Why does 3Sum sort the input first?',
+			options: ['So each comparison says which pointer to move', 'Sorting removes duplicates by itself', 'Sorted arrays use less memory'],
+			answer: 0,
+			explain: 'Sorted order is what lets one comparison rule out a whole end of the range.'
+		}
+	]}
 />
 
 <h2>Recognising a two-pointer problem</h2>

@@ -81,6 +81,20 @@ cookie: __Host-sid=k3v9Qp…; theme=dark`}
 
 <p>Use <code>__Host-</code> for session cookies unless you genuinely need to share them across subdomains. All current browsers support both prefixes.</p>
 
+
+<Quiz
+	variant="checkpoint"
+	title="Checkpoint 1"
+	questions={[
+		{
+			prompt: 'Which cookie attribute stops page JavaScript from reading the cookie through document.cookie?',
+			options: ['Secure', 'HttpOnly', 'SameSite=Strict'],
+			answer: 1,
+			explain: 'HttpOnly hides the cookie from scripts. Secure only limits it to HTTPS, and SameSite controls cross-site sending.'
+		}
+	]}
+/>
+
 <h2>Same-site is not same-origin</h2>
 <p>
 	<code>SameSite</code> is about <strong>sites</strong>, which are coarser than origins. An <strong>origin</strong> is scheme + host + port. A
@@ -257,6 +271,20 @@ server.listen(3000);
 	Chrome and Firefox treat <code>http://localhost</code> as a secure context and accept <code>Secure</code> and <code>__Host-</code> cookies
 	there, so you can keep production attributes in development. Test in Safari over HTTPS before assuming the same.
 </Note>
+
+
+<Quiz
+	variant="checkpoint"
+	title="Checkpoint 2"
+	questions={[
+		{
+			prompt: 'With SameSite=Lax, is the cookie sent when someone follows a link from another site to yours (a top-level GET)?',
+			options: ['Yes', 'No'],
+			answer: 0,
+			explain: 'Lax sends cookies on top-level navigations with safe methods like GET, and withholds them on cross-site subrequests.'
+		}
+	]}
+/>
 
 <h2>Server sessions or signed tokens?</h2>
 <p>
