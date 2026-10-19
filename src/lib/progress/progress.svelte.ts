@@ -1,6 +1,6 @@
 import { get, set, del } from 'idb-keyval';
 import { cards } from '../content/cards';
-import type { ConceptCard, Language } from '../content/types';
+import type { ConceptCard, Language, Level } from '../content/types';
 
 /**
  * Everything DevCodex remembers about a learner. Stored on this device only
@@ -22,8 +22,21 @@ export type ProgressData = {
 	reading?: Record<string, Reading>;
 	/** `${articleId}:${quizTitle}` → best quick-check result */
 	quizzes?: Record<string, { best: number; total: number; at: string }>;
-	/** What the dashboard greets the learner as. Never leaves the device. */
-	profile?: { name?: string };
+	/** Personal settings. Never leaves the device. */
+	profile?: Profile;
+	/** What the dashboard showed last visit, so new lessons and medals can be celebrated once. */
+	seen?: { lessons: string[]; medals: string[] };
+	/** When progress was last exported, and when the backup reminder was last dismissed. */
+	backup?: { exported?: string; dismissed?: string };
+};
+
+export type Profile = {
+	/** What the dashboard greets the learner as. */
+	name?: string;
+	/** Where their path starts: lessons at this level and above are featured first. */
+	level?: Level;
+	/** Lessons per week they aim for. */
+	weeklyGoal?: number;
 };
 
 export type Reading = {
@@ -34,20 +47,40 @@ export type Reading = {
 	percent: number;
 	/** The section being read when they left. */
 	section?: { id: string; text: string };
+	/** Every section that has been read past, so jumping straight to the end doesn't count as reading. */
+	sections?: string[];
+	/** Active reading time in seconds: counted only while the tab is visible and the reader is interacting. */
+	seconds?: number;
 };
 
 const KEY = 'devcodex:progress';
 
-const empty = (): ProgressData => ({ version: 1, completed: {}, cards: {}, solved: {}, drafts: {}, days: [], reading: {}, quizzes: {}, profile: {} });
+const empty = (): ProgressData => ({
+	version: 1,
+	completed: {},
+	cards: {},
+	solved: {},
+	drafts: {},
+	days: [],
+	reading: {},
+	quizzes: {},
+	profile: {},
+	backup: {}
+});
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /** Accept only data with the expected shape; anything else is rejected, never half-loaded. */
 function parse(value: unknown): ProgressData | null {
 	if (!isRecord(value) || value.version !== 1) return null;
-	const { completed, cards: c, solved, drafts, days, reading, quizzes, profile } = value;
+	const { completed, cards: c, solved, drafts, days, reading, quizzes, profile, seen, backup } = value;
 	if (![completed, c, solved, drafts].every(isRecord) || !Array.isArray(days)) return null;
-	const name = isRecord(profile) && typeof profile.name === 'string' ? profile.name.slice(0, 40) : undefined;
+	const p = isRecord(profile) ? profile : {};
+	const clean: Profile = {};
+	if (typeof p.name === 'string' && p.name.trim()) clean.name = p.name.slice(0, 40);
+	if (p.level === 'entry' || p.level === 'experienced' || p.level === 'senior') clean.level = p.level;
+	if (typeof p.weeklyGoal === 'number' && p.weeklyGoal >= 1 && p.weeklyGoal <= 7) clean.weeklyGoal = Math.round(p.weeklyGoal);
+	const strings = (x: unknown) => (Array.isArray(x) ? x.filter((v): v is string => typeof v === 'string') : []);
 	return {
 		version: 1,
 		completed,
@@ -57,7 +90,14 @@ function parse(value: unknown): ProgressData | null {
 		days: days.filter((d) => typeof d === 'string'),
 		reading: isRecord(reading) ? reading : {},
 		quizzes: isRecord(quizzes) ? quizzes : {},
-		profile: name ? { name } : {}
+		profile: clean,
+		seen: isRecord(seen) ? { lessons: strings(seen.lessons), medals: strings(seen.medals) } : undefined,
+		backup: isRecord(backup)
+			? {
+					exported: typeof backup.exported === 'string' ? backup.exported : undefined,
+					dismissed: typeof backup.dismissed === 'string' ? backup.dismissed : undefined
+				}
+			: {}
 	} as ProgressData;
 }
 
@@ -188,12 +228,27 @@ class Progress {
 		const now = new Date().toISOString();
 		this.data.reading ??= {};
 		const entry = this.data.reading[articleId];
+		const sections = entry?.sections ?? [];
 		this.data.reading[articleId] = {
+			...entry,
 			opened: entry?.opened ?? now,
 			last: now,
 			percent: Math.max(entry?.percent ?? 0, Math.min(1, Math.max(0, percent))),
-			section: section ?? entry?.section
+			section: section ?? entry?.section,
+			sections: section && !sections.includes(section.id) ? [...sections, section.id] : sections
 		};
+		this.#saveSoon();
+	}
+
+	/** Adds active reading time to an article that has been opened. */
+	readTime(articleId: string, seconds: number) {
+		const entry = this.data.reading?.[articleId];
+		if (!entry) return;
+		entry.seconds = (entry.seconds ?? 0) + seconds;
+		this.#saveSoon();
+	}
+
+	#saveSoon() {
 		clearTimeout(this.#readTimer);
 		this.#readTimer = setTimeout(() => this.#save(), 800);
 	}
@@ -209,7 +264,35 @@ class Progress {
 
 	setName(name: string) {
 		const clean = name.trim().slice(0, 40);
-		this.data.profile = clean ? { name: clean } : {};
+		this.data.profile = { ...this.data.profile, name: clean || undefined };
+		this.#save();
+	}
+
+	setLevel(level: Level | undefined) {
+		this.data.profile = { ...this.data.profile, level };
+		this.#save();
+	}
+
+	setWeeklyGoal(goal: number) {
+		this.data.profile = { ...this.data.profile, weeklyGoal: Math.min(7, Math.max(1, Math.round(goal))) };
+		this.#save();
+	}
+
+	/** Takes a lesson off "Pick up where you left off" without touching anything else. */
+	forget(articleId: string) {
+		if (!this.data.reading?.[articleId]) return;
+		delete this.data.reading[articleId];
+		this.#save();
+	}
+
+	/** Remembers what the dashboard has shown, so the same win is only celebrated once. */
+	rememberDashboard(lessons: string[], medals: string[]) {
+		this.data.seen = { lessons, medals };
+		this.#save();
+	}
+
+	dismissBackup() {
+		this.data.backup = { ...this.data.backup, dismissed: new Date().toISOString() };
 		this.#save();
 	}
 
@@ -232,6 +315,8 @@ class Progress {
 	}
 
 	export(): string {
+		this.data.backup = { ...this.data.backup, exported: new Date().toISOString() };
+		this.#save();
 		return JSON.stringify({ app: 'DevCodex', exported: new Date().toISOString(), ...$state.snapshot(this.data) }, null, 2);
 	}
 
