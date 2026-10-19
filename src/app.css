@@ -1,0 +1,455 @@
+/* DevCodex — Binder. Tokens and base styles shared by every screen. */
+
+:root {
+	color-scheme: dark;
+
+	--ground: #121016;
+	--panel: #1c1823;
+	--panel-2: #262030;
+	--ink: #f5f2f9;
+	--ink-2: #c0b8cf;
+	--ink-3: #938aa5;
+	--rule: #322b3e;
+
+	--web: #ff7a3d;
+	--programming: #a387ff;
+	--structures: #1fcfa9;
+	--gold: #ffc94a;
+	--miss: #ff6b81;
+	--miss-ink: #2a0710;
+
+	/* Article levels: green, blue, red, like ski-slope and LeetCode difficulty. */
+	--entry: #86e06f;
+	--experienced: #59b0ff;
+	--senior: #ff4b62;
+
+	--display: 'Bricolage Grotesque Variable', 'Avenir Next', system-ui, sans-serif;
+	--body: 'Atkinson Hyperlegible Next Variable', system-ui, sans-serif;
+	--mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+
+	/* Default accent before a track is known. */
+	--t: var(--gold);
+	--t-ink: #1d1400;
+}
+
+.t-web {
+	--t: var(--web);
+	--t-ink: #2a1003;
+}
+.t-programming {
+	--t: var(--programming);
+	--t-ink: #170c3a;
+}
+.t-structures {
+	--t: var(--structures);
+	--t-ink: #032a21;
+}
+
+.lv-entry {
+	--lv: var(--entry);
+	--lv-ink: #0c2405;
+}
+.lv-experienced {
+	--lv: var(--experienced);
+	--lv-ink: #04203d;
+}
+.lv-senior {
+	--lv: var(--senior);
+	--lv-ink: #2e040c;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+	background: var(--ground);
+	scrollbar-color: var(--rule) var(--ground);
+}
+
+body {
+	margin: 0;
+	min-height: 100dvh;
+	background: var(--ground);
+	color: var(--ink);
+	font-family: var(--body);
+	font-size: 1.0625rem;
+	line-height: 1.55;
+	font-synthesis-weight: none;
+	-webkit-font-smoothing: antialiased;
+	-webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+	background: var(--gold);
+	color: #1d1400;
+}
+
+:focus-visible {
+	outline: 3px solid var(--gold);
+	outline-offset: 3px;
+	border-radius: 10px;
+}
+
+h1,
+h2,
+h3 {
+	font-family: var(--display);
+	text-wrap: balance;
+}
+
+code,
+pre,
+kbd {
+	font-family: var(--mono);
+}
+
+img,
+svg {
+	display: block;
+	max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+	font: inherit;
+	color: inherit;
+}
+
+a {
+	color: inherit;
+	text-underline-offset: 0.2em;
+}
+
+:where(h1, h2, h3, h4, p, figure, blockquote, ul, ol, dl) {
+	margin: 0;
+}
+
+:where(ul, ol) {
+	padding: 0;
+	list-style: none;
+}
+
+/* Long-form article text. Calm column, reading face, real measure. */
+.prose {
+	/* Labs and quizzes rearrange themselves with @container prose (…) as the column widens. */
+	container: prose / inline-size;
+	font-size: 1.12rem;
+	line-height: 1.7;
+}
+
+.prose > :where(* + *) {
+	margin-top: 1rem;
+}
+
+.prose > h2 {
+	margin: 3rem 0 0.7rem;
+	font-size: 1.6rem;
+	font-weight: 800;
+	letter-spacing: -0.025em;
+	line-height: 1.15;
+}
+
+.prose > h3 {
+	margin: 2rem 0 0.4rem;
+	font-size: 1.2rem;
+	font-weight: 800;
+	letter-spacing: -0.02em;
+	line-height: 1.2;
+}
+
+.prose > :where(h2, h3) + * {
+	margin-top: 0;
+}
+
+/* Section links from "On this page" land below the sticky header. */
+.prose > :where(h2, h3) {
+	scroll-margin-top: 5.5rem;
+}
+
+/*
+ * Desktop: text keeps a readable measure (about 80 characters) while tables, code,
+ * labs, notes, quizzes and diagrams take the full width of the article column.
+ */
+@media (min-width: 900px) {
+	.prose {
+		font-size: 1.18rem;
+		line-height: 1.75;
+	}
+
+	.prose > :where(p, ul, ol, h2, h3) {
+		max-width: 52rem;
+	}
+
+	.prose > dl {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		column-gap: 2rem;
+		padding: 0.6rem 1.5rem;
+	}
+
+	.prose > dl > div:nth-last-child(2):nth-child(odd) {
+		border-bottom: 0;
+	}
+}
+
+.prose :where(.prose > ul, .prose > ol, .prose li > ul, .prose li > ol) {
+	display: grid;
+	gap: 0.5rem;
+}
+
+.prose :where(.prose > ul, .prose li > ul) {
+	padding-left: 1.2rem;
+	list-style: disc;
+}
+
+.prose :where(.prose > ul, .prose li > ul) ::marker {
+	color: var(--t);
+}
+
+.prose li > :where(ul, ol) {
+	margin-top: 0.5rem;
+}
+
+/* Numbered lists: big track-coloured counters, for sequences that happen in order. */
+.prose > ol {
+	counter-reset: step;
+	gap: 0.75rem;
+}
+
+.prose > ol > li {
+	counter-increment: step;
+	position: relative;
+	padding-left: 2.6rem;
+}
+
+.prose > ol > li::before {
+	content: counter(step);
+	position: absolute;
+	left: 0;
+	top: 0.1rem;
+	display: grid;
+	place-items: center;
+	width: 1.8rem;
+	height: 1.8rem;
+	border-radius: 999px;
+	background: var(--t);
+	color: var(--t-ink);
+	font-family: var(--display);
+	font-size: 0.95rem;
+	font-weight: 800;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Key terms: a word, then what it means. */
+.prose > dl {
+	display: grid;
+	gap: 0.15rem;
+	padding: 0.4rem 1.1rem;
+	border-radius: 22px;
+	background: var(--panel);
+	border: 1px solid var(--rule);
+}
+
+.prose > dl > div {
+	padding: 0.7rem 0;
+	border-bottom: 1px solid var(--rule);
+}
+
+.prose > dl > div:last-child {
+	border-bottom: 0;
+}
+
+.prose dt {
+	font-family: var(--display);
+	font-weight: 800;
+	color: var(--t);
+}
+
+.prose dd {
+	margin: 0.1rem 0 0;
+	line-height: 1.6;
+}
+
+.prose a {
+	text-decoration-color: var(--t);
+	text-decoration-thickness: 2px;
+}
+
+.prose a:hover {
+	color: var(--t);
+}
+
+.prose code {
+	padding: 0.05em 0.35em;
+	border-radius: 6px;
+	background: var(--panel-2);
+	font-size: 0.86em;
+}
+
+.prose strong {
+	font-weight: 700;
+}
+
+.prose .table-wrap {
+	position: relative;
+	margin: 1.5rem 0 0.75rem;
+	overflow-x: auto;
+	border-radius: 16px;
+	border: 1px solid var(--rule);
+}
+
+.prose table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 1.0625rem;
+	line-height: 1.55;
+}
+
+.prose caption {
+	padding: 0.7rem 0.9rem;
+	text-align: left;
+	font-family: var(--display);
+	font-weight: 800;
+	background: var(--panel);
+	border-bottom: 1px solid var(--rule);
+}
+
+.prose th,
+.prose td {
+	padding: 0.6rem 0.9rem;
+	text-align: left;
+	vertical-align: top;
+	border-bottom: 1px solid var(--rule);
+}
+
+.prose thead th {
+	font-family: var(--display);
+	background: var(--panel);
+	white-space: nowrap;
+}
+
+.prose tbody th {
+	font-weight: 700;
+}
+
+.prose td {
+	font-variant-numeric: tabular-nums;
+}
+
+.prose tr:last-child > * {
+	border-bottom: 0;
+}
+
+.prose table code {
+	white-space: nowrap;
+}
+
+/*
+ * Phones: each row becomes a small card. Column names come from data-label,
+ * which the table-labels preprocessor adds at build time.
+ */
+@media (max-width: 559px) {
+	.prose :is(table, tbody, tr, td, tbody th) {
+		display: block;
+	}
+
+	.prose thead {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+
+	.prose tbody tr {
+		padding: 0.8rem 1rem 0.9rem;
+		border-bottom: 1px solid var(--rule);
+	}
+
+	.prose tbody tr:last-child {
+		border-bottom: 0;
+	}
+
+	.prose tbody :is(td, th) {
+		padding: 0;
+		border-bottom: 0;
+	}
+
+	.prose tbody :is(td, th) + td {
+		margin-top: 0.5rem;
+	}
+
+	.prose tbody th {
+		font-family: var(--display);
+		font-weight: 800;
+		color: var(--t);
+	}
+
+	.prose tbody th::before {
+		font-family: var(--body);
+	}
+
+	.prose tbody [data-label]::before {
+		content: attr(data-label);
+		display: block;
+		font-size: 0.8rem;
+		font-weight: 700;
+		line-height: 1.3;
+		color: var(--ink-3);
+	}
+
+	.prose table code {
+		white-space: normal;
+	}
+}
+
+/* Syntax colours for highlighted samples (teach/highlight.ts). Same palette as the practice editor. */
+.tk-k {
+	color: #b9a3ff;
+}
+.tk-s {
+	color: #4fdcbc;
+}
+.tk-n,
+.tk-l {
+	color: #ff935f;
+}
+.tk-c {
+	color: #8f86a1;
+	font-style: italic;
+}
+.tk-f,
+.tk-d {
+	color: #ffd36e;
+}
+
+/* Screen-reader-only helper. */
+.visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}

@@ -1,0 +1,594 @@
+{
+	"schemaVersion": 2,
+	"generatedAt": "2026-10-18T22:00:17.083762+00:00",
+	"title": "Design System: DevCodex",
+	"extensions": {
+		"colorMeta": {
+			"binder-felt": {
+				"role": "neutral",
+				"displayName": "Binder Felt",
+				"canonical": "oklch(17.8% 0.013 300.4)",
+				"tonalRamp": [
+					"#0c0a10",
+					"#26242a",
+					"#434148",
+					"#626067",
+					"#838189",
+					"#a6a3ac",
+					"#cac7d0",
+					"#f0edf6"
+				]
+			},
+			"sleeve": {
+				"role": "neutral",
+				"displayName": "Sleeve",
+				"canonical": "oklch(21.9% 0.022 301.2)",
+				"tonalRamp": [
+					"#0d0913",
+					"#27232e",
+					"#443f4c",
+					"#635f6c",
+					"#84808e",
+					"#a7a2b1",
+					"#cbc6d6",
+					"#f1ebfb"
+				]
+			},
+			"sleeve-raised": {
+				"role": "neutral",
+				"displayName": "Raised Sleeve",
+				"canonical": "oklch(25.8% 0.031 301.5)",
+				"tonalRamp": [
+					"#0d0816",
+					"#282232",
+					"#453e50",
+					"#645d70",
+					"#857e92",
+					"#a8a1b6",
+					"#ccc5da",
+					"#f2eaff"
+				]
+			},
+			"sleeve-edge": {
+				"role": "neutral",
+				"displayName": "Sleeve Edge",
+				"canonical": "oklch(30.5% 0.035 301.2)",
+				"tonalRamp": [
+					"#0e0717",
+					"#282133",
+					"#453e52",
+					"#645d72",
+					"#867e94",
+					"#a9a0b8",
+					"#cdc4dd",
+					"#f2eaff"
+				]
+			},
+			"ink": {
+				"role": "neutral",
+				"displayName": "Ink",
+				"canonical": "oklch(96.5% 0.010 305.4)",
+				"tonalRamp": [
+					"#0c0a0f",
+					"#262429",
+					"#434146",
+					"#626066",
+					"#848187",
+					"#a6a4aa",
+					"#cac8ce",
+					"#f0edf4"
+				]
+			},
+			"ink-soft": {
+				"role": "neutral",
+				"displayName": "Soft Ink",
+				"canonical": "oklch(79.6% 0.033 301.5)",
+				"tonalRamp": [
+					"#0e0817",
+					"#282133",
+					"#453e51",
+					"#645d71",
+					"#867e93",
+					"#a8a1b7",
+					"#cdc5dc",
+					"#f2eaff"
+				]
+			},
+			"ink-faint": {
+				"role": "neutral",
+				"displayName": "Faint Ink",
+				"canonical": "oklch(65.0% 0.041 300.5)",
+				"tonalRamp": [
+					"#0e0719",
+					"#282036",
+					"#453d55",
+					"#655c75",
+					"#867d98",
+					"#a9a0bb",
+					"#cdc4e0",
+					"#f3e9ff"
+				]
+			},
+			"web-ember": {
+				"role": "primary",
+				"displayName": "Web Ember",
+				"canonical": "oklch(72.6% 0.178 43.2)",
+				"tonalRamp": [
+					"#390000",
+					"#600000",
+					"#860000",
+					"#ad2d00",
+					"#d55403",
+					"#fd793b",
+					"#ff9e62",
+					"#ffc488"
+				]
+			},
+			"web-ember-ink": {
+				"role": "primary",
+				"displayName": "Web Ember Ink",
+				"canonical": "oklch(21.0% 0.050 47.9)",
+				"tonalRamp": [
+					"#1b0400",
+					"#381d0e",
+					"#583a2a",
+					"#795949",
+					"#9c7a69",
+					"#c09c8b",
+					"#e5c0ae",
+					"#ffe5d2"
+				]
+			},
+			"code-violet": {
+				"role": "primary",
+				"displayName": "Code Violet",
+				"canonical": "oklch(70.1% 0.171 292.1)",
+				"tonalRamp": [
+					"#19004b",
+					"#2e006e",
+					"#492193",
+					"#6746b8",
+					"#876adf",
+					"#a98dff",
+					"#cdb2ff",
+					"#f2d8ff"
+				]
+			},
+			"code-violet-ink": {
+				"role": "primary",
+				"displayName": "Code Violet Ink",
+				"canonical": "oklch(20.5% 0.084 287.6)",
+				"tonalRamp": [
+					"#0c012b",
+					"#241c4b",
+					"#403a6c",
+					"#5f598e",
+					"#7f7ab2",
+					"#a29dd7",
+					"#c5c1fd",
+					"#eae7ff"
+				]
+			},
+			"data-teal": {
+				"role": "primary",
+				"displayName": "Data Teal",
+				"canonical": "oklch(76.4% 0.142 172.6)",
+				"tonalRamp": [
+					"#001805",
+					"#00371d",
+					"#00583a",
+					"#007959",
+					"#009d79",
+					"#00c19c",
+					"#48e7c0",
+					"#76ffe5"
+				]
+			},
+			"data-teal-ink": {
+				"role": "primary",
+				"displayName": "Data Teal Ink",
+				"canonical": "oklch(25.6% 0.046 173.5)",
+				"tonalRamp": [
+					"#001109",
+					"#052c23",
+					"#264a40",
+					"#456a5f",
+					"#668c80",
+					"#88afa2",
+					"#abd3c6",
+					"#d0f9ec"
+				]
+			},
+			"reward-gold": {
+				"role": "secondary",
+				"displayName": "Reward Gold",
+				"canonical": "oklch(86.2% 0.151 85.0)",
+				"tonalRamp": [
+					"#250000",
+					"#441500",
+					"#653500",
+					"#885600",
+					"#ab7800",
+					"#d09c00",
+					"#f6c03f",
+					"#ffe66b"
+				]
+			},
+			"reward-gold-ink": {
+				"role": "secondary",
+				"displayName": "Reward Gold Ink",
+				"canonical": "oklch(19.7% 0.040 87.9)",
+				"tonalRamp": [
+					"#120a00",
+					"#2d240c",
+					"#4b4129",
+					"#6b6047",
+					"#8c8167",
+					"#b0a489",
+					"#d4c8ac",
+					"#faeed1"
+				]
+			},
+			"miss-rose": {
+				"role": "secondary",
+				"displayName": "Miss Rose",
+				"canonical": "oklch(71.6% 0.181 13.8)",
+				"tonalRamp": [
+					"#3a0000",
+					"#610007",
+					"#880023",
+					"#b01b41",
+					"#d84761",
+					"#ff6d83",
+					"#ff92a6",
+					"#ffb8ca"
+				]
+			},
+			"miss-rose-ink": {
+				"role": "secondary",
+				"displayName": "Miss Rose Ink"
+			},
+			"level-entry": {
+				"role": "secondary",
+				"displayName": "Entry Green",
+				"canonical": "oklch(82.5% 0.173 139.5)",
+				"tonalRamp": [
+					"#002700",
+					"#004000",
+					"#005800",
+					"#177700",
+					"#419a25",
+					"#65be4d",
+					"#7ad363",
+					"#91ec7a"
+				]
+			},
+			"level-entry-ink": {
+				"role": "secondary",
+				"displayName": "Entry Green Ink",
+				"canonical": "oklch(23.3% 0.062 139.0)",
+				"tonalRamp": [
+					"#001100",
+					"#142c0c",
+					"#314a29",
+					"#4f6a48",
+					"#708c68",
+					"#92af89",
+					"#b5d3ad",
+					"#d6f5ce"
+				]
+			},
+			"level-experienced": {
+				"role": "secondary",
+				"displayName": "Experienced Blue",
+				"canonical": "oklch(73.7% 0.142 248.3)",
+				"tonalRamp": [
+					"#001157",
+					"#002d72",
+					"#00458c",
+					"#0065ae",
+					"#2c87d3",
+					"#54abfa",
+					"#69c0ff",
+					"#81d8ff"
+				]
+			},
+			"level-experienced-ink": {
+				"role": "secondary",
+				"displayName": "Experienced Blue Ink",
+				"canonical": "oklch(24.1% 0.065 252.2)",
+				"tonalRamp": [
+					"#000a26",
+					"#092643",
+					"#274464",
+					"#466485",
+					"#6685a9",
+					"#88a8cd",
+					"#abccf3",
+					"#cceeff"
+				]
+			},
+			"level-senior": {
+				"role": "secondary",
+				"displayName": "Senior Red",
+				"canonical": "oklch(67.4% 0.215 18.1)",
+				"tonalRamp": [
+					"#590000",
+					"#7a0000",
+					"#970010",
+					"#bd002f",
+					"#e6304f",
+					"#ff5c70",
+					"#ff7384",
+					"#ff8c9a"
+				]
+			},
+			"level-senior-ink": {
+				"role": "secondary",
+				"displayName": "Senior Red Ink",
+				"canonical": "oklch(20.0% 0.069 14.2)",
+				"tonalRamp": [
+					"#210004",
+					"#40141a",
+					"#613237",
+					"#845155",
+					"#a87276",
+					"#cc9498",
+					"#f2b7bb",
+					"#ffd8dc"
+				]
+			},
+			"veil-light": {
+				"role": "neutral",
+				"displayName": "Light Veil"
+			},
+			"veil-dark": {
+				"role": "neutral",
+				"displayName": "Dark Veil"
+			},
+			"syntax-keyword": {
+				"role": "syntax",
+				"displayName": "Syntax Keyword"
+			},
+			"syntax-string": {
+				"role": "syntax",
+				"displayName": "Syntax String"
+			},
+			"syntax-number": {
+				"role": "syntax",
+				"displayName": "Syntax Number"
+			},
+			"syntax-function": {
+				"role": "syntax",
+				"displayName": "Syntax Function"
+			},
+			"syntax-property": {
+				"role": "syntax",
+				"displayName": "Syntax Property"
+			},
+			"editor-ground": {
+				"role": "neutral",
+				"displayName": "Editor Ground"
+			}
+		},
+		"typographyMeta": {
+			"display": {
+				"displayName": "Display",
+				"purpose": "Article and quest titles."
+			},
+			"headline": {
+				"displayName": "Headline",
+				"purpose": "Section headings."
+			},
+			"title": {
+				"displayName": "Title",
+				"purpose": "Lab headings, card names, buttons."
+			},
+			"reading": {
+				"displayName": "Reading",
+				"purpose": "Article prose, max ~42rem."
+			},
+			"body": {
+				"displayName": "Body",
+				"purpose": "Interface text."
+			},
+			"label": {
+				"displayName": "Label",
+				"purpose": "Chips, metadata, dock labels."
+			},
+			"code": {
+				"displayName": "Code",
+				"purpose": "Code, wire messages, keys only."
+			},
+			"page-title": {
+				"displayName": "Page title",
+				"purpose": "Top-level screen titles."
+			},
+			"subhead": {
+				"displayName": "Subhead",
+				"purpose": "Short captions, questions and claims in shorts."
+			},
+			"lead": {
+				"displayName": "Lead",
+				"purpose": "Article deks."
+			},
+			"ui": {
+				"displayName": "UI",
+				"purpose": "Controls."
+			},
+			"small": {
+				"displayName": "Small",
+				"purpose": "Secondary text."
+			},
+			"caption": {
+				"displayName": "Caption",
+				"purpose": "Metadata and dock labels."
+			}
+		},
+		"shadows": [
+			{
+				"name": "card",
+				"value": "0 18px 36px -18px rgb(0 0 0 / 0.85)",
+				"purpose": "Concept cards and answer faces."
+			},
+			{
+				"name": "dock",
+				"value": "0 16px 40px -12px rgb(0 0 0 / 0.7)",
+				"purpose": "Floating phone dock."
+			},
+			{
+				"name": "new-card-glow",
+				"value": "0 0 0 3px #ffc94a, 0 0 26px -4px rgb(255 201 74 / 0.55)",
+				"purpose": "Cards not yet reviewed."
+			}
+		],
+		"motion": [
+			{
+				"name": "ease-out-expo",
+				"value": "cubic-bezier(0.16, 1, 0.3, 1)",
+				"purpose": "Every transition: lifts, flips, swipes, arrows."
+			},
+			{
+				"name": "flip",
+				"value": "520-650ms ease-out-expo",
+				"purpose": "Card flips and pack reveals."
+			},
+			{
+				"name": "press",
+				"value": "scale(0.98) 160ms ease-out",
+				"purpose": "Button press."
+			}
+		],
+		"breakpoints": [
+			{
+				"name": "two-column",
+				"value": "560px"
+			},
+			{
+				"name": "tablet",
+				"value": "640px"
+			},
+			{
+				"name": "desktop",
+				"value": "900px"
+			},
+			{
+				"name": "wide",
+				"value": "1280px"
+			}
+		]
+	},
+	"components": [
+		{
+			"name": "Primary Button",
+			"kind": "button",
+			"refersTo": "button-primary",
+			"description": "Run, continue, next step: the main action on a surface.",
+			"html": "<button class=\"ds-btn-primary\">Run 5 tests</button>",
+			"css": ".ds-btn-primary{display:inline-flex;align-items:center;gap:.55rem;min-height:3.25rem;padding:0 1.4rem;border:0;border-radius:999px;background:#1fcfa9;color:#032a21;font:800 1.08rem 'Bricolage Grotesque Variable',system-ui,sans-serif;cursor:pointer;transition:transform 200ms cubic-bezier(.16,1,.3,1)}.ds-btn-primary:hover{transform:translateY(-2px)}.ds-btn-primary:active{transform:scale(.98)}.ds-btn-primary:focus-visible{outline:3px solid #ffc94a;outline-offset:3px}"
+		},
+		{
+			"name": "Reward Button",
+			"kind": "button",
+			"refersTo": "button-reward",
+			"description": "Collecting actions such as opening a pack.",
+			"html": "<button class=\"ds-btn-reward\">Finish and open pack</button>",
+			"css": ".ds-btn-reward{min-height:3.25rem;padding:0 1.4rem;border:0;border-radius:999px;background:#ffc94a;color:#1d1400;font:800 1.08rem 'Bricolage Grotesque Variable',system-ui,sans-serif;cursor:pointer;transition:transform 200ms cubic-bezier(.16,1,.3,1)}.ds-btn-reward:hover{transform:translateY(-2px)}.ds-btn-reward:focus-visible{outline:3px solid #f5f2f9;outline-offset:3px}"
+		},
+		{
+			"name": "Ghost Button",
+			"kind": "button",
+			"refersTo": "button-ghost",
+			"description": "Secondary actions: reset, find, reveal all.",
+			"html": "<button class=\"ds-btn-ghost\">Reset</button>",
+			"css": ".ds-btn-ghost{min-height:3rem;padding:0 1.1rem;border:2px solid #322b3e;border-radius:999px;background:none;color:#f5f2f9;font:800 1rem 'Bricolage Grotesque Variable',system-ui,sans-serif;cursor:pointer}.ds-btn-ghost:hover{border-color:#ffc94a}.ds-btn-ghost:focus-visible{outline:3px solid #ffc94a;outline-offset:3px}"
+		},
+		{
+			"name": "Chip",
+			"kind": "chip",
+			"refersTo": "chip",
+			"description": "Article metadata and status.",
+			"html": "<span class=\"ds-chip\">8 min</span> <span class=\"ds-chip ds-chip-gold\">5 cards inside</span>",
+			"css": ".ds-chip{display:inline-flex;padding:.3rem .75rem;border-radius:999px;background:#1c1823;border:1px solid #322b3e;color:#c0b8cf;font:700 .88rem 'Atkinson Hyperlegible Next Variable',system-ui,sans-serif}.ds-chip-gold{color:#ffc94a;border-color:rgb(255 201 74/.35)}"
+		},
+		{
+			"name": "Search Input",
+			"kind": "input",
+			"refersTo": "input",
+			"description": "Pill field on binder felt.",
+			"html": "<input class=\"ds-input\" placeholder=\"Search articles\">",
+			"css": ".ds-input{min-height:3rem;padding:0 1rem;border-radius:999px;border:2px solid #322b3e;background:#121016;color:#f5f2f9;font:1rem 'Atkinson Hyperlegible Next Variable',system-ui,sans-serif;caret-color:#ffc94a}.ds-input:focus-visible{outline:none;border-color:#ffc94a}.ds-input::placeholder{color:#938aa5}"
+		},
+		{
+			"name": "Phone Dock",
+			"kind": "nav",
+			"refersTo": "nav-dock",
+			"description": "Floating bottom navigation on phones.",
+			"html": "<nav class=\"ds-dock\"><a class=\"on\"><span><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z\"/></svg></span>Binder</a><a><span><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 4.5h9.5A2.5 2.5 0 0 1 17 7v12.5H7.5A2.5 2.5 0 0 1 5 17z\"/></svg></span>Learn</a><a><span><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 5.5v13l10-6.5z\"/></svg></span>Shorts</a></nav>",
+			"css": ".ds-dock{display:grid;grid-template-columns:repeat(3,1fr);padding:.3rem;border-radius:22px;background:#1c1823;border:1px solid #322b3e;box-shadow:0 16px 40px -12px rgb(0 0 0/.7)}.ds-dock a{display:flex;flex-direction:column;align-items:center;gap:.15rem;padding:.3rem 0;color:#938aa5;font:700 .74rem 'Atkinson Hyperlegible Next Variable',system-ui,sans-serif}.ds-dock a span{display:grid;place-items:center;width:3rem;height:2rem;border-radius:999px}.ds-dock a.on{color:#f5f2f9}.ds-dock a.on span{background:#ffc94a;color:#1d1400}"
+		},
+		{
+			"name": "Concept Card",
+			"kind": "card",
+			"refersTo": "panel",
+			"description": "Signature collectible: track frame, art window, level pips, collector number.",
+			"html": "<div class=\"ds-card\"><div class=\"ds-face\"><b>Big-O notation</b><div class=\"ds-art\"></div><p>Looking up a value by index in an array is O(?)</p><small>#001/032 · Data</small></div></div>",
+			"css": ".ds-card{width:12rem;aspect-ratio:5/7;padding:7px;border-radius:16px;background:#1fcfa9;box-shadow:0 0 0 3px #ffc94a,0 0 26px -4px rgb(255 201 74/.55)}.ds-face{height:100%;display:flex;flex-direction:column;gap:.6rem;padding:.75rem;border-radius:10px;background:#1c1823;color:#f5f2f9;font:.85rem/1.3 'Atkinson Hyperlegible Next Variable',system-ui,sans-serif}.ds-face b{font:800 1.1rem/1.05 'Bricolage Grotesque Variable',system-ui,sans-serif}.ds-art{aspect-ratio:2/1;border-radius:8px;background:#1fcfa9}.ds-face small{margin-top:auto;color:#c0b8cf;font-weight:700}"
+		},
+		{
+			"name": "Level Tag",
+			"kind": "chip",
+			"refersTo": "level-tag",
+			"description": "An article's difficulty: career level, plain grade and 1 to 3 pips, in the level colour. Pairs with a 2px level-colour frame around the lesson.",
+			"html": "<span class=\"ds-level\"><span class=\"ds-pips\"><i class=\"on\"></i><i></i><i></i></span>Entry-level<span class=\"ds-grade\"> · Easy</span></span>",
+			"css": ".ds-level{display:inline-flex;align-items:center;gap:.45rem;padding:.3rem .75rem .3rem .65rem;border-radius:999px;border:1.5px solid #86e06f;color:#86e06f;font:800 .88rem/1.2 'Atkinson Hyperlegible Next Variable',system-ui,sans-serif;white-space:nowrap}.ds-grade{font-weight:600;opacity:.85}.ds-pips{display:inline-flex;align-items:flex-end;gap:2px}.ds-pips i{width:4px;border-radius:3px;background:currentColor;opacity:.3}.ds-pips i:nth-child(1){height:7px}.ds-pips i:nth-child(2){height:10px}.ds-pips i:nth-child(3){height:13px}.ds-pips i.on{opacity:1}"
+		}
+	],
+	"narrative": {
+		"northStar": "The Binder",
+		"overview": "DevCodex treats every software engineering concept as a collectible trading card. Finishing an article opens a pack, and the trivia deck is your binder. The world comes from card binders and collectible sets: felt-dark sleeves, numbered cards with a level and a rarity, and saturated track colours that fill whole surfaces instead of tinting small accents. That energy belongs to the frame. Inside an article, the reading column stays calm, with a hyperlegible reading face at a real measure, so the binder rewards learning without competing with it.",
+		"keyCharacteristics": [
+			"A near-black binder-felt ground with three saturated track fields: Web ember, Code violet and Data teal.",
+			"Numbered 5:7 concept cards with a track-colour frame, a per-concept line drawing, level pips and a collector number.",
+			"Gold is the colour of reward: selection, new cards, collected counts, rares.",
+			"Chunky rounded geometry: pills for actions, 16–28px radii for cards and panels.",
+			"One ritual per surface: pack opening, the swipe deck, the auto-playing short."
+		],
+		"rules": [
+			{
+				"name": "The Track Owns The Field Rule",
+				"body": "A track colour fills a region (`--t` on the region, `--t-ink` for everything on top of it), or it does not appear. Never use it as a thin stripe or a tint on grey.",
+				"section": "colors"
+			},
+			{
+				"name": "The Gold Means Earned Rule",
+				"body": "Gold marks what the learner selected, collected or unlocked. Do not use it as a generic accent.",
+				"section": "colors"
+			},
+			{
+				"name": "The Level Frames The Lesson Rule",
+				"body": "A level colour (entry green, experienced blue, senior red) appears only as a full 2px frame around a lesson and as its tag. Never as a fill, a stripe or a decoration elsewhere.",
+				"section": "colors"
+			},
+			{
+				"name": "The Mono Is For Machines Rule",
+				"body": "Monospace sets code, wire messages, hash arithmetic and keys. It never sets prose or headings.",
+				"section": "typography"
+			}
+		],
+		"dos": [
+			"**Do** fill whole regions with a track colour and put its paired ink on top.",
+			"**Do** give every new concept card its own line drawing in `cardArt.ts`.",
+			"**Do** keep article prose in Atkinson Hyperlegible at about 1.12rem, max 42rem wide.",
+			"**Do** honour reduced motion: no flips, no travelling packets, no autoplay.",
+			"**Do** label anything that is a demo or a preview, and show progress only from real activity."
+		],
+		"donts": [
+			"**Don't** use a track colour as a left stripe, a thin border accent or gradient text.",
+			"**Don't** put an eyebrow or kicker label above a heading.",
+			"**Don't** use static holographic stripes; foil appears only as a hover response.",
+			"**Don't** set prose or headings in monospace.",
+			"**Don't** use glass blur, hard offset shadows or bounce easing. Motion is exponential ease-out."
+		]
+	}
+}
