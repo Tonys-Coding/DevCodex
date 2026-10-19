@@ -8,50 +8,100 @@
 </script>
 
 <script lang="ts">
-	import { untrack } from 'svelte';
+	import { tick, untrack } from 'svelte';
+	import { fly } from 'svelte/transition';
+	import { cubicOut } from 'svelte/easing';
+	import { prefersReducedMotion } from 'svelte/motion';
 	import Icon from '../Icon.svelte';
 
+	/**
+	 * One question at a time. Answering locks the choice and shows feedback; the
+	 * learner moves on when ready, and the last step shows the score.
+	 */
 	let { questions, title = 'Quick check' }: { questions: QuizQuestion[]; title?: string } = $props();
 	const uid = $props.id();
 	let picks = $state<(number | null)[]>(untrack(() => questions.map(() => null)));
+	let at = $state(0);
+	let prompt = $state<HTMLElement>();
+
+	const q = $derived(questions[at]);
+	const pick = $derived(at < questions.length ? picks[at] : null);
+	const finished = $derived(at >= questions.length);
 	const right = $derived(picks.filter((p, i) => p === questions[i].answer).length);
-	const answered = $derived(picks.filter((p) => p !== null).length);
+	const many = $derived(questions.length > 1);
+	const enter = $derived({ x: prefersReducedMotion.current ? 0 : 24, duration: prefersReducedMotion.current ? 0 : 320, easing: cubicOut });
+
+	async function next() {
+		at += 1;
+		await tick();
+		prompt?.focus();
+	}
+
+	async function restart() {
+		picks = questions.map(() => null);
+		at = 0;
+		await tick();
+		prompt?.focus();
+	}
 </script>
 
-<section class="quiz" class:single={questions.length === 1} aria-labelledby="{uid}-title">
+<section class="quiz" aria-labelledby="{uid}-title">
 	<div class="head">
 		<h2 id="{uid}-title">{title}</h2>
-		{#if questions.length > 1}<span class="score">{right}/{questions.length}</span>{/if}
-	</div>
-	{#each questions as q, qi (qi)}
-		{@const pick = picks[qi]}
-		<div class="q">
-			<p class="prompt" id="{uid}-q{qi}">{q.prompt}</p>
-			<div class="answers" role="group" aria-labelledby="{uid}-q{qi}">
-				{#each q.options as option, oi (oi)}
-					<button
-						type="button"
-						class:right={pick !== null && oi === q.answer}
-						class:wrong={pick === oi && oi !== q.answer}
-						aria-pressed={pick === oi}
-						onclick={() => (picks[qi] = oi)}
-					>
-						<span>{option}</span>
-						{#if pick !== null && oi === q.answer}<Icon name="check" stroke={2.5} />{/if}
-					</button>
+		{#if many}
+			<span class="progress" aria-hidden="true">
+				{#each questions as question, i (i)}
+					<i class:now={i === at} class:right={picks[i] !== null && picks[i] === question.answer} class:wrong={picks[i] !== null && picks[i] !== question.answer}></i>
 				{/each}
-			</div>
-			{#if pick !== null}
-				<p class="feedback" class:ok={pick === q.answer} role="status">
-					<strong>{pick === q.answer ? 'Nice.' : 'Not quite.'}</strong>
-					{q.explain}
+			</span>
+		{/if}
+	</div>
+
+	{#key at}
+		<div class="stage" in:fly={enter}>
+			{#if !finished}
+				{#if many}<p class="count">Question {at + 1} of {questions.length}</p>{/if}
+				<p class="prompt" id="{uid}-q" tabindex="-1" bind:this={prompt}>{q.prompt}</p>
+				<div class="answers" role="group" aria-labelledby="{uid}-q">
+					{#each q.options as option, oi (oi)}
+						<button
+							type="button"
+							class:right={pick !== null && oi === q.answer}
+							class:wrong={pick === oi && oi !== q.answer}
+							aria-pressed={pick === oi}
+							disabled={pick !== null && pick !== oi && oi !== q.answer}
+							onclick={() => pick === null && (picks[at] = oi)}
+						>
+							<span>{option}</span>
+							{#if pick !== null && oi === q.answer}<Icon name="check" stroke={2.5} />{/if}
+						</button>
+					{/each}
+				</div>
+				{#if pick !== null}
+					<p class="feedback" class:ok={pick === q.answer} role="status">
+						<strong>{pick === q.answer ? 'Nice.' : 'Not quite.'}</strong>
+						{q.explain}
+					</p>
+					{#if many}
+						<button type="button" class="go" onclick={next}>
+							{at === questions.length - 1 ? 'See your score' : 'Next question'}
+							<Icon name="arrow-right" stroke={2} />
+						</button>
+					{/if}
+				{/if}
+			{:else}
+				<p class="prompt" tabindex="-1" bind:this={prompt}>
+					{right === questions.length ? 'All correct.' : `${right} of ${questions.length} correct.`}
 				</p>
+				<p class="summary" role="status">
+					{right === questions.length
+						? 'You have this one down. Open your pack below.'
+						: 'Each question showed why its answer is right. Run through it again to lock it in.'}
+				</p>
+				<button type="button" class="go ghost" onclick={restart}><Icon name="refresh" stroke={2} /> Try again</button>
 			{/if}
 		</div>
-	{/each}
-	{#if questions.length > 1 && answered === questions.length}
-		<p class="total" role="status">{right === questions.length ? 'All correct.' : `${right} of ${questions.length} correct. The explanations above show where the others went.`}</p>
-	{/if}
+	{/key}
 </section>
 
 <style>
@@ -71,47 +121,52 @@
 		letter-spacing: -0.025em;
 	}
 
-	.score {
-		font-family: var(--display);
-		font-weight: 800;
-		color: var(--ink-2);
-		font-variant-numeric: tabular-nums;
+	.progress {
+		display: flex;
+		gap: 5px;
 	}
 
-	.q + .q {
-		margin-top: 1.6rem;
+	.progress i {
+		width: 1.4rem;
+		height: 6px;
+		border-radius: 3px;
+		background: var(--panel-2);
 	}
 
-	/* Wide article column: questions sit side by side as cards. */
-	@container prose (min-width: 46rem) {
-		.quiz {
-			display: grid;
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-			gap: 1rem;
-		}
+	.progress i.now {
+		background: var(--ink-3);
+	}
 
-		.head,
-		.total,
-		.single .q {
-			grid-column: 1 / -1;
-		}
+	.progress i.right {
+		background: var(--structures);
+	}
 
-		.q {
-			padding: 0.4rem 1.2rem 1.2rem;
-			border-radius: 22px;
-			border: 1px solid var(--rule);
-			background: var(--panel);
-		}
+	.progress i.wrong {
+		background: var(--miss);
+	}
 
-		.q + .q {
-			margin-top: 0;
-		}
+	.stage {
+		max-width: 46rem;
+	}
+
+	.count {
+		margin-top: 1rem;
+		font-size: 0.88rem;
+		font-weight: 700;
+		color: var(--ink-3);
 	}
 
 	.prompt {
-		margin: 0.7rem 0 0.8rem;
-		font-size: 1.12rem;
+		margin: 0.35rem 0 0.9rem;
+		font-family: var(--display);
+		font-size: 1.35rem;
 		font-weight: 700;
+		line-height: 1.25;
+		letter-spacing: -0.015em;
+	}
+
+	.prompt:focus {
+		outline: none;
 	}
 
 	.answers {
@@ -138,8 +193,13 @@
 		transition: transform 160ms ease-out;
 	}
 
-	button:hover {
+	button:hover:not(:disabled) {
 		border-color: var(--ink-3);
+	}
+
+	button:disabled {
+		opacity: 0.45;
+		cursor: default;
 	}
 
 	button:active {
@@ -156,12 +216,11 @@
 		background: rgb(255 107 129 / 0.1);
 	}
 
+	/* Feedback reads as plain text under the answers, no box around it. */
 	.feedback {
-		margin-top: 0.8rem;
-		padding: 0.85rem 1rem;
-		border-radius: 16px;
-		background: var(--panel);
+		margin-top: 1rem;
 		color: var(--ink-2);
+		line-height: 1.6;
 	}
 
 	.feedback strong {
@@ -172,9 +231,33 @@
 		color: var(--structures);
 	}
 
-	.total {
-		margin-top: 1.2rem;
-		font-weight: 700;
+	.summary {
 		color: var(--ink-2);
+	}
+
+	.go {
+		display: inline-flex;
+		justify-content: center;
+		gap: 0.55rem;
+		min-height: 3.25rem;
+		margin-top: 1.25rem;
+		padding: 0 1.4rem;
+		border-radius: 999px;
+		border: 0;
+		background: var(--t);
+		color: var(--t-ink);
+		font-family: var(--display);
+		font-size: 1.05rem;
+		font-weight: 800;
+	}
+
+	.go:hover:not(:disabled) {
+		border-color: transparent;
+	}
+
+	.go.ghost {
+		border: 2px solid var(--rule);
+		background: none;
+		color: var(--ink);
 	}
 </style>
