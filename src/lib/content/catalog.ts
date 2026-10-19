@@ -26,6 +26,7 @@ export const articles: ArticleMeta[] = [
 	},
 	{
 		id: 'cookies-sessions',
+		builds: ['load-a-page'],
 		track: 'web',
 		level: 'experienced',
 		status: 'live',
@@ -37,6 +38,7 @@ export const articles: ArticleMeta[] = [
 	},
 	{
 		id: 'http-caching',
+		builds: ['load-a-page'],
 		track: 'web',
 		level: 'experienced',
 		status: 'live',
@@ -48,6 +50,7 @@ export const articles: ArticleMeta[] = [
 	},
 	{
 		id: 'cors',
+		builds: ['load-a-page', 'cookies-sessions'],
 		track: 'web',
 		level: 'senior',
 		status: 'live',
@@ -70,6 +73,7 @@ export const articles: ArticleMeta[] = [
 	},
 	{
 		id: 'recursion',
+		builds: ['stacks-queues'],
 		track: 'programming',
 		level: 'entry',
 		status: 'live',
@@ -81,6 +85,7 @@ export const articles: ArticleMeta[] = [
 	},
 	{
 		id: 'js-event-loop',
+		builds: ['values-references'],
 		track: 'programming',
 		level: 'senior',
 		status: 'live',

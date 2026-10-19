@@ -20,6 +20,8 @@ export type ArticleMeta = {
 	level: Level;
 	/** What the reader should already know, in one short sentence. */
 	assumes: string;
+	/** Lessons this one builds on, by id. Shown as "Builds on" links and a gentle nudge if unfinished. */
+	builds?: string[];
 	/** `soon` articles are listed in the curriculum but not written yet. */
 	status: 'live' | 'soon';
 };

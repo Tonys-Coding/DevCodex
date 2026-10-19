@@ -33,7 +33,7 @@
 	<div class="page">
 		{#each rows as { track, lessons, done } (track.id)}
 			<div class="track t-{track.id}">
-				<h3><a href={resolve('/learn')}>{track.title}</a> <span>{done}/{lessons.length}</span></h3>
+				<h3><a href={resolve('/learn/topic/[track]', { track: track.id })}>{track.title}</a> <span>{done}/{lessons.length}</span></h3>
 				<ol>
 					{#each lessons as lesson, i (lesson.id)}
 						{@const at = progress.data.completed[lesson.id]}
