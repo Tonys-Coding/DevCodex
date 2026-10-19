@@ -305,9 +305,25 @@ Lit elements fill with the track colour, and message chips are ink pills with da
 - **Diagrams** (`teach/Diagram.svelte`): sysketch SVGs in the midnight theme on a matching #070b16 frame, with a caption and an "Open full size" link. On phones a wide diagram scrolls sideways at a minimum of 40rem so its labels stay legible.
 
 ### Learn page
-- **Topic card:** a landscape version of the concept card, quietened: a raised-sleeve frame, a sleeve face, a tinted art window with the track's line drawing, the title, blurb, lesson and finished counts, and a collector number (#01/03). The track colour appears only in the art and the "Show lessons" toggle; when open, the frame takes a muted mix of the track colour. It is a disclosure button (`aria-expanded`).
-- **Lesson cards:** opening a topic deals its lessons out as portrait cards, one after another (70ms stagger, a small drop and rotation, none under reduced motion). Each is framed in its level colour and shows the lesson number, the art of its first concept card, the level tag, title, summary and boxless meta. On phones the hand scrolls sideways with snap; from 900px the three topic cards share a row and the open hand fills the width below.
-- **Tools:** search is an underlined field, and the level filter is text tabs underlined in the chosen level's colour. Searching or filtering deals every topic with a match.
+- **Built to scale:** a grid of topic cards (as many columns as fit, each at least 22rem), each linking to that topic's own page. Above it sits one "Continue …" line for the most recently read lesson. Old `/learn#topic-<id>` links redirect to the topic page.
+- **Topic card:** a quiet landscape binder card linking to its topic page: track art, title, blurb, one segment per lesson (filled in its level colour once finished, striped once started), "4 lessons · about 61 min", finished count, and "Open topic", "Continue" or "Review topic". A topic with a lesson under way gets a muted frame in its colour. Its accessible name is just the title and lesson count.
+- **Search:** lesson titles and summaries, section headings, key terms inside sections (indexed at build time) and concept cards, in one flat list under the search box.
+- **Level without a search:** lists every lesson at that level across topics, each labelled with its topic, and the topic cards show how many lessons each has at that level.
+
+### Topic page (`/learn/topic/<id>`)
+- **Header:** a panel framed in a muted mix of the topic colour, with large art (hidden on phones), title, blurb and lesson counts per level; then the numbers (lessons finished, cards collected, problems solved, minutes left); then a segment per lesson; then the one next step (resume the most recently read lesson, or the next unfinished one) with a track-coloured button. On phones the next step comes right after the title.
+- **The path:** the topic's lessons as lesson cards, easiest first.
+- **Concept cards:** the topic's cards in a binder sleeve (six, then "Show all"), collected faces or locked hints, and a link to review them in Trivia.
+- **Side column:** the topic's achievement medal with progress, related practice problems with difficulty and solved state, and how many shorts come from the topic.
+- **Adding a topic:** add it to `tracks` in the catalog and to the `TrackId` type, give it a `.t-<id>` colour pair in app.css and line art in `trackArt` (cardArt.ts), and an achievement title in achievements.ts. Without its own colour, a topic falls back to gold.
+
+### Article reading aids
+- **Cover:** a back link to the article's topic page (the topic name in the tags links there too), "Builds on" links (plus a gold "New to this? Start with …" if the prerequisite isn't finished), and "Earn the pack:" with the three steps, ticked as they're met. On phones the summary clamps to three lines with More, which also reveals what the lesson assumes.
+- **While reading:** a 3px gold progress line under the header. Below 1100px, a line under it shows the current section and "Pack n/3"; tapping it opens a bottom sheet with the contents and the pack steps. From 1100px, the rail shows "Your pack" (live) above "On this page".
+- **Resume:** reopening a half-read lesson offers "You stopped at … Continue there", between hairlines.
+- **Checkpoints:** two one-question checks per lesson, set between hairlines with a gold "Checkpoint" flag. They count toward the pack (answering is enough).
+- **Glossary terms:** the first use of each "Words you will meet" entry is dotted-underlined in the track colour and shows its definition on hover, focus or tap.
+- **Code samples:** Copy in the title bar. When lines overflow, the right edge fades and a Wrap toggle appears.
 
 ### Binder (the dashboard)
 The dashboard leads with one next step and keeps everything else quieter. It renders once stored progress and the device clock are known, and fades in together so nothing jumps.

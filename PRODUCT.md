@@ -25,6 +25,8 @@ Learners may read a lesson in a longer desktop session or review a single concep
 ## Capabilities and Constraints
 
 - The intended learning loop is lesson → trivia → related deeper concept cards.
+- Learn is a grid of topics, each with its own page (lessons, progress, concept cards, practice, shorts, achievement), so the catalogue can grow to many topics.
+- Every lesson has two mid-lesson checkpoints (one question each) besides its quick check. Lessons can name prerequisites (`builds` in the catalog).
 - Packs are earned, not clicked: a lesson's pack opens only after most sections are read past, real time is spent (counted only while the tab is visible and the reader is active), and its quick checks are passed. All checks run on the device; there is no server to cheat against, so this is a guardrail for honest learners, not anti-tampering.
 - The short feed uses swipeable visual explainers and engineering scenarios, not video at launch.
 - Initial topics span web fundamentals, programming concepts, and basic data structures.

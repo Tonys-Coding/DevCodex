@@ -46,6 +46,10 @@
 
 - 2026-10-19: Packs gated behind real reading (sections, active time, quick checks), and an interactive lesson star map beside the greeting. The gate was tested over CDP: jumping to the end, failing then passing the quiz, and the time requirement.
 
+- 2026-10-19: All 20 points from the Learn senior review built and tested at 375 and 1440px. The article bundle went from 88 KB to about 6 KB plus about 9 KB per article.
+
+- 2026-10-19: Topic pages: Learn became a scalable topic grid, and each topic got its own page. Tested at 375 and 1440px, including the old-link redirect.
+
 ## Next checkpoint
 
 The user approves the first commit and push. Then Pages goes live at `https://tonys-coding.github.io/DevCodex/` and installs get tested on devices.

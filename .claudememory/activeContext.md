@@ -71,6 +71,20 @@ Phase 2 is built and verified. **Binder (direction C)** is the app. On 2026-10-1
 - `src/lib/progress/requirements.ts` defines the pack requirements: 80% of sections, active time of 30% of the estimate (60–300 s), and every quick check passed (≥60% on multi-question ones). ArticleShell counts active time in 5 s ticks (visible tab, activity in the last 60 s) through `progress.readTime`. `progress.read` records `sections`. Quizzes register through the `devcodex:quizzes` context; a passed check reopens on its best score.
 - `home/LessonMap.svelte`: a star map of lessons beside the greeting (desktop only).
 
+## Learn review build (2026-10-19)
+
+- Articles load on their own: `learn/[slug]/+page.ts` lazy-imports the body. The article page is now about 6 KB gzipped plus about 9 KB per article, down from 88 KB.
+- `learn/+page.server.ts` ships a build-time index (`src/lib/content/article-index.server.ts`): sections with key terms (`keywordsOf`) and quizzes (`quizzesOf`) per article, used for search and for pack status on cards.
+- Learn: remembers open topics (sessionStorage `devcodex:learn-open`), honours `#topic-<track>`, allows several open topics, search lists sections, terms and concepts, and a level filter that doesn't clear itself.
+- Articles: progress line, phone section line and sheet, rail pack steps, resume prompt, cover "Builds on" and "Earn the pack", phone summary clamp, two checkpoints each (`Quiz variant="checkpoint"`), `teach/Term.svelte` glossary tooltips in the three Entry-level glossaries, and code Copy/Wrap.
+- Requirements: the time step is waived when every section is read and every check is fully right. `--header-h` is set by the layout.
+
+## Topic pages (2026-10-19)
+
+- Learn (`/learn`) is a scalable grid of TopicCard links, plus a Continue line, search, and a level list when a level is picked without a search. Each topic has `/learn/topic/[track]` (prerendered via `entries`, with this topic's slice of the article index from `+page.server.ts`): header with the next step, the path, concept cards, the achievement, practice and shorts.
+- Article back links and the dashboard binder's track headings point at topic pages. `/learn#topic-x` redirects.
+- Adding a topic means: tracks plus TrackId, a `.t-<id>` colour, `trackArt`, and an achievement title. A topic without a colour falls back to gold.
+
 ## Known quirks
 
 - CI runs `npm ci` from scratch. A stale local `.svelte-kit/` can hide type errors, so clear it before trusting a local `npm run check`. `@types/node` is a direct dev dependency for vite.config.ts.
