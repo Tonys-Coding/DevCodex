@@ -18,20 +18,47 @@ export type ProgressData = {
 	drafts: Record<string, string>;
 	/** Local dates (YYYY-MM-DD) with any learning activity. */
 	days: string[];
+	/** articleId → where the reader got to. Optional fields were added later; version 1 files without them still load. */
+	reading?: Record<string, Reading>;
+	/** `${articleId}:${quizTitle}` → best quick-check result */
+	quizzes?: Record<string, { best: number; total: number; at: string }>;
+	/** What the dashboard greets the learner as. Never leaves the device. */
+	profile?: { name?: string };
+};
+
+export type Reading = {
+	/** First opened, and last read, as ISO times. */
+	opened: string;
+	last: string;
+	/** Furthest point reached, 0–1. */
+	percent: number;
+	/** The section being read when they left. */
+	section?: { id: string; text: string };
 };
 
 const KEY = 'devcodex:progress';
 
-const empty = (): ProgressData => ({ version: 1, completed: {}, cards: {}, solved: {}, drafts: {}, days: [] });
+const empty = (): ProgressData => ({ version: 1, completed: {}, cards: {}, solved: {}, drafts: {}, days: [], reading: {}, quizzes: {}, profile: {} });
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /** Accept only data with the expected shape; anything else is rejected, never half-loaded. */
 function parse(value: unknown): ProgressData | null {
 	if (!isRecord(value) || value.version !== 1) return null;
-	const { completed, cards: c, solved, drafts, days } = value;
+	const { completed, cards: c, solved, drafts, days, reading, quizzes, profile } = value;
 	if (![completed, c, solved, drafts].every(isRecord) || !Array.isArray(days)) return null;
-	return { version: 1, completed, cards: c, solved, drafts, days: days.filter((d) => typeof d === 'string') } as ProgressData;
+	const name = isRecord(profile) && typeof profile.name === 'string' ? profile.name.slice(0, 40) : undefined;
+	return {
+		version: 1,
+		completed,
+		cards: c,
+		solved,
+		drafts,
+		days: days.filter((d) => typeof d === 'string'),
+		reading: isRecord(reading) ? reading : {},
+		quizzes: isRecord(quizzes) ? quizzes : {},
+		profile: name ? { name } : {}
+	} as ProgressData;
 }
 
 const today = () => {
@@ -78,6 +105,30 @@ class Progress {
 		}
 		return count;
 	});
+
+	/** The longest run of consecutive active days ever, so a streak badge is kept once earned. */
+	bestStreak = $derived.by(() => {
+		const sorted = [...new Set(this.data.days)].sort();
+		let best = 0;
+		let run = 0;
+		let prev: number | undefined;
+		for (const day of sorted) {
+			const [y, m, d] = day.split('-').map(Number);
+			const n = Date.UTC(y, m - 1, d) / 86_400_000;
+			run = prev !== undefined && n - prev === 1 ? run + 1 : 1;
+			best = Math.max(best, run);
+			prev = n;
+		}
+		return best;
+	});
+
+	/** Lessons opened but not finished, most recently read first. */
+	inProgress = $derived(
+		Object.entries(this.data.reading ?? {})
+			.filter(([id]) => !this.isDone(id))
+			.sort(([, a], [, b]) => b.last.localeCompare(a.last))
+			.map(([id, reading]) => ({ id, reading }))
+	);
 
 	async load() {
 		try {
@@ -129,6 +180,37 @@ class Progress {
 			changed = true;
 		}
 		if (changed) this.#save();
+	}
+
+	/** Records how far into an article the reader is. Saves are batched while scrolling. */
+	#readTimer: ReturnType<typeof setTimeout> | undefined;
+	read(articleId: string, percent: number, section?: { id: string; text: string }) {
+		const now = new Date().toISOString();
+		this.data.reading ??= {};
+		const entry = this.data.reading[articleId];
+		this.data.reading[articleId] = {
+			opened: entry?.opened ?? now,
+			last: now,
+			percent: Math.max(entry?.percent ?? 0, Math.min(1, Math.max(0, percent))),
+			section: section ?? entry?.section
+		};
+		clearTimeout(this.#readTimer);
+		this.#readTimer = setTimeout(() => this.#save(), 800);
+	}
+
+	/** Keeps the best score for one quick check. */
+	quiz(key: string, right: number, total: number) {
+		this.data.quizzes ??= {};
+		const entry = this.data.quizzes[key];
+		if (!entry || right > entry.best) this.data.quizzes[key] = { best: right, total, at: new Date().toISOString() };
+		this.#touch();
+		this.#save();
+	}
+
+	setName(name: string) {
+		const clean = name.trim().slice(0, 40);
+		this.data.profile = clean ? { name: clean } : {};
+		this.#save();
 	}
 
 	solve(problemId: string, language: Language) {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import { setContext, type Snippet } from 'svelte';
 	import { resolve } from '$app/paths';
 	import type { ArticleMeta } from '../../content/types';
 	import { trackById, nextArticle, practiceFor } from '../../content/catalog';
@@ -30,24 +30,42 @@
 		opening = true;
 	}
 
-	/** The section being read: the last heading that has scrolled past the top band. */
+	// Quick checks inside the article record their scores against this id.
+	setContext('devcodex:article', () => meta.id);
+
+	let proseEl = $state<HTMLElement>();
+
+	/**
+	 * The section being read: the last heading that has scrolled past the top band.
+	 * The same pass records reading progress for "Pick up where you left off".
+	 */
 	let current = $state('');
 	$effect(() => {
 		const ids = toc.map((t) => t.id);
+		const id = meta.id;
+		// Re-run once stored progress has loaded, so simply opening an article counts as starting it.
+		void progress.loaded;
 		let frame = 0;
 		const update = () => {
 			frame = 0;
 			let at = '';
-			for (const id of ids) {
-				const el = document.getElementById(id);
-				if (el && el.getBoundingClientRect().top < window.innerHeight * 0.3) at = id;
+			for (const tocId of ids) {
+				const el = document.getElementById(tocId);
+				if (el && el.getBoundingClientRect().top < window.innerHeight * 0.3) at = tocId;
 			}
 			current = at;
+			if (proseEl && progress.loaded && !progress.isDone(id)) {
+				const r = proseEl.getBoundingClientRect();
+				const percent = (window.innerHeight - r.top) / Math.max(r.height, 1);
+				const entry = toc.find((t) => t.id === at);
+				progress.read(id, percent, entry ? { id: entry.id, text: entry.text } : undefined);
+			}
 		};
 		const onScroll = () => {
 			if (!frame) frame = requestAnimationFrame(update);
 		};
-		update();
+		// First pass on the next frame, outside this effect, so recording progress never re-triggers it.
+		frame = requestAnimationFrame(update);
 		window.addEventListener('scroll', onScroll, { passive: true });
 		return () => {
 			window.removeEventListener('scroll', onScroll);
@@ -97,7 +115,7 @@
 				</details>
 			{/if}
 
-			<div class="prose">
+			<div class="prose" bind:this={proseEl}>
 				{@render children()}
 			</div>
 

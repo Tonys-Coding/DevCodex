@@ -8,7 +8,8 @@
 </script>
 
 <script lang="ts">
-	import { tick, untrack } from 'svelte';
+	import { getContext, tick, untrack } from 'svelte';
+	import { progress } from '../../progress/progress.svelte';
 	import { fly } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import { prefersReducedMotion } from 'svelte/motion';
@@ -31,8 +32,16 @@
 	const many = $derived(questions.length > 1);
 	const enter = $derived({ x: prefersReducedMotion.current ? 0 : 24, duration: prefersReducedMotion.current ? 0 : 320, easing: cubicOut });
 
+	/** Inside an article, the best score is kept for the dashboard and achievements. */
+	const articleId = getContext<(() => string) | undefined>('devcodex:article');
+	function record() {
+		const id = articleId?.();
+		if (id) progress.quiz(`${id}:${title}`, right, questions.length);
+	}
+
 	async function next() {
 		at += 1;
+		if (at === questions.length) record();
 		await tick();
 		prompt?.focus();
 	}
@@ -70,7 +79,11 @@
 							class:wrong={pick === oi && oi !== q.answer}
 							aria-pressed={pick === oi}
 							disabled={pick !== null && pick !== oi && oi !== q.answer}
-							onclick={() => pick === null && (picks[at] = oi)}
+							onclick={() => {
+								if (pick !== null) return;
+								picks[at] = oi;
+								if (!many) record();
+							}}
 						>
 							<span>{option}</span>
 							{#if pick !== null && oi === q.answer}<Icon name="check" stroke={2.5} />{/if}
