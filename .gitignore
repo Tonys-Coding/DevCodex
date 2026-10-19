@@ -1,0 +1,35 @@
+node_modules
+
+# Output
+.output
+.vercel
+.netlify
+.wrangler
+/.svelte-kit
+/build
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.*
+!.env.example
+!.env.test
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Impeccable generated review artifacts (not source)
+.impeccable/review/
+.impeccable/mocks/
+.impeccable/build/
+.impeccable/live/
+.impeccable/config.local.json
+
+# Local logs and scratch
+*.log
+.logs/
+notes/
