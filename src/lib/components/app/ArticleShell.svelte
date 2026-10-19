@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { setContext, type Snippet } from 'svelte';
+	import { setContext, untrack, type Snippet } from 'svelte';
 	import { resolve } from '$app/paths';
 	import type { ArticleMeta } from '../../content/types';
-	import { trackById, nextArticle, practiceFor } from '../../content/catalog';
+	import { trackById, nextArticle, practiceFor, articleById } from '../../content/catalog';
 	import { cardsUnlockedBy } from '../../content/cards';
 	import { problemById } from '../../content/problems';
 	import { progress } from '../../progress/progress.svelte';
@@ -10,7 +10,7 @@
 	import CollectCard from '../CollectCard.svelte';
 	import LevelTag from './LevelTag.svelte';
 	import type { TocEntry } from '../../content/article-markup';
-	import { requirements, type QuizInfo } from '../../progress/requirements';
+	import { requirements, requiredSeconds, type QuizInfo } from '../../progress/requirements';
 
 	let { meta, toc = [], children }: { meta: ArticleMeta; toc?: TocEntry[]; children: Snippet } = $props();
 
@@ -19,6 +19,10 @@
 	const next = $derived(nextArticle(meta.id));
 	const practice = $derived((practiceFor[meta.id] ?? []).map((id) => problemById(id)!).filter(Boolean));
 	const done = $derived(progress.isDone(meta.id));
+	const builds = $derived((meta.builds ?? []).map((id) => articleById(id)!).filter(Boolean));
+	const unfinishedPrereq = $derived(builds.find((b) => !progress.isDone(b.id)));
+	/** On phones the summary is clamped to three lines; "More" shows it in full, with what the lesson assumes. */
+	let dekOpen = $state(false);
 
 	/** Set when the pack is opened during this visit, so cards can be flipped one by one. */
 	let opening = $state(false);
@@ -63,6 +67,29 @@
 	});
 
 	let proseEl = $state<HTMLElement>();
+	/** How far down the lesson the reader is right now, for the progress bar under the header. */
+	let readNow = $state(0);
+
+	/** Reopening a half-read lesson offers to jump back to where the reader stopped. */
+	let resumeAt = $state<{ id: string; text: string; percent: number } | null>(null);
+	let resumeChecked = false;
+	$effect(() => {
+		if (resumeChecked || !progress.loaded) return;
+		resumeChecked = true;
+		untrack(() => {
+			const r = progress.data.reading?.[meta.id];
+			if (r?.section && !progress.isDone(meta.id) && !location.hash && window.scrollY < 300) resumeAt = { ...r.section, percent: r.percent };
+		});
+	});
+	function resume() {
+		const target = resumeAt && document.getElementById(resumeAt.id);
+		resumeAt = null;
+		target?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+	}
+
+	/** Phones: the current section sits in a line under the header; tapping it opens the contents and pack checklist. */
+	let sheet = $state<HTMLDialogElement>();
+	const currentText = $derived(toc.find((t) => t.id === current)?.text);
 
 	/**
 	 * The section being read: the last heading that has scrolled past the top band.
@@ -83,6 +110,10 @@
 				if (el && el.getBoundingClientRect().top < window.innerHeight * 0.3) at = tocId;
 			}
 			current = at;
+			if (proseEl) {
+				const r0 = proseEl.getBoundingClientRect();
+				readNow = Math.min(1, Math.max(0, (window.innerHeight - r0.top) / Math.max(r0.height, 1)));
+			}
 			if (proseEl && progress.loaded && !progress.isDone(id)) {
 				const r = proseEl.getBoundingClientRect();
 				const percent = (window.innerHeight - r.top) / Math.max(r.height, 1);
@@ -103,8 +134,23 @@
 	});
 </script>
 
+{#snippet packSteps()}
+	<ul class="steps">
+		{#each checklist as r (r.id)}
+			<li class:met={r.met}>
+				<span class="tick sm" aria-hidden="true">{#if r.met}<Icon name="check" size={13} stroke={3} />{/if}</span>
+				<span class="what">
+					<span class="label">{r.label}</span>
+					<span class="detail">{r.detail}</span>
+				</span>
+				<span class="visually-hidden">{r.met ? 'Done.' : 'Not done yet.'}</span>
+			</li>
+		{/each}
+	</ul>
+{/snippet}
+
 {#snippet sections()}
-	<ol>
+	<ol class="sections-list">
 		{#each toc as t (t.id)}
 			<li><a href="#{t.id}" aria-current={current === t.id ? 'location' : undefined}>{t.text}</a></li>
 		{/each}
@@ -113,16 +159,35 @@
 {/snippet}
 
 <article class="read t-{meta.track}">
-	<a class="back" href={resolve('/learn')}><Icon name="arrow-left" size={18} stroke={2} /> Learn</a>
+	{#if !done}
+		<div class="readbar" aria-hidden="true"><i style="transform: scaleX({readNow})"></i></div>
+	{/if}
+	{#if currentText}
+		<button type="button" class="where-bar" onclick={() => sheet?.showModal()} aria-haspopup="dialog">
+			<span class="where-text">{currentText}</span>
+			{#if !done}<span class="where-pack">Pack {checklist.filter((r) => r.met).length}/3</span>{/if}
+			<Icon name="chevron-right" size={18} stroke={2.5} />
+		</button>
+	{/if}
+
+	<a class="back" href={resolve('/learn/topic/[track]', { track: meta.track })}><Icon name="arrow-left" size={18} stroke={2} /> {track.title}</a>
 	<header class="cover lv-{meta.level}">
 		<p class="tags meta-row">
 			<LevelTag level={meta.level} />
-			<span>{track.title}</span>
+			<a class="topic-link" href={resolve('/learn/topic/[track]', { track: meta.track })}>{track.title}</a>
 		</p>
 		<h1>{meta.title}</h1>
-		<p class="dek">{meta.dek}</p>
-		<div class="facts">
+		<p class="dek" class:open={dekOpen}>{meta.dek}</p>
+		<button type="button" class="more" onclick={() => (dekOpen = !dekOpen)} aria-expanded={dekOpen}>{dekOpen ? 'Less' : 'More'}</button>
+		<div class="facts" class:open={dekOpen}>
 			<p class="assumes"><strong>Assumes:</strong> {meta.assumes}</p>
+			{#if builds.length}
+				<p class="builds">
+					<strong>Builds on:</strong>
+					{#each builds as b, i (b.id)}<a href={resolve('/learn/[slug]', { slug: b.id })}>{b.title}</a>{i < builds.length - 1 ? '; ' : '.'}{/each}
+					{#if unfinishedPrereq}<span class="nudge">New to this? Start with “{unfinishedPrereq.title}”.</span>{/if}
+				</p>
+			{/if}
 			<p class="chips meta-row">
 				<span><Icon name="clock" size={16} stroke={2} /> {meta.minutes} min</span>
 				<span>{toc.length} sections</span>
@@ -132,8 +197,27 @@
 					<span class="gold"><Icon name="cards" size={16} stroke={2} /> {pack.length} cards inside</span>
 				{/if}
 			</p>
+			{#if !done}
+				<p class="earn">
+					<span class="earn-label">Earn the pack:</span>
+					{#each checklist as r (r.id)}
+						<span class:met={r.met}>
+							{#if r.met}<Icon name="check" size={15} stroke={3} />{/if}
+							{r.id === 'sections' ? 'read it through' : r.id === 'time' ? `about ${Math.ceil(requiredSeconds(meta.minutes) / 60)} min with it` : quizzes.length > 1 ? 'pass the checks' : 'pass the quick check'}
+						</span>
+					{/each}
+				</p>
+			{/if}
 		</div>
 	</header>
+
+	{#if resumeAt && !current}
+		<p class="resume-line">
+			<span>You stopped at <strong>“{resumeAt.text}”</strong> ({Math.round(resumeAt.percent * 100)}% read).</span>
+			<button type="button" class="resume-go" onclick={resume}>Continue there <Icon name="arrow-right" size={16} stroke={2.5} /></button>
+			<button type="button" class="resume-x" onclick={() => (resumeAt = null)} aria-label="Start from the top instead"><Icon name="close" size={18} stroke={2} /></button>
+		</p>
+	{/if}
 
 	<div class="layout">
 		<div class="main">
@@ -227,11 +311,37 @@
 
 		{#if toc.length}
 			<nav class="rail" aria-label="On this page">
-				<p class="rail-title">On this page</p>
+				{#if !done}
+					<p class="rail-title">Your pack</p>
+					{@render packSteps()}
+				{/if}
+				<p class="rail-title" class:pack-title={!done}>On this page</p>
 				{@render sections()}
 			</nav>
 		{/if}
 	</div>
+	<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
+	<dialog
+		class="sheet"
+		bind:this={sheet}
+		aria-label="On this page"
+		onclick={(e) => {
+			// A tap on the backdrop or on a section link closes the sheet.
+			if (e.target === sheet || (e.target as HTMLElement).closest('a')) sheet?.close();
+		}}
+	>
+		<div class="sheet-body">
+			<div class="sheet-head">
+				<p class="rail-title">On this page</p>
+				<button type="button" class="resume-x" onclick={() => sheet?.close()} aria-label="Close"><Icon name="close" size={20} stroke={2} /></button>
+			</div>
+			{@render sections()}
+			{#if !done}
+				<p class="rail-title pack-title">Your pack</p>
+				{@render packSteps()}
+			{/if}
+		</div>
+	</dialog>
 </article>
 
 <style>
@@ -283,12 +393,12 @@
 		padding: 0 0.6rem 0.8rem;
 	}
 
-	.layout ol {
+	.sections-list {
 		display: grid;
 		gap: 0.1rem;
 	}
 
-	.layout ol a {
+	.sections-list a {
 		display: flex;
 		align-items: center;
 		gap: 0.4rem;
@@ -301,12 +411,12 @@
 		text-decoration: none;
 	}
 
-	.layout ol a:hover {
+	.sections-list a:hover {
 		background: var(--panel-2);
 		color: var(--ink);
 	}
 
-	.layout ol a[aria-current] {
+	.sections-list a[aria-current] {
 		background: var(--panel-2);
 		color: var(--t);
 		font-weight: 700;
@@ -348,6 +458,17 @@
 		border-radius: 28px;
 		border: 2px solid var(--lv);
 		background: var(--panel);
+	}
+
+	.topic-link {
+		color: var(--ink-2);
+		text-decoration: none;
+	}
+
+	.topic-link:hover {
+		color: var(--t);
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
 	}
 
 	.tags {
@@ -431,6 +552,258 @@
 
 	.big:active {
 		transform: translateY(1px) scale(0.98);
+	}
+
+	/* Reading progress: a thin gold line under the sticky header. */
+	.readbar {
+		position: fixed;
+		top: var(--header-h, 4rem);
+		left: 0;
+		right: 0;
+		z-index: 9;
+		height: 3px;
+		pointer-events: none;
+	}
+
+	.readbar i {
+		display: block;
+		height: 100%;
+		background: var(--gold);
+		transform-origin: left;
+	}
+
+	/* Phones and tablets: the section being read, pinned under the header. */
+	.where-bar {
+		position: fixed;
+		top: calc(var(--header-h, 4rem) + 3px);
+		left: 0;
+		right: 0;
+		z-index: 8;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		min-height: 2.75rem;
+		padding: 0 max(1rem, env(safe-area-inset-right)) 0 max(1rem, env(safe-area-inset-left));
+		border: 0;
+		border-bottom: 1px solid var(--rule);
+		background: rgb(18 16 22 / 0.94);
+		color: var(--ink);
+		font-size: 0.95rem;
+		font-weight: 700;
+		text-align: left;
+		cursor: pointer;
+	}
+
+	.where-text {
+		flex: 1;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.where-pack {
+		color: var(--gold);
+		font-size: 0.88rem;
+		white-space: nowrap;
+	}
+
+	/* The contents sheet on phones: a native dialog sliding up from the bottom. */
+	.sheet {
+		width: 100%;
+		max-width: 34rem;
+		max-height: 80dvh;
+		margin: auto auto 0;
+		padding: 0;
+		border: 0;
+		border-radius: 22px 22px 0 0;
+		background: var(--panel);
+		color: var(--ink);
+	}
+
+	.sheet::backdrop {
+		background: rgb(0 0 0 / 0.6);
+	}
+
+	.sheet-body {
+		padding: 1rem 0.75rem calc(1.25rem + env(safe-area-inset-bottom));
+	}
+
+	.sheet-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.pack-title {
+		margin-top: 1.1rem;
+	}
+
+	/* Compact pack steps, for the rail and the sheet. */
+	.steps {
+		display: grid;
+		gap: 0.15rem;
+		padding: 0 0.6rem;
+	}
+
+	.steps li {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: 0.6rem;
+		align-items: start;
+		padding: 0.45rem 0;
+	}
+
+	.tick.sm {
+		width: 1.35rem;
+		height: 1.35rem;
+		border-width: 2px;
+	}
+
+	.steps .label {
+		font-size: 0.95rem;
+		line-height: 1.3;
+	}
+
+	.steps .detail {
+		font-size: 0.88rem;
+		line-height: 1.35;
+	}
+
+	/* Cover: what the lesson builds on, and what earns its pack. */
+	.builds,
+	.earn {
+		margin-top: 0.8rem;
+		font-size: 0.98rem;
+		line-height: 1.5;
+		color: var(--ink-2);
+	}
+
+	.builds strong,
+	.earn-label {
+		color: var(--ink);
+		font-weight: 700;
+	}
+
+	.builds a {
+		color: var(--ink);
+		text-decoration-color: var(--t);
+		text-decoration-thickness: 2px;
+		text-underline-offset: 0.2em;
+	}
+
+	.nudge {
+		display: block;
+		color: var(--gold);
+		font-weight: 700;
+	}
+
+	.earn {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.2rem 1rem;
+	}
+
+	.earn span {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
+	.earn .met {
+		color: var(--structures);
+	}
+
+	.more {
+		display: none;
+		min-height: 2.75rem;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: var(--gold);
+		font-weight: 800;
+		cursor: pointer;
+	}
+
+	/* Reopened half-read lesson: one line offering to jump back. */
+	.resume-line {
+		display: grid;
+		grid-template-columns: 1fr auto auto;
+		align-items: center;
+		gap: 0.4rem 0.8rem;
+		margin-top: 1.25rem;
+		padding: 0.6rem 0;
+		border-block: 1px solid var(--rule);
+		color: var(--ink-2);
+	}
+
+	.resume-line strong {
+		color: var(--ink);
+	}
+
+	.resume-go {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+		min-height: 2.75rem;
+		padding: 0 1.1rem;
+		border: 0;
+		border-radius: 999px;
+		background: var(--gold);
+		color: #1d1400;
+		font-weight: 800;
+		cursor: pointer;
+	}
+
+	.resume-x {
+		display: grid;
+		place-items: center;
+		width: 2.75rem;
+		height: 2.75rem;
+		border: 0;
+		border-radius: 50%;
+		background: none;
+		color: var(--ink-3);
+		cursor: pointer;
+	}
+
+	.resume-x:hover {
+		color: var(--ink);
+	}
+
+	@media (max-width: 559px) {
+		/* Phones: three lines of summary; "More" shows the rest and what the lesson assumes. */
+		.dek:not(.open) {
+			display: -webkit-box;
+			-webkit-line-clamp: 3;
+			line-clamp: 3;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+		}
+
+		.more {
+			display: inline-flex;
+			align-items: center;
+		}
+
+		.facts:not(.open) .assumes {
+			display: none;
+		}
+
+		.resume-line {
+			grid-template-columns: 1fr auto;
+		}
+
+		.resume-line > span {
+			grid-column: 1 / -1;
+		}
+	}
+
+	@media (min-width: 1100px) {
+		.where-bar {
+			display: none;
+		}
 	}
 
 	/* The pack checklist: plain rows, a tick per requirement, a thin line toward each one. */

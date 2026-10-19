@@ -13,8 +13,18 @@
 
 	let { children }: LayoutProps = $props();
 
+	let header = $state<HTMLElement>();
+
 	onMount(() => {
 		progress.load();
+		// Publish the sticky header's height, so things that stick under it (reading progress, the section line) line up.
+		if (!header) return;
+		const root = document.documentElement;
+		const measure = () => root.style.setProperty('--header-h', `${header!.offsetHeight}px`);
+		measure();
+		const watch = new ResizeObserver(measure);
+		watch.observe(header);
+		return () => watch.disconnect();
 	});
 
 	const nav = [
@@ -30,7 +40,7 @@
 
 <a class="skip" href="#main">Skip to content</a>
 
-<header class="top">
+<header class="top" bind:this={header}>
 	<a class="brand" href={nav[0].href}>
 		<span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>
 		DevCodex

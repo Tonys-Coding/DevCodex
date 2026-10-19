@@ -168,9 +168,9 @@ a {
 	margin-top: 0;
 }
 
-/* Section links from "On this page" land below the sticky header. */
+/* Section links land below the sticky header and the section line that sits under it on smaller screens. */
 .prose > :where(h2, h3) {
-	scroll-margin-top: 5.5rem;
+	scroll-margin-top: calc(var(--header-h, 4.5rem) + 3.75rem);
 }
 
 /*

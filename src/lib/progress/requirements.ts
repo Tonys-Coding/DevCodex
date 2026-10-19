@@ -5,6 +5,7 @@ import type { ProgressData } from './progress.svelte';
  *  - most of its sections read past (jumping to the end doesn't count),
  *  - real time spent on it (only while the tab is visible and the reader is active),
  *  - every quick check finished, with at least 60% on the multi-question ones.
+ * The time step is waived for a reader who reads every section and gets every check fully right.
  */
 
 export type QuizInfo = { key: string; title: string; total: number };
@@ -53,6 +54,10 @@ export function requirements(
 	const pending = quizzes.find((q) => !quizPassed(data, q));
 	const pendingRecord = pending && data.quizzes?.[pending.key];
 
+	// Reading every section and acing every check is proof enough: the time step is waived.
+	const aced = sectionIds.length > 0 && read >= sectionIds.length && quizzes.length > 0 && quizzes.every((q) => data.quizzes?.[q.key]?.best === q.total);
+	const timeMet = spent >= needTime || aced;
+
 	return [
 		{
 			id: 'sections',
@@ -64,13 +69,13 @@ export function requirements(
 		{
 			id: 'time',
 			label: 'Spend some time with it',
-			detail: spent >= needTime ? `${mins(spent)} spent` : `About ${mins(needTime - spent)} to go`,
-			met: spent >= needTime,
-			ratio: Math.min(1, spent / needTime)
+			detail: spent >= needTime ? `${mins(spent)} spent` : aced ? 'Waived: you read every section and aced the checks' : `About ${mins(needTime - spent)} to go`,
+			met: timeMet,
+			ratio: timeMet ? 1 : Math.min(1, spent / needTime)
 		},
 		{
 			id: 'checks',
-			label: quizzes.length === 1 ? 'Pass the quick check' : 'Pass the quick checks',
+			label: quizzes.length === 1 ? 'Pass the quick check' : 'Answer the checkpoints and pass the quick check',
 			detail: !quizzes.length
 				? 'No quick check in this lesson'
 				: !pending
