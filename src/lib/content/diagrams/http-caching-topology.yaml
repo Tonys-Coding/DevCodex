@@ -1,0 +1,17 @@
+title: Where cached copies live
+theme: midnight
+nodes:
+  browser: browser | Browser
+  sw: worker | Service worker | Cache Storage, your code
+  bcache: cache | HTTP cache | private, one user
+  cdn: cdn | CDN edge | shared, many users
+  origin: server | Origin | owns the file
+groups:
+  Your device: [browser, sw, bcache]
+edges:
+  - browser > sw | fetch
+  - sw > bcache | not handled
+  - bcache > cdn | miss or stale
+  - cdn > origin | miss or stale [amber]
+  - origin ..> cdn | 200 + Cache-Control [blue]
+  - cdn ..> bcache | 200 or 304 + Age [blue]

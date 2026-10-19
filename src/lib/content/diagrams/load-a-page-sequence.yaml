@@ -1,0 +1,18 @@
+title: One page load, start to finish
+type: sequence
+theme: midnight
+nodes:
+  browser: browser | Browser
+  dns: dns | DNS resolver
+  server: server | example.com server
+edges:
+  - browser > dns | where is example.com?
+  - dns ..> browser | 203.0.113.7
+  - browser > server | hello (TCP)
+  - server ..> browser | hello back
+  - browser <> server | TLS handshake + certificate
+  - browser > server | GET /
+  - server ..> browser | 200 OK + HTML
+  - browser > server | GET /style.css, /cat.jpg
+  - server ..> browser | 200 OK + files
+  - browser > browser | read, style, place, paint

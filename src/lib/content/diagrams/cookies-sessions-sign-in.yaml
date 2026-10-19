@@ -1,0 +1,19 @@
+title: Signing in with a server-side session
+type: sequence
+theme: midnight
+nodes:
+  browser: browser | Browser
+  server: server | App server
+  store: key-value | Session store
+edges:
+  - browser > server | POST /login (email, password)
+  - server > server | check password
+  - server > store | save new id with user, expiry
+  - server ..> browser | 303 + Set-Cookie __Host-sid
+  - browser > server | GET /dashboard + Cookie
+  - server > store | look up id [teal]
+  - store ..> server | user u_1, not expired [teal]
+  - server ..> browser | 200, page for u_1
+  - browser > server | POST /logout + Cookie
+  - server > store | delete id [red]
+  - server ..> browser | Set-Cookie with Max-Age=0 [red]

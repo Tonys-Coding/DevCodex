@@ -1,0 +1,20 @@
+title: Sent directly vs preflighted
+type: sequence
+theme: midnight
+nodes:
+  page: browser | Script on app.example
+  ua: desktop | Browser (enforces CORS)
+  api: server | api.example
+edges:
+  - page > ua | fetch GET /items
+  - ua > api | GET /items + Origin
+  - api ..> ua | 200 + Allow-Origin
+  - ua > ua | CORS check passes
+  - ua ..> page | response readable
+  - page > ua | fetch PUT /items/1, JSON
+  - ua > api | OPTIONS /items/1 [amber]
+  - api ..> ua | 204 + Allow-Methods, Headers [amber]
+  - ua > ua | cache result for this URL [amber]
+  - ua > api | PUT /items/1 + Origin
+  - api ..> ua | 200 + Allow-Origin
+  - ua ..> page | response readable

@@ -1,0 +1,18 @@
+{
+	"cookies-sessions-sign-in": {
+		"width": 887,
+		"height": 922
+	},
+	"cors-preflight": {
+		"width": 902,
+		"height": 1027
+	},
+	"http-caching-topology": {
+		"width": 1132,
+		"height": 596
+	},
+	"load-a-page-sequence": {
+		"width": 810,
+		"height": 885
+	}
+}
