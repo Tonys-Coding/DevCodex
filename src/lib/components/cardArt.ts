@@ -54,3 +54,10 @@ export const cardArt: Record<string, string> = {
 	'cors-credentials': '<path d="M26 20v24M15 26l22 12M37 26 15 38"/><path d="M48 32h10m-4-4 4 4-4 4"/><rect class="hot" x="66" y="18" width="44" height="28" rx="5"/>',
 	'preflight-cache': '<circle cx="32" cy="32" r="18"/><path d="M32 22v10l7 5"/><rect x="64" y="14" width="46" height="10" rx="3"/><rect class="hot" x="64" y="28" width="46" height="10" rx="3"/><rect x="64" y="42" width="46" height="8" rx="3" opacity=".5"/>'
 };
+
+/** Art for the topic cards on the Learn page, on the same 120 × 64 grid. */
+export const trackArt: Record<string, string> = {
+	web: '<rect x="8" y="12" width="46" height="40" rx="5"/><path d="M8 22h46"/><path d="M15 32h28M15 40h20"/><path d="M60 32h16m-4-4 4 4-4 4"/><rect class="hot" x="82" y="16" width="30" height="32" rx="4"/><path class="cut" d="M88 26h18M88 34h18M88 42h10"/>',
+	programming: '<path d="M26 10c-9 0-9 7-9 13s-4 9-9 9c5 0 9 3 9 9s0 13 9 13"/><path d="M94 10c9 0 9 7 9 13s4 9 9 9c-5 0-9 3-9 9s0 13-9 13"/><rect x="36" y="14" width="48" height="9" rx="3"/><rect x="36" y="27" width="48" height="9" rx="3"/><rect class="hot" x="36" y="40" width="48" height="9" rx="3"/>',
+	structures: '<circle class="hot" cx="60" cy="11" r="6"/><circle cx="32" cy="33" r="6"/><circle cx="88" cy="33" r="6"/><circle cx="18" cy="54" r="5"/><circle cx="46" cy="54" r="5"/><circle cx="102" cy="54" r="5"/><path d="M55 15 37 29M65 15l18 14M28 38l-7 11M36 38l7 11M91 38l8 11"/>'
+};
