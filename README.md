@@ -8,7 +8,7 @@ A free, installable app for learning software engineering. Concepts are collecti
 - **Practice:** 12 LeetCode/NeetCode-style problems, solved in Python (Pyodide) or JavaScript, run in a Web Worker with real tests and time limits.
 - **You:** progress, streak, and export/import. Everything is stored on the device; nothing is sent anywhere.
 
-Built with SvelteKit 3 + Svelte 5 as a static PWA for GitHub Pages: add it to the Home Screen on iPhone or the Dock on a Mac, and it works offline.
+Built with SvelteKit 3 + Svelte 5 as a static PWA for GitHub Pages: add it to the Home Screen on iPhone, or the Dock on a Mac, and it works offline.
 
 ## Develop
 
