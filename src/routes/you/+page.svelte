@@ -3,7 +3,10 @@
 	import { cards } from '#lib/content/cards.js';
 	import { problems } from '#lib/content/problems.js';
 	import { progress } from '#lib/progress/progress.svelte.js';
+	import { levels } from '#lib/content/levels.js';
+	import { downloadBackup } from '#lib/progress/dashboard.js';
 	import Icon from '#lib/components/Icon.svelte';
+	import Medals from '#lib/components/home/Medals.svelte';
 
 	const finished = $derived(liveArticles.filter((a) => progress.isDone(a.id)).length);
 	const solved = $derived(Object.keys(progress.data.solved).length);
@@ -14,15 +17,28 @@
 	let fileInput = $state<HTMLInputElement>();
 
 	function download() {
-		const blob = new Blob([progress.export()], { type: 'application/json' });
-		const url = URL.createObjectURL(blob);
-		const link = document.createElement('a');
-		link.href = url;
-		link.download = `devcodex-progress-${new Date().toISOString().slice(0, 10)}.json`;
-		link.click();
-		URL.revokeObjectURL(url);
+		downloadBackup(progress.export());
 		message = 'Progress file saved. Open it on another device with “Import progress”.';
 	}
+
+	const lastBackup = $derived(
+		progress.data.backup?.exported
+			? new Date(progress.data.backup.exported).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+			: null
+	);
+
+	let nameDraft = $state('');
+	let nameSaved = $state(false);
+	$effect(() => {
+		// Fill the field once progress has loaded.
+		if (progress.loaded) nameDraft = progress.data.profile?.name ?? '';
+	});
+	function saveName(event: SubmitEvent) {
+		event.preventDefault();
+		progress.setName(nameDraft);
+		nameSaved = true;
+	}
+	const goal = $derived(progress.data.profile?.weeklyGoal ?? 2);
 
 	async function load(event: Event) {
 		const file = (event.currentTarget as HTMLInputElement).files?.[0];
@@ -54,6 +70,43 @@
 		<div><dt>Problems solved</dt><dd>{solved} of {problems.length}</dd></div>
 	</dl>
 
+	<section class="settings" aria-labelledby="settings-title">
+		<h2 id="settings-title">Settings</h2>
+
+		<form class="field" onsubmit={saveName}>
+			<label for="you-name">Your name</label>
+			<div class="row">
+				<input id="you-name" bind:value={nameDraft} oninput={() => (nameSaved = false)} maxlength="40" autocomplete="given-name" placeholder="Shown in the dashboard greeting" />
+				<button type="submit" class="btn">Save</button>
+			</div>
+			{#if nameSaved}<p class="msg" role="status">{nameDraft.trim() ? 'Saved.' : 'Name removed.'}</p>{/if}
+		</form>
+
+		<fieldset class="field">
+			<legend>Where your path starts</legend>
+			<div class="choices">
+				{#each levels as l (l.id)}
+					<label class="lv-{l.id}" class:on={progress.data.profile?.level === l.id}>
+						<input type="radio" name="you-level" class="visually-hidden" checked={progress.data.profile?.level === l.id} onchange={() => progress.setLevel(l.id)} />
+						{l.label}
+					</label>
+				{/each}
+			</div>
+			<p class="hint">The dashboard features lessons at this level and above first. Every lesson stays open to you.</p>
+		</fieldset>
+
+		<div class="field">
+			<p class="label" id="goal-label">Weekly goal</p>
+			<div class="stepper" role="group" aria-labelledby="goal-label">
+				<button type="button" onclick={() => progress.setWeeklyGoal(goal - 1)} disabled={goal <= 1} aria-label="Lower the goal">−</button>
+				<span>{goal} {goal === 1 ? 'lesson' : 'lessons'} a week</span>
+				<button type="button" onclick={() => progress.setWeeklyGoal(goal + 1)} disabled={goal >= 7} aria-label="Raise the goal">+</button>
+			</div>
+		</div>
+	</section>
+
+	<Medals mode="full" />
+
 	<section class="panel" aria-labelledby="data-title">
 		<h2 id="data-title">Your data</h2>
 		<p>
@@ -65,6 +118,7 @@
 				want to keep it.
 			{/if}
 		</p>
+		<p class="backup-state">{lastBackup ? `Last backup: ${lastBackup}.` : 'No backup yet.'}</p>
 		<div class="actions">
 			<button class="btn" type="button" onclick={download}><Icon name="download" size={18} stroke={2} /> Export progress</button>
 			<button class="btn" type="button" onclick={() => fileInput?.click()}><Icon name="upload" size={18} stroke={2} /> Import progress</button>
@@ -84,7 +138,7 @@
 		{#if message}<p class="msg" role="status">{message}</p>{/if}
 	</section>
 
-	<section class="panel" aria-labelledby="install-title">
+	<section class="panel" id="install" aria-labelledby="install-title">
 		<h2 id="install-title">Install DevCodex</h2>
 		<p>DevCodex works like an app once installed: its own icon, full screen, and it opens offline.</p>
 		<ul class="steps">
@@ -217,6 +271,105 @@
 	.msg {
 		font-weight: 700;
 		color: var(--gold) !important;
+	}
+
+	.settings {
+		display: grid;
+		gap: 1.4rem;
+	}
+
+	.field {
+		display: grid;
+		gap: 0.45rem;
+		margin: 0;
+		padding: 0;
+		border: 0;
+	}
+
+	.field label[for],
+	.field legend,
+	.label {
+		font-weight: 800;
+	}
+
+	.row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.6rem 1rem;
+		align-items: center;
+	}
+
+	.row input {
+		flex: 1 1 14rem;
+		min-height: 2.9rem;
+		border: 0;
+		border-bottom: 2px solid var(--rule);
+		background: none;
+		color: var(--ink);
+		font-size: 1.05rem;
+		outline: none;
+	}
+
+	.row input:focus {
+		border-bottom-color: var(--gold);
+	}
+
+	.choices {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0 1.4rem;
+	}
+
+	.choices label {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.75rem;
+		border-bottom: 3px solid transparent;
+		color: color-mix(in srgb, var(--lv) 75%, var(--ink-3));
+		font-weight: 800;
+		cursor: pointer;
+	}
+
+	.choices label.on {
+		color: var(--lv);
+		border-bottom-color: var(--lv);
+	}
+
+	.choices label:has(:focus-visible) {
+		outline: 3px solid var(--gold);
+		outline-offset: 3px;
+	}
+
+	.hint,
+	.backup-state {
+		font-size: 0.95rem;
+		color: var(--ink-2);
+	}
+
+	.stepper {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		color: var(--ink-2);
+	}
+
+	.stepper button {
+		display: grid;
+		place-items: center;
+		width: 2.75rem;
+		height: 2.75rem;
+		border: 2px solid var(--rule);
+		border-radius: 50%;
+		background: none;
+		color: var(--ink);
+		font-size: 1.2rem;
+		font-weight: 800;
+		cursor: pointer;
+	}
+
+	.stepper button:disabled {
+		opacity: 0.35;
+		cursor: default;
 	}
 
 	.steps {
