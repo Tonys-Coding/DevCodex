@@ -8,7 +8,7 @@
 </script>
 
 <script lang="ts">
-	import { getContext, tick, untrack } from 'svelte';
+	import { getContext, onMount, tick, untrack } from 'svelte';
 	import { progress } from '../../progress/progress.svelte';
 	import { fly } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
@@ -34,6 +34,27 @@
 
 	/** Inside an article, the best score is kept for the dashboard and achievements. */
 	const articleId = getContext<(() => string) | undefined>('devcodex:article');
+	// The article's pack waits until every quick check in it is passed.
+	const register = getContext<((quiz: { key: string; title: string; total: number }) => void) | undefined>('devcodex:quizzes');
+	onMount(() => {
+		const id = articleId?.();
+		if (id) register?.({ key: `${id}:${title}`, title, total: questions.length });
+	});
+
+	/** A check finished on an earlier visit opens on its best score instead of starting over. */
+	let restored = $state<{ best: number; total: number } | null>(null);
+	let checkedStore = false;
+	$effect(() => {
+		if (checkedStore || !progress.loaded) return;
+		checkedStore = true;
+		const id = articleId?.();
+		const record = id ? progress.data.quizzes?.[`${id}:${title}`] : undefined;
+		if (record && questions.length > 1 && untrack(() => at === 0 && picks.every((p) => p === null))) {
+			restored = { best: record.best, total: record.total };
+			at = questions.length;
+		}
+	});
+	const score = $derived(restored ? restored.best : right);
 	function record() {
 		const id = articleId?.();
 		if (id) progress.quiz(`${id}:${title}`, right, questions.length);
@@ -47,6 +68,7 @@
 	}
 
 	async function restart() {
+		restored = null;
 		picks = questions.map(() => null);
 		at = 0;
 		await tick();
@@ -104,12 +126,14 @@
 				{/if}
 			{:else}
 				<p class="prompt" tabindex="-1" bind:this={prompt}>
-					{right === questions.length ? 'All correct.' : `${right} of ${questions.length} correct.`}
+					{restored ? 'Best so far: ' : ''}{score === questions.length ? (restored ? `${score} of ${questions.length}, all correct.` : 'All correct.') : `${score} of ${questions.length} correct.`}
 				</p>
 				<p class="summary" role="status">
-					{right === questions.length
-						? 'You have this one down. Open your pack below.'
-						: 'Each question showed why its answer is right. Run through it again to lock it in.'}
+					{score === questions.length
+						? 'You have this one down.'
+						: score / questions.length >= 0.6
+							? 'Enough to pass. Run through it again to lock in the rest.'
+							: `Each question showed why its answer is right. ${Math.ceil(questions.length * 0.6)} of ${questions.length} passes; try it again.`}
 				</p>
 				<button type="button" class="go ghost" onclick={restart}><Icon name="refresh" stroke={2} /> Try again</button>
 			{/if}

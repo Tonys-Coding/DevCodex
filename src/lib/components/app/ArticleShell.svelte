@@ -10,6 +10,7 @@
 	import CollectCard from '../CollectCard.svelte';
 	import LevelTag from './LevelTag.svelte';
 	import type { TocEntry } from '../../content/article-markup';
+	import { requirements, type QuizInfo } from '../../progress/requirements';
 
 	let { meta, toc = [], children }: { meta: ArticleMeta; toc?: TocEntry[]; children: Snippet } = $props();
 
@@ -30,8 +31,36 @@
 		opening = true;
 	}
 
-	// Quick checks inside the article record their scores against this id.
+	// Quick checks inside the article record their scores against this id, and register so the pack can wait for them.
 	setContext('devcodex:article', () => meta.id);
+	let quizzes = $state<QuizInfo[]>([]);
+	setContext('devcodex:quizzes', (quiz: QuizInfo) => {
+		if (!quizzes.some((q) => q.key === quiz.key)) quizzes = [...quizzes, quiz];
+	});
+
+	/** What still stands between the reader and the pack. */
+	const checklist = $derived(requirements(progress.data, meta, toc.map((t) => t.id), quizzes));
+	const unlocked = $derived(checklist.every((r) => r.met));
+
+	/**
+	 * Active reading time: counted in 5-second ticks while the tab is visible and the
+	 * reader has scrolled, pointed, typed or tapped in the last minute.
+	 */
+	$effect(() => {
+		const id = meta.id;
+		if (done) return;
+		let lastActive = Date.now();
+		const active = () => (lastActive = Date.now());
+		const events = ['scroll', 'pointermove', 'pointerdown', 'keydown', 'touchstart'] as const;
+		for (const e of events) window.addEventListener(e, active, { passive: true });
+		const tick = setInterval(() => {
+			if (document.visibilityState === 'visible' && Date.now() - lastActive < 60_000) progress.readTime(id, 5);
+		}, 5000);
+		return () => {
+			clearInterval(tick);
+			for (const e of events) window.removeEventListener(e, active);
+		};
+	});
 
 	let proseEl = $state<HTMLElement>();
 
@@ -121,11 +150,29 @@
 
 			<section class="packzone" aria-labelledby="pack-title">
 				{#if !done}
-					<h2 id="pack-title">Your pack is ready</h2>
-					<p>Finish the article to open a pack of {pack.length} concept cards. They join your binder and your trivia deck.</p>
-					<button class="big gold" type="button" onclick={open}>
-						<Icon name="spark" stroke={2} /> Finish and open pack
+					<h2 id="pack-title">{unlocked ? 'Your pack is ready' : 'Earn your pack'}</h2>
+					<p>
+						{unlocked
+							? `You worked through it. Open your pack of ${pack.length} concept cards; they join your binder and trivia deck.`
+							: `A pack of ${pack.length} concept cards opens once you have really worked through this lesson:`}
+					</p>
+					<ul class="checklist">
+						{#each checklist as r (r.id)}
+							<li class:met={r.met}>
+								<span class="tick" aria-hidden="true">{#if r.met}<Icon name="check" size={16} stroke={3} />{/if}</span>
+								<span class="what">
+									<span class="label">{r.label}</span>
+									<span class="detail">{r.detail}</span>
+									{#if !r.met}<span class="line" aria-hidden="true"><i style="transform: scaleX({r.ratio})"></i></span>{/if}
+								</span>
+								<span class="visually-hidden">{r.met ? 'Done.' : 'Not done yet.'}</span>
+							</li>
+						{/each}
+					</ul>
+					<button class="big gold" type="button" onclick={open} disabled={!unlocked} aria-describedby={unlocked ? undefined : 'pack-locked'}>
+						<Icon name={unlocked ? 'spark' : 'lock'} stroke={2} /> {unlocked ? 'Finish and open pack' : 'Pack locked'}
 					</button>
+					{#if !unlocked}<p class="locked-note" id="pack-locked">The checklist updates as you read. Nothing is sent anywhere.</p>{/if}
 				{:else}
 					<h2 id="pack-title">{opening && !allRevealed ? 'Tap each card to reveal it' : 'In your binder'}</h2>
 					<div class="pack">
@@ -386,11 +433,90 @@
 		transform: translateY(1px) scale(0.98);
 	}
 
+	/* The pack checklist: plain rows, a tick per requirement, a thin line toward each one. */
+	.checklist {
+		display: grid;
+		gap: 0.2rem;
+		margin-top: 1rem;
+	}
+
+	.checklist li {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: 0.8rem;
+		align-items: start;
+		padding: 0.75rem 0;
+		border-bottom: 1px solid var(--rule);
+	}
+
+	.tick {
+		display: grid;
+		place-items: center;
+		width: 1.75rem;
+		height: 1.75rem;
+		border-radius: 50%;
+		border: 2px solid var(--rule);
+		color: #032a21;
+	}
+
+	.met .tick {
+		border-color: var(--structures);
+		background: var(--structures);
+	}
+
+	.what {
+		display: grid;
+		gap: 0.15rem;
+	}
+
+	.label {
+		font-weight: 800;
+	}
+
+	.met .label {
+		color: var(--ink-2);
+	}
+
+	.detail {
+		font-size: 0.95rem;
+		color: var(--ink-2);
+	}
+
+	.line {
+		height: 4px;
+		margin-top: 0.35rem;
+		border-radius: 3px;
+		background: var(--panel-2);
+		overflow: hidden;
+	}
+
+	.line i {
+		display: block;
+		height: 100%;
+		background: var(--gold);
+		transform-origin: left;
+		transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	.locked-note {
+		margin-top: 0.6rem;
+		font-size: 0.95rem;
+		color: var(--ink-3);
+	}
+
 	.big.gold {
 		width: 100%;
 		margin-top: 1rem;
 		background: var(--gold);
 		color: #1d1400;
+	}
+
+	/* Locked: same size and place as the open button, clearly not pressable yet. */
+	.big.gold:disabled {
+		background: var(--panel-2);
+		color: var(--ink-3);
+		cursor: not-allowed;
+		transform: none;
 	}
 
 	.ghost {
