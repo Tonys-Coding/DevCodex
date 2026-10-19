@@ -309,6 +309,16 @@ Lit elements fill with the track colour, and message chips are ink pills with da
 - **Lesson cards:** opening a topic deals its lessons out as portrait cards, one after another (70ms stagger, a small drop and rotation, none under reduced motion). Each is framed in its level colour and shows the lesson number, the art of its first concept card, the level tag, title, summary and boxless meta. On phones the hand scrolls sideways with snap; from 900px the three topic cards share a row and the open hand fills the width below.
 - **Tools:** search is an underlined field, and the level filter is text tabs underlined in the chosen level's colour. Searching or filtering deals every topic with a match.
 
+### Binder (the dashboard)
+- **Greeting:** a display-size line that changes with the visit: "Welcome to DevCodex" on a first visit, "Welcome back" when they have already learned today, otherwise good morning, afternoon or evening, and "Burning the midnight oil" late at night. The learner's optional name is set in gold. Below it is one line about their streak or lessons in progress, and a text button to add or change the name.
+- **Key numbers:** boxless big figures over small labels (lessons, cards, problems, day streak with a flame, minutes learned), under a hairline.
+- **Featured lesson:** the track-filled quest panel with fanned card backs. It features the next lesson on the path that hasn't been started.
+- **Pick up where you left off:** a plain list (hairline dividers, no boxes) of lessons opened but not finished, each with the section where the reader stopped and a progress line in the level colour.
+- **Lessons collected:** a binder page of clear pockets, one per lesson. A finished lesson sits in its pocket as a mini card (level frame, pips, art, title, a gold date stamp); empty pockets are dashed, with the lesson's name in faint ink.
+- **Tracks:** rows with one segment per lesson, filled in that lesson's level colour once finished, striped once started.
+- **Achievements:** hexagonal medals. Earned medals are struck in gold with a soft glow; locked ones are dashed, with progress drawn round the hexagon's edge and a "have / need" count. Earned first, then closest to done; eight show by default.
+- **Your cards:** a fanned hand of the latest cards beside the trivia prompt, and the full collection behind "Show all cards".
+
 ### Navigation
 - Phone: a floating dock of five sections. The active item gets a gold pill behind its icon.
 - Desktop: the same five sections as header pills, with the active one in gold. A collected-cards chip on the right leads to the progress page.

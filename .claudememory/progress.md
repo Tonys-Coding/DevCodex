@@ -40,6 +40,8 @@
 
 - 2026-10-19: Learn revamp (topic cards dealing lesson cards), boxless metadata sitewide, and the one-at-a-time quiz. Check, build and the detector are clean; checked at 375 and 1440px.
 
+- 2026-10-19: Binder dashboard revamp (greeting, metrics, featured, continue reading, lesson pockets, tracks, achievements, cards), with reading and quiz tracking. Tested end to end over CDP. Check, build and the detector are clean.
+
 ## Next checkpoint
 
 The user approves the first commit and push. Then Pages goes live at `https://tonys-coding.github.io/DevCodex/` and installs get tested on devices.

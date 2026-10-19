@@ -29,6 +29,7 @@ Learners may read a lesson in a longer desktop session or review a single concep
 - Initial topics span web fundamentals, programming concepts, and basic data structures.
 - Coding practice is a smaller section: write and run Python (Pyodide) and JavaScript (Web Worker) solutions in the browser against tests; problems are written in our own words and link out to LeetCode/NeetCode.
 - No accounts at first: progress lives on the device with JSON export/import. Cross-device sync via Supabase is a later option.
+- The Binder home is the learner's dashboard: greeting (with an optional on-device name), key numbers, a featured lesson, lessons in progress (articles record where the reader stopped), collected lessons, tracks, achievements computed from progress, and cards.
 - GitHub Pages serves static files; it does not run a SvelteKit server.
 - The user wants no required purchases. Public email/password signup remains unresolved because Supabase's default sender is limited to development use.
 

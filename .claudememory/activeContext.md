@@ -60,6 +60,11 @@ Phase 2 is built and verified. **Binder (direction C)** is the app. On 2026-10-1
 - No pills for facts anywhere: `.meta-row` in app.css replaces the chips (article cover, practice badges and score, header card count), and LevelTag is boxless.
 - Quiz is a one-question-at-a-time stepper with locked answers, Next question, and a final score with Try again.
 
+## Binder dashboard (2026-10-19)
+
+- `/` is now a dashboard: `home/Greeting.svelte` (time-of-day greeting, optional name), key numbers, featured lesson, Pick up where you left off, `home/LessonBinder.svelte` (pockets), tracks with level-coloured segments, `home/Medals.svelte` (17 achievements from `src/lib/progress/achievements.ts`), and cards.
+- Progress gained optional `reading` (articleId → opened/last/percent/section), `quizzes` (best score per quick check) and `profile.name`. They are still version 1; older files load. ArticleShell records reading on scroll and provides the article id to Quiz via context (`devcodex:article`).
+
 ## Known quirks
 
 - CI runs `npm ci` from scratch. A stale local `.svelte-kit/` can hide type errors, so clear it before trusting a local `npm run check`. `@types/node` is a direct dev dependency for vite.config.ts.
