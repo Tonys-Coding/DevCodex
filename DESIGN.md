@@ -148,18 +148,14 @@ components:
     textColor: "{colors.ink}"
     rounded: "{rounded.panel}"
     padding: "1.1rem"
-  chip:
-    backgroundColor: "{colors.sleeve}"
+  meta-row:
+    backgroundColor: "transparent"
     textColor: "{colors.ink-soft}"
     typography: "{typography.label}"
-    rounded: "{rounded.pill}"
-    padding: "0.3rem 0.75rem"
   level-tag:
     backgroundColor: "transparent"
     textColor: "{colors.level-entry}"
     typography: "{typography.label}"
-    rounded: "{rounded.pill}"
-    padding: "0.3rem 0.75rem"
   input:
     backgroundColor: "{colors.binder-felt}"
     textColor: "{colors.ink}"
@@ -214,6 +210,8 @@ The palette is Committed. Track colours own whole regions (quest panels, short c
 
 ### Named Rules
 **The Level Frames The Lesson Rule.** A level colour is a full border plus its tag, never a fill or a stripe.
+
+**The No Pills For Facts Rule.** Information never sits in an outlined or filled pill. Reading time, card counts, status, difficulty, pattern and level are set as boxless `.meta-row` text with icons, spaced apart (no separator dots, so a wrapped line never starts with a mark). Pills are for actions (buttons) and the navigation's active state only.
 
 **The Track Owns The Field Rule.** A track colour fills a region (`--t` on the region, `--t-ink` for everything on top of it), or it does not appear. Never use it as a thin stripe or a tint on grey.
 
@@ -299,11 +297,17 @@ StepFlow, CodeTrace, EventLoopSim, HashMapLab, TwoPointerGame and Choice share o
 Lit elements fill with the track colour, and message chips are ink pills with dark mono text.
 
 ### Article blocks
-- **Level Tag:** a pill outlined in the level colour with 1–3 pips, "Entry-level · Easy". It appears on library cards, the article cover, the home quest and "Up next".
+- **Level Tag:** boxless: 1–3 pips and "Entry-level · Easy" in the level colour (in the surface's ink when it sits on a track-coloured panel). It appears on lesson cards, the article cover, the home quest and "Up next".
+- **Quick check:** one question at a time with a progress bar of segments (teal right, rose wrong). Picking an answer locks it and shows the explanation as plain text, then "Next question"; the last step shows the score and "Try again".
 - **Code sample** (`teach/Code.svelte`): an editor-ground block (18px) with a title bar and an optional caption. Highlighting comes from `teach/highlight.ts` with the editor palette (`.tk-*` in app.css).
 - **Notes:** `tip` (gold), `warn` (miss rose, for real pitfalls), `plain` (sleeve, for everyday comparisons and precision asides).
 - **Tables:** under 560px each row becomes a labelled card (labels are added at build time by `src/lib/content/article-markup.ts`).
 - **Diagrams** (`teach/Diagram.svelte`): sysketch SVGs in the midnight theme on a matching #070b16 frame, with a caption and an "Open full size" link. On phones a wide diagram scrolls sideways at a minimum of 40rem so its labels stay legible.
+
+### Learn page
+- **Topic card:** a landscape version of the concept card, quietened: a raised-sleeve frame, a sleeve face, a tinted art window with the track's line drawing, the title, blurb, lesson and finished counts, and a collector number (#01/03). The track colour appears only in the art and the "Show lessons" toggle; when open, the frame takes a muted mix of the track colour. It is a disclosure button (`aria-expanded`).
+- **Lesson cards:** opening a topic deals its lessons out as portrait cards, one after another (70ms stagger, a small drop and rotation, none under reduced motion). Each is framed in its level colour and shows the lesson number, the art of its first concept card, the level tag, title, summary and boxless meta. On phones the hand scrolls sideways with snap; from 900px the three topic cards share a row and the open hand fills the width below.
+- **Tools:** search is an underlined field, and the level filter is text tabs underlined in the chosen level's colour. Searching or filtering deals every topic with a match.
 
 ### Navigation
 - Phone: a floating dock of five sections. The active item gets a gold pill behind its icon.

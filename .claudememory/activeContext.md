@@ -54,6 +54,12 @@ Phase 2 is built and verified. **Binder (direction C)** is the app. On 2026-10-1
 - Diagrams: sysketch 0.5.0 (devDependency) renders `src/lib/content/diagrams/*.yaml` to SVG, plus `sizes.json`, via `npm run diagrams`. They are placed with `teach/Diagram.svelte`. Two exist so far: the load-a-page sequence and the http-caching topology. Algorithm articles deliberately have none.
 - The session "Write the four coming-soon DevCodex articles by level" (soon-articles) is writing recursion, stacks-queues, cookies-sessions and cors in this checkout.
 
+## Learn revamp (2026-10-19)
+
+- Learn (`src/routes/learn/+page.svelte`) shows the three tracks as landscape topic cards (`app/TopicCard.svelte`, art in `trackArt` in cardArt.ts). Opening one deals its lessons as portrait `app/LessonCard.svelte` cards; the tagline is "Your path to expertise."; search is underlined and the level filter is text tabs.
+- No pills for facts anywhere: `.meta-row` in app.css replaces the chips (article cover, practice badges and score, header card count), and LevelTag is boxless.
+- Quiz is a one-question-at-a-time stepper with locked answers, Next question, and a final score with Try again.
+
 ## Known quirks
 
 - CI runs `npm ci` from scratch. A stale local `.svelte-kit/` can hide type errors, so clear it before trusting a local `npm run check`. `@types/node` is a direct dev dependency for vite.config.ts.

@@ -38,6 +38,8 @@
 
 - 2026-10-19: CI fixed (`@types/node` added, the config import uses a .ts extension). The first deploy succeeded and the site is live at https://tonys-coding.github.io/DevCodex/.
 
+- 2026-10-19: Learn revamp (topic cards dealing lesson cards), boxless metadata sitewide, and the one-at-a-time quiz. Check, build and the detector are clean; checked at 375 and 1440px.
+
 ## Next checkpoint
 
 The user approves the first commit and push. Then Pages goes live at `https://tonys-coding.github.io/DevCodex/` and installs get tested on devices.
