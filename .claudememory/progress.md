@@ -34,6 +34,8 @@
 
 - 2026-10-18: the wide desktop article layout with an On this page rail, and sysketch diagrams (2 so far). Check and build are clean, and it was checked at 375, 1000 and 1440px.
 
+- 2026-10-19: first commits (nine, one per feature, with no type prefixes in the messages) pushed to origin/main.
+
 ## Next checkpoint
 
 The user approves the first commit and push. Then Pages goes live at `https://tonys-coding.github.io/DevCodex/` and installs get tested on devices.

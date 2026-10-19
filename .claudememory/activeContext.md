@@ -4,7 +4,7 @@ _Last updated: 2026-10-18_
 
 ## Now
 
-Phase 2 is built and verified locally. **Binder (direction C)** is the app. Nothing has been committed or pushed yet.
+Phase 2 is built and verified. **Binder (direction C)** is the app. On 2026-10-19 it was committed in nine feature commits and pushed to `Tonys-Coding/DevCodex` main. GitHub Pages is not enabled yet, so the deploy workflow fails until Settings → Pages → Source is set to GitHub Actions.
 
 ## What exists
 
@@ -60,7 +60,7 @@ Phase 2 is built and verified locally. **Binder (direction C)** is the app. Noth
 
 ## Next
 
-1. With the user's OK: initial commit, push to `Tonys-Coding/DevCodex`, then turn on Pages (Settings → Pages → Source: GitHub Actions).
+1. The user turns on Pages (Settings → Pages → Source: GitHub Actions), then re-runs the deploy workflow.
 2. The user tests installing on iPhone (Add to Home Screen) and Mac (Add to Dock).
 3. Content backlog:
    - four "soon" articles: cookies-sessions, cors, recursion, stacks-queues
