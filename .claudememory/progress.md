@@ -36,6 +36,8 @@
 
 - 2026-10-19: first commits (nine, one per feature, with no type prefixes in the messages) pushed to origin/main.
 
+- 2026-10-19: CI fixed (`@types/node` added, the config import uses a .ts extension). The first deploy succeeded and the site is live at https://tonys-coding.github.io/DevCodex/.
+
 ## Next checkpoint
 
 The user approves the first commit and push. Then Pages goes live at `https://tonys-coding.github.io/DevCodex/` and installs get tested on devices.

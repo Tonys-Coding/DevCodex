@@ -4,7 +4,7 @@ _Last updated: 2026-10-18_
 
 ## Now
 
-Phase 2 is built and verified. **Binder (direction C)** is the app. On 2026-10-19 it was committed in nine feature commits and pushed to `Tonys-Coding/DevCodex` main. GitHub Pages is not enabled yet, so the deploy workflow fails until Settings → Pages → Source is set to GitHub Actions.
+Phase 2 is built and verified. **Binder (direction C)** is the app. On 2026-10-19 it was committed in nine feature commits and pushed to `Tonys-Coding/DevCodex` main. Pages is on (source: GitHub Actions), and the site is live at https://tonys-coding.github.io/DevCodex/.
 
 ## What exists
 
@@ -56,11 +56,13 @@ Phase 2 is built and verified. **Binder (direction C)** is the app. On 2026-10-1
 
 ## Known quirks
 
+- CI runs `npm ci` from scratch. A stale local `.svelte-kit/` can hide type errors, so clear it before trusting a local `npm run check`. `@types/node` is a direct dev dependency for vite.config.ts.
+
 - The in-app browser pane cannot register service workers and sometimes renders phone screenshots scaled. Use CDP headless Chrome for screenshots: `Emulation.setDeviceMetricsOverride`.
 
 ## Next
 
-1. The user turns on Pages (Settings → Pages → Source: GitHub Actions), then re-runs the deploy workflow.
+1. Done: Pages is live.
 2. The user tests installing on iPhone (Add to Home Screen) and Mac (Add to Dock).
 3. Content backlog:
    - four "soon" articles: cookies-sessions, cors, recursion, stacks-queues
