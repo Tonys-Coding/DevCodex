@@ -1,7 +1,7 @@
 import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
-import { articleMarkup } from './src/lib/content/article-markup';
+import { articleMarkup } from './src/lib/content/article-markup.ts';
 
 // GitHub Pages serves this project from https://<user>.github.io/DevCodex/.
 // `vite dev` stays at the domain root; the production build carries the /DevCodex base.
