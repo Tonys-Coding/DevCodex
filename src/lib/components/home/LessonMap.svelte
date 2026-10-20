@@ -21,10 +21,12 @@
 	const stars: Star[] = tracks.flatMap((track, t) => {
 		const lessons = articlesInTrack(track.id).filter((a) => a.status === 'live');
 		return lessons.map((a) => {
-			// Lessons at the same level in one track sit side by side.
+			// Lessons at the same level in one track sit side by side, squeezed to fit their
+			// column's band (140 wide) so a busy column never runs into the next.
 			const same = lessons.filter((b) => b.level === a.level);
 			const k = same.indexOf(a);
-			const spread = (k - (same.length - 1) / 2) * 52;
+			const step = same.length > 1 ? Math.min(52, 140 / (same.length - 1)) : 0;
+			const spread = (k - (same.length - 1) / 2) * step;
 			return { a, x: col[a.level] + spread, y: laneY[t] + (k % 2 ? 14 : -6) * (same.length > 1 ? 1 : 0), track: track.id };
 		});
 	});
