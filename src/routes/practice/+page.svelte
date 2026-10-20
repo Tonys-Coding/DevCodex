@@ -9,7 +9,10 @@
 		'Arrays & Hashing': 't-structures',
 		'Two Pointers': 't-web',
 		'Sliding Window': 't-programming',
-		Stack: 't-structures'
+		Stack: 't-structures',
+		'Binary Search': 't-web',
+		'Linked List': 't-programming',
+		Trees: 't-structures'
 	};
 </script>
 

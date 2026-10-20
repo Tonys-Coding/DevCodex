@@ -127,6 +127,42 @@ export const articles: ArticleMeta[] = [
 		dek: 'Finding a pair in a list usually means checking every pair, which gets slow fast. When the list is sorted, two fingers walking in from the ends find it in one pass. Play it, then write it.',
 		assumes: 'You can read a simple loop in Python or JavaScript.',
 		minutes: 6
+	},
+	{
+		id: 'binary-search',
+		builds: ['two-pointer-pattern'],
+		track: 'structures',
+		level: 'easy',
+		status: 'live',
+		title: 'Binary search: halve it every time',
+		summary: 'Find anything in a sorted list in a handful of looks.',
+		dek: 'Guessing a number between 1 and 100 never takes more than seven tries if every answer throws away half. That game is binary search: about 20 looks for a million sorted items. Play it, write it, and learn the small edge mistakes that catch almost everyone.',
+		assumes: 'You know what a list is and can read a simple loop.',
+		minutes: 10
+	},
+	{
+		id: 'linked-lists',
+		builds: ['stacks-queues'],
+		track: 'structures',
+		level: 'easy',
+		status: 'live',
+		title: 'Linked lists: a chain of nodes',
+		summary: 'Items that point to the next item, and when that beats an array.',
+		dek: 'A treasure hunt hands you one clue that points to the next. A linked list stores data the same way, which makes adding at the front instant and reaching the 500th item slow. Build one, splice items in and out, and learn when an array is the better choice.',
+		assumes: 'You know what a list or array is, and what an object is.',
+		minutes: 10
+	},
+	{
+		id: 'binary-trees',
+		builds: ['recursion', 'binary-search'],
+		track: 'structures',
+		level: 'medium',
+		status: 'live',
+		title: 'Binary trees and search trees',
+		summary: 'Nodes with two children, the rule that makes them searchable, and four ways to walk them.',
+		dek: 'Folders, web pages and your code are all trees. A binary search tree keeps smaller values to the left and bigger ones to the right, so finding, adding and removing stay fast as it grows, as long as it stays bushy. Grow one, walk it four ways, and see why insertion order matters.',
+		assumes: 'You are comfortable with recursion and with how binary search halves a range.',
+		minutes: 12
 	}
 ];
 
@@ -149,5 +185,8 @@ export const practiceFor: Record<string, string[]> = {
 	'hash-maps': ['pair-sum', 'has-duplicate', 'group-anagrams'],
 	'two-pointer-pattern': ['sorted-pair-sum', 'is-palindrome', 'most-water'],
 	'values-references': ['is-anagram'],
-	'stacks-queues': ['valid-brackets', 'warmer-days']
+	'stacks-queues': ['valid-brackets', 'warmer-days'],
+	'binary-search': ['find-sorted', 'sorted-pair-sum'],
+	'linked-lists': ['reverse-list'],
+	'binary-trees': ['tree-depth']
 };

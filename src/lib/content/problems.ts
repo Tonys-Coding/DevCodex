@@ -8,6 +8,12 @@ import type { Problem } from './types';
 const py = (sig: string, note: string) => `${sig}\n    # ${note}\n    pass\n`;
 const js = (sig: string, note: string) => `${sig} {\n  // ${note}\n}\n`;
 
+/** Test helpers: a linked list as nested {value, next} nodes, and a tree node as {value, left, right}. */
+type ListNode = { value: number; next: ListNode } | null;
+type TreeNode = { value: number; left: TreeNode; right: TreeNode } | null;
+const list = (...values: number[]): ListNode => values.reduceRight<ListNode>((next, value) => ({ value, next }), null);
+const tree = (value: number, left: TreeNode = null, right: TreeNode = null): TreeNode => ({ value, left, right });
+
 export const problems: Problem[] = [
 	{
 		id: 'pair-sum',
@@ -380,6 +386,103 @@ export const problems: Problem[] = [
 			{ args: [[90, 80, 70]], expected: [0, 0, 0] }
 		],
 		external: { label: 'Daily Temperatures on LeetCode', url: 'https://leetcode.com/problems/daily-temperatures/' }
+	},
+	{
+		id: 'find-sorted',
+		title: "Find it in a sorted list",
+		pattern: 'Binary Search',
+		difficulty: 'Easy',
+		statement: "The list is sorted from smallest to largest and has no repeats. Return the 0-based position of the target, or -1 if it is not there. Aim for O(log n): don’t check every item.",
+		examples: [
+			{ input: 'nums = [-1, 0, 3, 5, 9, 12], target = 9', output: '4' },
+			{ input: 'nums = [-1, 0, 3, 5, 9, 12], target = 2', output: '-1' }
+		],
+		hint: "Keep lo and hi. Look at the middle: if it is too small, the target can only be to its right; if too big, to its left.",
+		compare: 'exact',
+		fn: { python: 'find_sorted', javascript: 'findSorted' },
+		starter: {
+			python: py("def find_sorted(nums: list[int], target: int) -> int:", "Halve the search range each step."),
+			javascript: js("function findSorted(nums, target)", "Halve the search range each step.")
+		},
+		solution: {
+			python:
+				"def find_sorted(nums: list[int], target: int) -> int:\n    lo, hi = 0, len(nums) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if nums[mid] == target:\n            return mid\n        if nums[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1\n",
+			javascript:
+				"function findSorted(nums, target) {\n  let lo = 0;\n  let hi = nums.length - 1;\n  while (lo <= hi) {\n    const mid = Math.floor((lo + hi) / 2);\n    if (nums[mid] === target) return mid;\n    if (nums[mid] < target) lo = mid + 1;\n    else hi = mid - 1;\n  }\n  return -1;\n}\n"
+		},
+		tests: [
+			{ args: [[-1, 0, 3, 5, 9, 12], 9], expected: 4 },
+			{ args: [[-1, 0, 3, 5, 9, 12], 2], expected: -1 },
+			{ args: [[5], 5], expected: 0 },
+			{ args: [[], 3], expected: -1 },
+			{ args: [[1, 3], 3], expected: 1 },
+			{ args: [[2, 4, 6, 8, 10, 12, 14], 2], expected: 0 }
+		],
+		external: { label: "Binary Search on LeetCode", url: 'https://leetcode.com/problems/binary-search/' }
+	},
+	{
+		id: 'reverse-list',
+		title: "Turn a linked list around",
+		pattern: 'Linked List',
+		difficulty: 'Easy',
+		statement: "Each node is an object with a value and next, the following node; the last node’s next is null (None in Python), and an empty list is null itself. Reverse the list and return its new head. In Python, nodes are dictionaries: node[\"value\"] and node[\"next\"].",
+		examples: [
+			{ input: 'head = 1 → 2 → 3', output: '3 → 2 → 1' },
+			{ input: 'head = null', output: 'null', note: 'An empty list stays empty.' }
+		],
+		hint: "Walk the list once with three variables: the previous node, the current one, and the next one, saved before you turn the current arrow around.",
+		compare: 'exact',
+		fn: { python: 'reverse_list', javascript: 'reverseList' },
+		starter: {
+			python: py("def reverse_list(head: dict | None) -> dict | None:", "Turn each next pointer around."),
+			javascript: js("function reverseList(head)", "Turn each next pointer around.")
+		},
+		solution: {
+			python:
+				"def reverse_list(head: dict | None) -> dict | None:\n    prev = None\n    while head is not None:\n        nxt = head[\"next\"]\n        head[\"next\"] = prev\n        prev = head\n        head = nxt\n    return prev\n",
+			javascript:
+				"function reverseList(head) {\n  let prev = null;\n  while (head !== null) {\n    const next = head.next;\n    head.next = prev;\n    prev = head;\n    head = next;\n  }\n  return prev;\n}\n"
+		},
+		tests: [
+			{ args: [list(1, 2, 3)], expected: list(3, 2, 1) },
+			{ args: [list(5)], expected: list(5) },
+			{ args: [null], expected: null },
+			{ args: [list(1, 2)], expected: list(2, 1) },
+			{ args: [list(4, 8, 15, 16, 23, 42)], expected: list(42, 23, 16, 15, 8, 4) }
+		],
+		external: { label: "Reverse Linked List on LeetCode", url: 'https://leetcode.com/problems/reverse-linked-list/' }
+	},
+	{
+		id: 'tree-depth',
+		title: "How tall is the tree?",
+		pattern: 'Trees',
+		difficulty: 'Easy',
+		statement: "Each tree node is an object with a value, a left child and a right child; a missing child is null (None in Python). Return the number of levels: the nodes on the longest path from the root down to a leaf. An empty tree has 0. In Python, nodes are dictionaries: node[\"left\"] and node[\"right\"].",
+		examples: [
+			{ input: 'root = 3, with children 9 and 20; 20 has children 15 and 7', output: '3' },
+			{ input: 'root = null', output: '0' }
+		],
+		hint: "Ask both subtrees how tall they are, take the larger, and add one for this node. An empty tree is 0.",
+		compare: 'exact',
+		fn: { python: 'tree_depth', javascript: 'treeDepth' },
+		starter: {
+			python: py("def tree_depth(root: dict | None) -> int:", "Solve it for both subtrees, then combine."),
+			javascript: js("function treeDepth(root)", "Solve it for both subtrees, then combine.")
+		},
+		solution: {
+			python:
+				"def tree_depth(root: dict | None) -> int:\n    if root is None:\n        return 0\n    return 1 + max(tree_depth(root[\"left\"]), tree_depth(root[\"right\"]))\n",
+			javascript:
+				"function treeDepth(root) {\n  if (root === null) return 0;\n  return 1 + Math.max(treeDepth(root.left), treeDepth(root.right));\n}\n"
+		},
+		tests: [
+			{ args: [tree(3, tree(9), tree(20, tree(15), tree(7)))], expected: 3 },
+			{ args: [null], expected: 0 },
+			{ args: [tree(1)], expected: 1 },
+			{ args: [tree(1, null, tree(2, null, tree(3, null, tree(4))))], expected: 4 },
+			{ args: [tree(1, tree(2, tree(4)), tree(3))], expected: 3 }
+		],
+		external: { label: "Maximum Depth of Binary Tree on LeetCode", url: 'https://leetcode.com/problems/maximum-depth-of-binary-tree/' }
 	}
 ];
 

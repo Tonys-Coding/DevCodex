@@ -681,6 +681,194 @@ export const cards: ConceptCard[] = [
 		unlockedBy: 'stacks-queues',
 		layer: 'hood',
 		level: 3
+	},
+
+	// Binary search, linked lists and binary trees: Core cards with their bonus cards.
+	{
+		id: 'binary-search',
+		term: 'Binary search',
+		track: 'structures',
+		question: 'A sorted list holds 1,000,000 items. At most how many looks does binary search need?',
+		answer: 'About 20',
+		detail: 'Each look throws away half of what is left, so the count only grows by one when the list doubles. Checking one by one could take a million.',
+		unlockedBy: 'binary-search',
+		level: 1
+	},
+	{
+		id: 'log-n',
+		term: 'O(log n)',
+		track: 'structures',
+		question: 'The input doubles in size. How much more work does an O(log n) algorithm do?',
+		answer: 'About one more step',
+		detail: 'Logarithmic work grows with how many times n can be halved: about 20 for a million, 30 for a billion.',
+		unlockedBy: 'binary-search',
+		level: 2
+	},
+	{
+		id: 'search-bounds',
+		term: 'Search bounds',
+		track: 'structures',
+		question: 'A binary search loops while lo < hi instead of lo <= hi. What can it miss?',
+		answer: 'The last remaining item',
+		detail: 'When lo equals hi there is still one candidate. Use lo <= hi with mid + 1 and mid - 1, and test lists of 0, 1 and 2 items.',
+		unlockedBy: 'binary-search',
+		level: 2
+	},
+	{
+		id: 'bisect',
+		term: 'bisect',
+		track: 'structures',
+		question: 'In Python, what does bisect.bisect_left([3, 8, 12], 9) return?',
+		answer: '2: where 9 would go',
+		detail: 'bisect_left gives the index of the target, or where it would be inserted to keep the list sorted. Check that position to turn it into a find.',
+		unlockedBy: 'binary-search',
+		level: 1
+	},
+	{
+		id: 'answer-search',
+		term: 'Search on the answer',
+		track: 'structures',
+		question: 'What does a problem need before you can binary-search its answer instead of a list?',
+		answer: 'A yes/no check that flips once as the value grows',
+		detail: '“Smallest capacity that ships in 5 days” works: bigger always works too. Search for the first yes.',
+		unlockedBy: 'binary-search',
+		layer: 'deeper',
+		level: 2
+	},
+	{
+		id: 'midpoint-overflow',
+		term: 'Midpoint overflow',
+		track: 'structures',
+		question: 'Why can int mid = (low + high) / 2 crash in Java on a huge array?',
+		answer: 'low + high passes the int limit and wraps negative',
+		detail: 'It hid in Java’s Arrays.binarySearch for about nine years. Use low + (high - low) / 2, or (low + high) >>> 1.',
+		unlockedBy: 'binary-search',
+		layer: 'hood',
+		level: 3
+	},
+	{
+		id: 'linked-list',
+		term: 'Linked list',
+		track: 'structures',
+		question: 'How do you reach the 500th node of a linked list?',
+		answer: 'Walk from the head, following 499 pointers',
+		detail: 'Nodes can live anywhere in memory, so there is no index to jump to. Reaching item k is O(n).',
+		unlockedBy: 'linked-lists',
+		level: 1
+	},
+	{
+		id: 'list-head-insert',
+		term: 'Insert at the head',
+		track: 'structures',
+		question: 'Adding to the front: O(1) or O(n), for a linked list and for an array?',
+		answer: 'Linked list O(1); array O(n)',
+		detail: 'The list points a new node at the old head. An array has to move every item along by one.',
+		unlockedBy: 'linked-lists',
+		level: 1
+	},
+	{
+		id: 'null-tail',
+		term: 'The tail’s next',
+		track: 'structures',
+		question: 'What does the last node’s next pointer hold?',
+		answer: 'null (None in Python)',
+		detail: 'It marks the end. A traversal loop stops there, and forgetting to check for it crashes with a null reference.',
+		unlockedBy: 'linked-lists',
+		level: 1
+	},
+	{
+		id: 'lost-pointer',
+		term: 'Lost nodes',
+		track: 'structures',
+		question: 'You overwrite node.next before saving it. What happens to the rest of the list?',
+		answer: 'It is lost: nothing points to it any more',
+		detail: 'Save next in a variable first, then rewire. When inserting, set the new node’s next before the old node’s.',
+		unlockedBy: 'linked-lists',
+		level: 2
+	},
+	{
+		id: 'cycle-detection',
+		term: 'Cycle detection',
+		track: 'structures',
+		question: 'How do fast and slow pointers prove a linked list loops?',
+		answer: 'The fast one laps the slow one and they meet on the same node',
+		detail: 'Floyd’s method moves one pointer one step and the other two. No extra memory needed.',
+		unlockedBy: 'linked-lists',
+		layer: 'deeper',
+		level: 2
+	},
+	{
+		id: 'pointer-chasing',
+		term: 'Pointer chasing',
+		track: 'structures',
+		question: 'Walking an array and a linked list are both O(n). Why is the array usually much faster?',
+		answer: 'Its items are side by side, so the CPU cache helps',
+		detail: 'Each linked hop can be a cache miss: on the order of 100 ns to main memory.',
+		unlockedBy: 'linked-lists',
+		layer: 'hood',
+		level: 3
+	},
+	{
+		id: 'binary-tree',
+		term: 'Binary tree',
+		track: 'structures',
+		question: 'What is a node with no children called?',
+		answer: 'A leaf',
+		detail: 'A binary tree starts at one root, and each node has at most a left and a right child.',
+		unlockedBy: 'binary-trees',
+		level: 1
+	},
+	{
+		id: 'bst-rule',
+		term: 'Search tree rule',
+		track: 'structures',
+		question: 'In a binary search tree, where are the values smaller than a node?',
+		answer: 'Everywhere in its left subtree',
+		detail: 'Left is smaller and right is bigger at every node, so each comparison discards a whole subtree.',
+		unlockedBy: 'binary-trees',
+		level: 2
+	},
+	{
+		id: 'in-order',
+		term: 'In-order traversal',
+		track: 'structures',
+		question: 'Which traversal of a binary search tree gives its values in sorted order?',
+		answer: 'In-order: left, node, right',
+		detail: 'Pre-order copies a tree, post-order does children first, and level-order goes row by row with a queue.',
+		unlockedBy: 'binary-trees',
+		level: 2
+	},
+	{
+		id: 'tree-balance',
+		term: 'Balanced trees',
+		track: 'structures',
+		question: 'Insert 1, 2, 3, 4, 5 into an empty search tree. What is its height?',
+		answer: '5: a straight line',
+		detail: 'Sorted input makes a lopsided tree as slow as a linked list. A balanced tree of a million values is about 20 levels.',
+		unlockedBy: 'binary-trees',
+		level: 2
+	},
+	{
+		id: 'validate-bst',
+		term: 'Validating a BST',
+		track: 'structures',
+		question: 'Is checking each node against just its two children enough to validate a search tree?',
+		answer: 'No. Pass down the range each node must fall within',
+		detail: 'A 60 in the left subtree of 50 can sit happily next to its parent 30 and still break the rule.',
+		unlockedBy: 'binary-trees',
+		layer: 'deeper',
+		level: 2
+	},
+	{
+		id: 'red-black',
+		term: 'Red-black tree',
+		track: 'structures',
+		question: 'What keeps a red-black tree’s height within about 2 log₂ n?',
+		answer: 'Colour rules, restored with cheap rotations after each change',
+		detail: 'Java’s TreeMap, typical C++ std::map implementations and the Linux kernel use red-black trees.',
+		unlockedBy: 'binary-trees',
+		layer: 'hood',
+		level: 3
 	}
 ];
 
