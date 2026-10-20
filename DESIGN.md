@@ -19,12 +19,12 @@ colors:
   reward-gold-ink: "#1d1400"
   miss-rose: "#ff6b81"
   miss-rose-ink: "#2a0710"
-  level-entry: "#86e06f"
-  level-entry-ink: "#0c2405"
-  level-experienced: "#59b0ff"
-  level-experienced-ink: "#04203d"
-  level-senior: "#ff4b62"
-  level-senior-ink: "#2e040c"
+  level-easy: "#86e06f"
+  level-easy-ink: "#0c2405"
+  level-medium: "#59b0ff"
+  level-medium-ink: "#04203d"
+  level-hard: "#ff4b62"
+  level-hard-ink: "#2e040c"
   veil-light: "rgb(255 255 255 / 0.24)"
   veil-dark: "rgb(0 0 0 / 0.16)"
   syntax-keyword: "#b9a3ff"
@@ -154,7 +154,7 @@ components:
     typography: "{typography.label}"
   level-tag:
     backgroundColor: "transparent"
-    textColor: "{colors.level-entry}"
+    textColor: "{colors.level-easy}"
     typography: "{typography.label}"
   input:
     backgroundColor: "{colors.binder-felt}"
@@ -206,7 +206,7 @@ The palette is Committed. Track colours own whole regions (quest panels, short c
 - **Ink** (#f5f2f9), **Soft Ink** (#c0b8cf), **Faint Ink** (#938aa5): text in three steps. Faint ink is for metadata only.
 
 ### Levels
-- **Entry Green** (#86e06f), **Experienced Blue** (#59b0ff), **Senior Red** (#ff4b62), each with a dark ink (`--lv`, `--lv-ink` via `.lv-*`). They appear only as a 2px frame around a whole lesson (library card, article cover) and as the LevelTag pill with 1–3 pips.
+- **Easy Green** (#86e06f), **Medium Blue** (#59b0ff), **Hard Red** (#ff4b62), each with a dark ink (`--easy`, `--medium`, `--hard`; `--lv`, `--lv-ink` via `.lv-easy`, `.lv-medium`, `.lv-hard`). Difficulty describes the concept (rubric in PRODUCT.md). The colours appear only as a 2px frame around a whole lesson (lesson card, article cover) and as the boxless Level Tag.
 
 ### Named Rules
 **The Level Frames The Lesson Rule.** A level colour is a full border plus its tag, never a fill or a stripe.
@@ -282,7 +282,7 @@ Everything is rounded, on one scale:
   - a track-coloured art window with a per-concept line drawing
   - the question
   - the collector number (#001/032) and the track
-- New cards glow gold until first reviewed, and level-3 cards get a gold inner frame.
+- New cards glow gold until first reviewed, and level-3 cards get a gold inner frame. Core packs hold level 1–2 cards; Going deeper bonus cards are level 2 and Under the hood bonus cards are level 3, so every rare card is earned in a lesson's deepest layer. A locked bonus card's hint names its layer ("Finish Under the hood in …").
 - Faces: front, back (gold frame, diagonal pattern, fanned-card mark) and locked (dashed, lock, unlock hint).
 - On desktop a pointer-tracked foil sheen appears on hover only.
 
@@ -297,7 +297,9 @@ StepFlow, CodeTrace, EventLoopSim, HashMapLab, TwoPointerGame and Choice share o
 Lit elements fill with the track colour, and message chips are ink pills with dark mono text.
 
 ### Article blocks
-- **Level Tag:** boxless: 1–3 pips and "Entry-level · Easy" in the level colour (in the surface's ink when it sits on a track-coloured panel). It appears on lesson cards, the article cover, the home quest and "Up next".
+- **Level Tag:** boxless: 1–3 pips and "Easy", "Medium" or "Hard" in the level colour (in the surface's ink when it sits on a track-coloured panel). It appears on lesson cards, the article cover, the home quest and "Up next".
+- **Layer** (`teach/Layer.svelte`): Going deeper and Under the hood. A layer starts at a full-width 2px rule (a 4px double rule for Under the hood), never a box: gold depth pips, the layer name as an h2-sized title, a one-line summary, "n sections · about n min" and the bonus card count in gold, then an outlined "Open …"/"Close …" button whose chevron turns. Closed, the body is `hidden`. Open, it reads like the rest of the article and ends at a hairline with "Finish Going deeper": the checklist (sections read, checks passed) and a gold "Collect the bonus card" button, locked until the Core pack is open. Collected cards deal in below.
+- **Core pack** (`teach/CorePack.svelte`): marks where the Core ends. The article's "Earn your pack" checklist renders there, so the pack sits between the Core and the first layer rather than at the very bottom.
 - **Quick check:** one question at a time with a progress bar of segments (teal right, rose wrong). Picking an answer locks it and shows the explanation as plain text, then "Next question"; the last step shows the score and "Try again".
 - **Code sample** (`teach/Code.svelte`): an editor-ground block (18px) with a title bar and an optional caption. Highlighting comes from `teach/highlight.ts` with the editor palette (`.tk-*` in app.css).
 - **Notes:** `tip` (gold), `warn` (miss rose, for real pitfalls), `plain` (sleeve, for everyday comparisons and precision asides).
@@ -321,7 +323,9 @@ Lit elements fill with the track colour, and message chips are ink pills with da
 - **Cover:** a back link to the article's topic page (the topic name in the tags links there too), "Builds on" links (plus a gold "New to this? Start with …" if the prerequisite isn't finished), and "Earn the pack:" with the three steps, ticked as they're met. On phones the summary clamps to three lines with More, which also reveals what the lesson assumes.
 - **While reading:** a 3px gold progress line under the header. Below 1100px, a line under it shows the current section and "Pack n/3"; tapping it opens a bottom sheet with the contents and the pack steps. From 1100px, the rail shows "Your pack" (live) above "On this page".
 - **Resume:** reopening a half-read lesson offers "You stopped at … Continue there", between hairlines.
-- **Checkpoints:** two one-question checks per lesson, set between hairlines with a gold "Checkpoint" flag. They count toward the pack (answering is enough).
+- **Checkpoints:** one-question checks set between hairlines with a gold "Checkpoint" flag. Core checkpoints count toward the pack, layer checkpoints toward that layer (answering is enough).
+- **Layers in the rail:** "On this page" groups sections as Core, then "Open your pack", then each layer (dimmed while closed, ticked once finished). Choosing a section in a closed layer, or following a link or URL hash to one, opens the layer first. The cover lists the layers with their minutes; selecting one opens it.
+- **Depth preference:** the learner's choice (Core only, Going deeper, Under the hood) decides which layers start open.
 - **Glossary terms:** the first use of each "Words you will meet" entry is dotted-underlined in the track colour and shows its definition on hover, focus or tap.
 - **Code samples:** Copy in the title bar. When lines overflow, the right edge fades and a Wrap toggle appears.
 
@@ -330,17 +334,17 @@ The dashboard leads with one next step and keeps everything else quieter. It ren
 - **Greeting:** "Welcome to DevCodex" on a first visit, "Welcome back" after learning today, otherwise good morning, afternoon or evening, or "Burning the midnight oil" late at night. The optional name is set in gold. Below it is one line about the streak or open lessons. "Add your name" appears only until a name is set; changing it lives on the You page.
 - **Lesson map (desktop, beside the greeting):** every lesson as a star on a night-sky panel. Tracks run across (Web, Code, Data), and levels run left to right in dashed level-colour columns. Finished stars glow in their track colour and twinkle slowly; started ones draw a read-progress arc; the next step pulses gold; unvisited ones are dashed rings. Lines between a track's lessons light up once both ends are finished. Hover or focus shows a tooltip (title, level, status; it flips below for the top row), and each star links to its lesson. It is hidden on phones to keep the next step near the top, and pulse and twinkle stop under reduced motion.
 - **Notices:** dismissible lines between hairlines, never boxes. "Since your last visit you collected … and earned …" shows once per win. The backup reminder appears while progress exists only in an uninstalled browser with no backup in 14 days, and offers Install or Export.
-- **New users:** in place of the numbers, "How DevCodex works" (four boxless numbered steps) and "Where should your path start?" (three level choices underlined in the level colour).
+- **New users:** in place of the numbers, "How DevCodex works" (four boxless numbered steps) and "How deep do you want to go?" (Core, Going deeper, Under the hood, the choice underlined in gold).
 - **Key numbers:** links (Lessons → Learn, Cards → Trivia, Problems → Practice, Streak → This week, Minutes → You), as one swipeable row on phones.
-- **Hero:** the single loud, track-filled surface. It resumes a lesson read in the last three days (where you stopped, percent read, a progress bar) or offers the next unstarted lesson on the path, starting at the chosen level.
+- **Hero:** the single loud, track-filled surface. It resumes a lesson read in the last three days (where you stopped, percent read, a progress bar) or offers the next unstarted lesson on the path, easiest concepts first.
 - **This week:** Monday to Sunday dots (filled ember when learned, ringed for today, dashed for the future), the streak with an evening "learn today to keep it" nudge, and a gold weekly-goal ring with a stepper.
 - **Also in progress:** other open lessons as hairline rows, with where you stopped, when, a level-colour progress line, Resume, and Remove.
-- **Your binder:** one row of clear pockets per track, which also serves as track progress. A finished lesson is a mini card (level frame, pips, art, gold date stamp) and slides in with a gold glow the first time it's seen. Empty pockets show the lesson's name; started ones get a level-colour edge, a progress line and "Resume →"; on hover or focus (and always on touch) the pocket shows its action. A pip legend spells out the levels.
+- **Your binder:** one row of clear pockets per track, which also serves as track progress. A finished lesson is a mini card (level frame, pips, art, gold date stamp) and slides in with a gold glow the first time it's seen. Empty pockets show the lesson's name; started ones get a level-colour edge, a progress line and "Resume →"; on hover or focus (and always on touch) the pocket shows its action. A pip legend spells out the difficulties.
 - **Card of the day:** one unlocked card, face down until "Reveal the answer", then Knew it / Not yet grades it like Trivia. Below it is a sized invitation: "Review 10 cards · about 4 minutes".
 - **Achievements:** earned medals as a compact row (new ones strike in with a "New" tag), then "Within reach": the three locked medals closest to done, with counts. The full gallery is on the You page.
 
 ### Pack checklist (end of every article)
-"Earn your pack" lists three requirements as plain rows, each with a round tick (teal when done), a status line and a thin gold progress line: read through the lesson (80% of sections read past), spend some time with it (active time, 30% of the estimate, between 1 and 5 minutes), and pass the quick checks (every check finished, 60% or better on multi-question ones). Until all three are done, the gold button is a muted "Pack locked" with a lock icon; then the heading becomes "Your pack is ready". A quick check passed earlier reopens on its best score.
+"Earn your pack" (placed by `<CorePack />` at the end of the Core) lists three requirements for the Core as plain rows, each with a round tick (teal when done), a status line and a thin gold progress line: read through the lesson (80% of sections read past), spend some time with it (active time, 30% of the estimate, between 1 and 5 minutes), and pass the quick checks (every check finished, 60% or better on multi-question ones). Until all three are done, the gold button is a muted "Pack locked" with a lock icon; then the heading becomes "Your pack is ready". A quick check passed earlier reopens on its best score.
 
 ### Navigation
 - Phone: a floating dock of five sections. The active item gets a gold pill behind its icon.

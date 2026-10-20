@@ -1,6 +1,6 @@
 # Active Context
 
-_Last updated: 2026-10-18_
+_Last updated: 2026-10-19_
 
 ## Now
 
@@ -39,13 +39,13 @@ Phase 2 is built and verified. **Binder (direction C)** is the app. On 2026-10-1
 - Both runners were checked in the pane for pass, fail, syntax errors, exceptions, stdout and infinite-loop timeouts.
 - Impeccable finish review: inline (degraded) pass, verdict ship after one fix round. DESIGN.md and `.impeccable/design.json` were written from the build.
 
-## Article levels (2026-10-18)
+## Difficulty and depth (2026-10-19, replaces "Article levels")
 
-- Articles are ranked Entry-level / Experienced / Senior (rules in PRODUCT.md "Article levels"). Live: load-a-page and values-references (Entry), http-caching and two-pointer-pattern (Experienced), js-event-loop and hash-maps (Senior). The reading path (`liveArticles`) runs easiest first.
-- All six articles were rewritten and expanded, with tables, lists, highlighted code (`teach/Code.svelte`, `teach/highlight.ts`), note tones, recaps, quizzes and sources. Code samples were run in Node and Python.
-- Tables stack into labelled cards under 560px; `src/lib/content/table-labels.ts` is a build-time preprocessor (wired in vite.config.ts) that adds data-labels and ARIA roles.
-- Level colours, the Level Tag component and "The Level Frames The Lesson Rule" are in DESIGN.md and `.impeccable/design.json`.
-- The four soon articles are proposed as a separate session (task card "Write the four coming-soon DevCodex articles by level").
+- Difficulty is Easy / Medium / Hard and describes the concept, not the reader (rubric in PRODUCT.md "Difficulty and depth", data in `src/lib/content/levels.ts`). Easy: load-a-page, values-references, recursion, stacks-queues, hash-maps, two-pointer-pattern. Medium: cookies-sessions, http-caching, cors, js-event-loop. CSS is `--easy`/`--medium`/`--hard` and `.lv-easy`/`.lv-medium`/`.lv-hard`.
+- Every lesson has three layers: Core (plain words, earns the pack, ends with `<CorePack />`), then `<Layer depth="deeper">` and `<Layer depth="hood">` (`teach/Layer.svelte`). The `article-markup.ts` preprocessor tags each section and quiz with its depth and word count (code counts six words a line). Catalog `minutes` is Core time only.
+- Requirements: `requirements()` is Core-only. `layerRequirements()` needs the layer's sections read and checks passed, and the Core finished. `progress.finishLayer()` stores `layers[id]`; bonus cards (`layer` on ConceptCard) unlock from it. There are 21 bonus cards: deeper ones are level 2, hood ones level 3 (rare). `unlockHint()` names the layer.
+- The depth preference (`profile.depth`, migrated from the old start level) decides which layers open by default. Links and hashes into a closed layer open it.
+- Achievements: Going Deeper, Under the Hood and Bottom of the Stack replace the old senior and all-levels medals.
 
 ## Wide layout and diagrams (2026-10-18)
 
@@ -96,6 +96,6 @@ Phase 2 is built and verified. **Binder (direction C)** is the app. On 2026-10-1
 1. Done: Pages is live.
 2. The user tests installing on iPhone (Add to Home Screen) and Mac (Add to Dock).
 3. Content backlog:
-   - four "soon" articles: cookies-sessions, cors, recursion, stacks-queues
+   - new topics and lessons (each one written as Core, Going deeper and Under the hood)
    - more problems
    - Supabase sync later

@@ -32,19 +32,33 @@ Learners may read a lesson in a longer desktop session or review a single concep
 - Initial topics span web fundamentals, programming concepts, and basic data structures.
 - Coding practice is a smaller section: write and run Python (Pyodide) and JavaScript (Web Worker) solutions in the browser against tests; problems are written in our own words and link out to LeetCode/NeetCode.
 - No accounts at first: progress lives on the device with JSON export/import. Cross-device sync via Supabase is a later option.
-- The Binder home is the learner's dashboard. It leads with one next step (resume or start), then covers this week (streak dots, weekly goal), lessons in progress, the binder of collected lessons by track, a card of the day with a sized review, and achievements. New users get a how-it-works panel and pick where their path starts. Settings (name, start level, weekly goal), the full achievement gallery and backups live on the You page. Because progress is device-only and some browsers clear site data, the dashboard reminds uninstalled users to install or export.
+- The Binder home is the learner's dashboard. It leads with one next step (resume or start), then covers this week (streak dots, weekly goal), lessons in progress, the binder of collected lessons by track, a card of the day with a sized review, and achievements. New users get a how-it-works panel and pick how deep lessons open. Settings (name, depth, weekly goal), the full achievement gallery and backups live on the You page. Because progress is device-only and some browsers clear site data, the dashboard reminds uninstalled users to install or export.
 - GitHub Pages serves static files; it does not run a SvelteKit server.
 - The user wants no required purchases. Public email/password signup remains unresolved because Supabase's default sender is limited to development use.
 
-## Article levels
+## Difficulty and depth
 
-Every article has a level, shown as a coloured border and a tag (`src/lib/content/levels.ts`). Write for the level:
+Two separate ideas, kept apart on purpose.
 
-- **Entry-level · Easy (green):** plain words for someone with basic tech knowledge. Define every term on first use, use everyday comparisons, short sentences, a "Words you will meet" glossary and a "You will learn" list.
-- **Experienced · Medium (blue):** assumes the reader writes code. Use real terminology with brief definitions, code samples, trade-off tables, pitfalls and sources.
-- **Senior · Hard (red):** no guardrails. Specs, internals, edge cases and numbers, as long as it stays understandable. Nothing missing, redundant or unverified: run every code sample and check every claim, and cite sources.
+**Difficulty describes the concept, not the reader** (`src/lib/content/levels.ts`). It is shown as a coloured border and a tag.
 
-All levels use structure: tables, bullet and numbered lists, highlighted code (`teach/Code.svelte`), notes (`tone`: tip, warn, plain), a recap and a quiz. Each article sets an `assumes` line.
+| Difficulty | Rubric | Examples |
+| --- | --- | --- |
+| **Easy (green)** | A fundamental idea: few prerequisites and one concept to hold. | Stacks and queues, hash maps, two pointers, recursion, values and references, loading a page |
+| **Medium (blue)** | Builds on fundamentals: an idea plus rules or invariants to keep in mind. | Binary trees, caching, cookies and sessions, CORS, the event loop |
+| **Hard (red)** | Several interacting ideas and invariants, after Medium topics. | Balanced trees, dynamic programming, consensus |
+
+A lesson's `builds` lists the lessons it relies on, and its `assumes` line says what the reader should already know, in plain words.
+
+**Depth is how far a reader goes inside one lesson.** Every lesson has three layers:
+
+- **Core** (always open): plain words for someone with basic tech knowledge. Define every term on first use ("Words you will meet"), use everyday comparisons, short sentences, one interactive piece where it helps, a recap and a quick check. The Core alone earns the lesson's pack, and `minutes` in the catalog is the Core's reading time. It ends with `<CorePack />`.
+- **Going deeper** (`<Layer depth="deeper">`): assumes the reader writes code. Real terminology with brief definitions, code samples, trade-off tables, pitfalls, and two one-question checkpoints titled "Going deeper checkpoint".
+- **Under the hood** (`<Layer depth="hood">`): specs, internals, edge cases and numbers, as long as it stays understandable. Ends with a recap, a multi-question "Under the hood check" and sources.
+
+Finishing a layer (its sections read, its checks passed, and the Core already finished) collects its bonus cards: Going deeper cards are level 2, Under the hood cards are level 3 and rare. The learner's depth preference (onboarding and the You page) decides which layers open by default; every layer can be opened or closed in place.
+
+All layers use structure: tables, bullet and numbered lists, highlighted code (`teach/Code.svelte`), notes (`tone`: tip, warn, plain). Nothing missing, redundant or unverified: run every code sample and check every claim.
 
 ## Brand Commitments
 

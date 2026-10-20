@@ -248,9 +248,9 @@
 				"role": "secondary",
 				"displayName": "Miss Rose Ink"
 			},
-			"level-entry": {
+			"level-easy": {
 				"role": "secondary",
-				"displayName": "Entry Green",
+				"displayName": "Easy Green",
 				"canonical": "oklch(82.5% 0.173 139.5)",
 				"tonalRamp": [
 					"#002700",
@@ -263,9 +263,9 @@
 					"#91ec7a"
 				]
 			},
-			"level-entry-ink": {
+			"level-easy-ink": {
 				"role": "secondary",
-				"displayName": "Entry Green Ink",
+				"displayName": "Easy Green Ink",
 				"canonical": "oklch(23.3% 0.062 139.0)",
 				"tonalRamp": [
 					"#001100",
@@ -278,9 +278,9 @@
 					"#d6f5ce"
 				]
 			},
-			"level-experienced": {
+			"level-medium": {
 				"role": "secondary",
-				"displayName": "Experienced Blue",
+				"displayName": "Medium Blue",
 				"canonical": "oklch(73.7% 0.142 248.3)",
 				"tonalRamp": [
 					"#001157",
@@ -293,9 +293,9 @@
 					"#81d8ff"
 				]
 			},
-			"level-experienced-ink": {
+			"level-medium-ink": {
 				"role": "secondary",
-				"displayName": "Experienced Blue Ink",
+				"displayName": "Medium Blue Ink",
 				"canonical": "oklch(24.1% 0.065 252.2)",
 				"tonalRamp": [
 					"#000a26",
@@ -308,9 +308,9 @@
 					"#cceeff"
 				]
 			},
-			"level-senior": {
+			"level-hard": {
 				"role": "secondary",
-				"displayName": "Senior Red",
+				"displayName": "Hard Red",
 				"canonical": "oklch(67.4% 0.215 18.1)",
 				"tonalRamp": [
 					"#590000",
@@ -323,9 +323,9 @@
 					"#ff8c9a"
 				]
 			},
-			"level-senior-ink": {
+			"level-hard-ink": {
 				"role": "secondary",
-				"displayName": "Senior Red Ink",
+				"displayName": "Hard Red Ink",
 				"canonical": "oklch(20.0% 0.069 14.2)",
 				"tonalRamp": [
 					"#210004",
@@ -539,8 +539,8 @@
 			"name": "Level Tag",
 			"kind": "chip",
 			"refersTo": "level-tag",
-			"description": "An article's difficulty, boxless: 1 to 3 pips and the level name in the level colour. Pairs with a 2px level-colour frame around the lesson.",
-			"html": "<span class=\"ds-level\"><span class=\"ds-pips\"><i class=\"on\"></i><i></i><i></i></span>Entry-level<span class=\"ds-grade\"> · Easy</span></span>",
+			"description": "A lesson's concept difficulty, boxless: 1 to 3 pips and Easy, Medium or Hard in the level colour. Pairs with a 2px level-colour frame around the lesson.",
+			"html": "<span class=\"ds-level\"><span class=\"ds-pips\"><i class=\"on\"></i><i></i><i></i></span>Easy</span>",
 			"css": ".ds-level{display:inline-flex;align-items:center;gap:.45rem;color:#86e06f;font:800 .88rem/1.2 'Atkinson Hyperlegible Next Variable',system-ui,sans-serif;white-space:nowrap}.ds-grade{font-weight:600;opacity:.85}.ds-pips{display:inline-flex;align-items:flex-end;gap:2px}.ds-pips i{width:4px;border-radius:3px;background:currentColor;opacity:.3}.ds-pips i:nth-child(1){height:7px}.ds-pips i:nth-child(2){height:10px}.ds-pips i:nth-child(3){height:13px}.ds-pips i.on{opacity:1}"
 		}
 	],
@@ -567,7 +567,7 @@
 			},
 			{
 				"name": "The Level Frames The Lesson Rule",
-				"body": "A level colour (entry green, experienced blue, senior red) appears only as a full 2px frame around a lesson and as its tag. Never as a fill, a stripe or a decoration elsewhere.",
+				"body": "A level colour (easy green, medium blue, hard red) appears only as a full 2px frame around a lesson and as its tag. Never as a fill, a stripe or a decoration elsewhere.",
 				"section": "colors"
 			},
 			{

@@ -50,6 +50,8 @@
 
 - 2026-10-19: Topic pages: Learn became a scalable topic grid, and each topic got its own page. Tested at 375 and 1440px, including the old-link redirect.
 
+- 2026-10-19: Difficulty now describes the concept (Easy/Medium/Hard), and every lesson has Core, Going deeper and Under the hood layers. The six deep lessons got a new plain-words Core; the four entry lessons got new deeper layers (code run in Node and Python). There are 21 bonus cards with art, and the depth preference replaces the start level. Docs are updated.
+
 ## Next checkpoint
 
-The user approves the first commit and push. Then Pages goes live at `https://tonys-coding.github.io/DevCodex/` and installs get tested on devices.
+The user commits and pushes the layers work by feature (from the commands given), then tests installs on devices.
