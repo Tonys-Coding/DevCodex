@@ -102,10 +102,12 @@ h3 {
 	text-wrap: balance;
 }
 
+/* No ligatures in code: a learner should see the characters they will type (<!-- not ←, != not ≠). */
 code,
 pre,
 kbd {
 	font-family: var(--mono);
+	font-variant-ligatures: none;
 }
 
 img,
