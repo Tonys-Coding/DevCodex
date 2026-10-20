@@ -22,6 +22,8 @@ export type ProgressData = {
 	reading?: Record<string, Reading>;
 	/** articleId → deeper layers finished (each unlocks its bonus card) */
 	layers?: Record<string, Exclude<Depth, 'core'>[]>;
+	/** TL;DR briefId → ISO time it was read to the end */
+	briefs?: Record<string, string>;
 	/** `${articleId}:${quizTitle}` → best quick-check result */
 	quizzes?: Record<string, { best: number; total: number; at: string }>;
 	/** Personal settings. Never leaves the device. */
@@ -67,6 +69,7 @@ const empty = (): ProgressData => ({
 	reading: {},
 	quizzes: {},
 	layers: {},
+	briefs: {},
 	profile: {},
 	backup: {}
 });
@@ -76,7 +79,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> => typeof va
 /** Accept only data with the expected shape; anything else is rejected, never half-loaded. */
 function parse(value: unknown): ProgressData | null {
 	if (!isRecord(value) || value.version !== 1) return null;
-	const { completed, cards: c, solved, drafts, days, reading, quizzes, profile, seen, backup, layers } = value;
+	const { completed, cards: c, solved, drafts, days, reading, quizzes, profile, seen, backup, layers, briefs } = value;
 	if (![completed, c, solved, drafts].every(isRecord) || !Array.isArray(days)) return null;
 	const p = isRecord(profile) ? profile : {};
 	const clean: Profile = {};
@@ -100,6 +103,7 @@ function parse(value: unknown): ProgressData | null {
 					Object.entries(layers).map(([id, list]) => [id, strings(list).filter((d) => d === 'deeper' || d === 'hood')])
 				)
 			: {},
+		briefs: isRecord(briefs) ? Object.fromEntries(Object.entries(briefs).filter(([, at]) => typeof at === 'string')) : {},
 		profile: clean,
 		seen: isRecord(seen) ? { lessons: strings(seen.lessons), medals: strings(seen.medals) } : undefined,
 		backup: isRecord(backup)
@@ -201,6 +205,17 @@ class Progress {
 	#touch() {
 		const day = today();
 		if (!this.data.days.includes(day)) this.data.days = [...this.data.days, day].slice(-400);
+	}
+
+	briefRead = (id: string) => !!this.data.briefs?.[id];
+
+	/** Marks a TL;DR read. It counts as a day of learning for the streak. */
+	readBrief(id: string) {
+		this.data.briefs ??= {};
+		if (this.data.briefs[id]) return;
+		this.data.briefs[id] = new Date().toISOString();
+		this.#touch();
+		this.#save();
 	}
 
 	/** Records a finished deeper layer and returns the bonus cards it unlocked. */

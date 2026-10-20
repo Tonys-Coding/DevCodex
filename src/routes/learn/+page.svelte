@@ -5,11 +5,13 @@
 	import { tracks, articlesInTrack, articleById, liveArticles } from '#lib/content/catalog.js';
 	import { cards } from '#lib/content/cards.js';
 	import { levels, levelById } from '#lib/content/levels.js';
+	import { briefs } from '#lib/content/briefs.js';
 	import type { ArticleMeta, Level, TrackId } from '#lib/content/types.js';
 	import { progress } from '#lib/progress/progress.svelte.js';
 	import Icon from '#lib/components/Icon.svelte';
 	import TopicCard from '#lib/components/app/TopicCard.svelte';
 	import LessonCard from '#lib/components/app/LessonCard.svelte';
+	import LearnSwitch from '#lib/components/app/LearnSwitch.svelte';
 	import type { PageProps } from './$types';
 
 	/**
@@ -41,8 +43,13 @@
 
 	const atLevel = $derived(level === 'all' ? [] : liveArticles.filter((a) => a.level === level));
 
-	/** Search covers lesson titles and summaries, section headings, key terms in sections, and concept-card terms. */
-	type Hit = { kind: 'lesson' | 'section' | 'concept'; article: ArticleMeta; text: string; href: string; key: string; via?: string };
+	/**
+	 * Search covers lesson titles and summaries, section headings, key terms in sections,
+	 * concept-card terms, and TL;DR reads (title, hook, bullets, headings and key terms).
+	 */
+	type Hit =
+		| { kind: 'lesson' | 'section' | 'concept'; article: ArticleMeta; text: string; href: string; key: string; via?: string }
+		| { kind: 'tldr'; article?: undefined; text: string; href: string; key: string; via?: string; part?: string };
 	const LIMIT = 24;
 	const hits = $derived.by((): Hit[] => {
 		if (!q) return [];
@@ -64,6 +71,20 @@
 			if (`${c.term} ${c.question}`.toLowerCase().includes(q))
 				out.push({ kind: 'concept', article: a, text: c.term, href: resolve('/learn/[slug]', { slug: a.id }), key: `card-${c.id}` });
 		}
+		// TL;DR reads have no difficulty, so they only show when no level is picked.
+		if (level === 'all')
+			for (const b of briefs) {
+				const base = resolve('/learn/tldr/[slug]', { slug: b.id });
+				if (`${b.title} ${b.hook} ${b.tldr.join(' ')}`.toLowerCase().includes(q)) {
+					out.push({ kind: 'tldr', text: b.title, href: base, key: `tldr-${b.id}` });
+					continue;
+				}
+				const hit = (data.briefIndex[b.id] ?? [])
+					.filter((x) => x.text !== 'Sources')
+					.map((x) => ({ x, via: x.text.toLowerCase().includes(q) ? undefined : x.keywords.filter((k) => k.toLowerCase().includes(q)).sort((m, n) => m.length - n.length)[0] }))
+					.find(({ x, via }) => x.text.toLowerCase().includes(q) || via);
+				if (hit) out.push({ kind: 'tldr', text: b.title, href: `${base}#${hit.x.id}`, key: `tldr-${b.id}`, via: hit.via, part: hit.x.text });
+			}
 		return out.slice(0, LIMIT);
 	});
 
@@ -84,11 +105,12 @@
 	<header class="head">
 		<h1>Learn</h1>
 		<p class="tagline">Your path to expertise.</p>
+		<div class="switch"><LearnSwitch current="paths" /></div>
 		<div class="tools">
 			<label class="search">
 				<Icon name="search" size={20} stroke={2} />
-				<span class="visually-hidden">Search lessons, sections and concepts</span>
-				<input type="search" bind:value={query} placeholder="Search lessons, sections and concepts" autocomplete="off" />
+				<span class="visually-hidden">Search lessons, sections, concepts and TL;DR reads</span>
+				<input type="search" bind:value={query} placeholder="Search lessons, concepts and TL;DR" autocomplete="off" />
 			</label>
 			<div class="levels" role="radiogroup" aria-label="Difficulty">
 				<button type="button" role="radio" aria-checked={level === 'all'} class="all" class:on={level === 'all'} onclick={() => (level = 'all')}>All levels</button>
@@ -109,15 +131,16 @@
 				<ul>
 					{#each hits as h (h.key)}
 						{@const parts = mark(h.text)}
-						<li class="t-{h.article.track} lv-{h.article.level}">
+						<li class={h.article ? `t-${h.article.track} lv-${h.article.level}` : 'tldr-hit'}>
 							<a href={h.href}>
-								<span class="kind">{h.kind === 'lesson' ? 'Lesson' : h.kind === 'section' ? 'Section' : 'Concept card'}</span>
+								<span class="kind">{{ lesson: 'Lesson', section: 'Section', concept: 'Concept card', tldr: 'TL;DR' }[h.kind]}</span>
 								<span class="hit-text">{parts[0]}<mark>{parts[1]}</mark>{parts[2]}</span>
 								{#if h.via}
 									{@const v = mark(h.via)}
 									<span class="where">mentions <span class="kw">{v[0]}<mark>{v[1]}</mark>{v[2]}</span></span>
 								{/if}
-								{#if h.kind !== 'lesson'}<span class="where">in {h.article.title}</span>{/if}
+								{#if h.article && h.kind !== 'lesson'}<span class="where">in {h.article.title}</span>{/if}
+								{#if h.kind === 'tldr' && h.part}<span class="where">in “{h.part}”</span>{/if}
 							</a>
 						</li>
 					{/each}
@@ -188,6 +211,10 @@
 		font-size: 1.2rem;
 		font-weight: 700;
 		color: var(--ink-2);
+	}
+
+	.switch {
+		margin-top: 1rem;
 	}
 
 	.tools {
@@ -295,6 +322,10 @@
 		font-size: 0.88rem;
 		font-weight: 700;
 		color: var(--lv);
+	}
+
+	.tldr-hit {
+		--lv: var(--gold);
 	}
 
 	.hit-text {

@@ -20,6 +20,7 @@
 	import LessonBinder from '#lib/components/home/LessonBinder.svelte';
 	import Medals from '#lib/components/home/Medals.svelte';
 	import LessonMap from '#lib/components/home/LessonMap.svelte';
+	import FreshRead from '#lib/components/home/FreshRead.svelte';
 
 	/** The dashboard depends on the device's clock and stored progress, so it renders once both are known. */
 	let now = $state<Date | null>(null);
@@ -111,6 +112,7 @@
 
 		<div class="side" in:fade={{ duration: 200 }}>
 			<ThisWeek {now} />
+			<FreshRead />
 			{#if others.length}<ContinueList items={others} {now} />{/if}
 		</div>
 

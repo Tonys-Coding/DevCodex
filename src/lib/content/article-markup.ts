@@ -147,7 +147,7 @@ function addSections(code: string, articleId: string): string {
 export const articleMarkup: PreprocessorGroup = {
 	name: 'devcodex-article-markup',
 	markup({ content, filename }) {
-		if (!filename || !/[/\\]content[/\\]articles[/\\][^/\\]+\.svelte$/.test(filename)) return;
+		if (!filename || !/[/\\]content[/\\](?:articles|briefs)[/\\][^/\\]+\.svelte$/.test(filename)) return;
 		const articleId = filename.split(/[/\\]/).pop()!.replace(/\.svelte$/, '');
 		return { code: addSections(content.replace(/<table>[\s\S]*?<\/table>/g, labelTable), articleId) };
 	}
