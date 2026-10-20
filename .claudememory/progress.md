@@ -54,6 +54,8 @@
 
 - 2026-10-19: TL;DR built: Learn's Paths · TL;DR switch, list and reading pages, a Binder slot, Learn search over briefs, an RSS feed, and five sample reads. Read tracking counts toward the streak.
 
+- 2026-10-19: `npm run content:check` added: structure, cards and briefs checks plus running every JS/Python code sample. Fixed the two content bugs it found (js-event-loop checkpoint titles, two-pointer-pattern Sources).
+
 ## Next checkpoint
 
 The user commits and pushes the layers work by feature (from the commands given), then tests installs on devices.

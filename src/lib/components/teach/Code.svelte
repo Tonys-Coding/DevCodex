@@ -14,6 +14,11 @@
 		title?: string;
 		/** One sentence under the code saying what to notice. */
 		caption?: string;
+		/**
+		 * For `npm run content:check` only, ignored here: false marks a fragment that
+		 * can't run on its own, and "fails" a sample meant to end in an error.
+		 */
+		run?: false | 'fails';
 	} = $props();
 
 	const names: Record<CodeLang, string> = { js: 'JavaScript', py: 'Python', http: 'HTTP', text: 'Text' };

@@ -272,6 +272,7 @@ countdown(3)`}
 <Code
 	lang="js"
 	title="broken.js"
+	run="fails"
 	code={`function broken(n) {
   return n * broken(n - 1);   // no base case: nothing ever says "stop"
 }

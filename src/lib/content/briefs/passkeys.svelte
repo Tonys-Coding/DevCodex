@@ -44,6 +44,7 @@
 
 <Code
 	lang="js"
+	run={false}
 	code={`const assertion = await navigator.credentials.get({
   publicKey: {
     challenge,              // random bytes from your server

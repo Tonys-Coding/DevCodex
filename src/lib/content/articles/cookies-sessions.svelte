@@ -272,6 +272,7 @@ cookie: __Host-sid=k3v9Qp…; theme=dark`}
 <Code
 	lang="js"
 	title="server.js"
+	run={false}
 	code={`import { createServer } from 'node:http';
 import { randomBytes } from 'node:crypto';
 
@@ -367,6 +368,7 @@ server.listen(3000);
 <Code
 	lang="js"
 	title="signed-cookie.js"
+	run={false}
 	code={`import { createHmac, timingSafeEqual } from 'node:crypto';
 
 const SECRET = process.env.COOKIE_SECRET;   // long, random, kept on the server

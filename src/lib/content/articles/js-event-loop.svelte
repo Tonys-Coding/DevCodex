@@ -123,6 +123,7 @@ console.log("D");`;
 
 <Code
 	lang="js"
+	run={false}
 	code={`button.addEventListener("click", () => {
   // Runs for 3 seconds. Nothing else on the page can happen meanwhile.
   const end = Date.now() + 3000;
@@ -222,6 +223,7 @@ console.log("D");`;
 <Code
 	lang="js"
 	title="Event loop, simplified from the HTML Standard"
+	run={false}
 	code={`while (true) {
   const queue = chooseTaskQueue();   // implementation-defined priority
   if (queue) runTask(queue.shift()); // exactly one task
@@ -250,7 +252,7 @@ console.log("D");`;
 
 <Quiz
 	variant="checkpoint"
-	title="Going deeper checkpoint"
+	title="Going deeper checkpoint 1"
 	questions={[
 		{
 			prompt: 'One task has just finished. What runs before the loop takes the next task?',
@@ -299,7 +301,7 @@ console.log(8);`}
 />
 
 <Quiz
-	title="Predict it"
+	title="Going deeper checkpoint 2"
 	questions={[
 		{
 			prompt: 'What does the snippet above log?',
@@ -380,6 +382,7 @@ async function processAll(items) {
 
 <Code
 	lang="js"
+	run={false}
 	code={`button.addEventListener('click', () => {
   Promise.resolve().then(() => console.log('micro 1'));
   console.log('listener 1');
@@ -407,6 +410,7 @@ button.addEventListener('click', () => {
 
 <Code
 	lang="js"
+	run={false}
 	code={`function spinMicro() { queueMicrotask(spinMicro); }
 spinMicro(); // the tab never paints or handles input again
 
@@ -423,6 +427,7 @@ spinTask();  // wasteful, but rendering and input still get turns`}
 
 <Code
 	lang="js"
+	run={false}
 	code={`// Forced layout on every iteration: write, then read.
 for (const el of items) {
   el.style.width = box.offsetWidth + 'px';

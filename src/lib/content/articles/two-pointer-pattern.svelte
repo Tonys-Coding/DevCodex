@@ -399,4 +399,12 @@
 		}
 	]}
 />
+
+<h2>Sources and further reading</h2>
+<ul>
+	<li><a href="https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/" rel="external">LeetCode 167: Two Sum II, input array is sorted</a></li>
+	<li><a href="https://leetcode.com/problems/container-with-most-water/" rel="external">LeetCode 11: Container With Most Water</a></li>
+	<li><a href="https://leetcode.com/problems/3sum/" rel="external">LeetCode 15: 3Sum</a></li>
+	<li><a href="https://en.wikipedia.org/wiki/3SUM" rel="external">Wikipedia: 3SUM, its quadratic algorithm and lower bounds</a></li>
+</ul>
 </Layer>

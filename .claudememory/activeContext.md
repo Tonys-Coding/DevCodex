@@ -93,6 +93,10 @@ Phase 2 is built and verified. **Binder (direction C)** is the app. On 2026-10-1
 - `progress.data.briefs[id]` records a brief as read once its end is in view at least 40 s after opening. It counts as a streak day; no cards.
 - Five samples: python-t-strings, regex-outage, passkeys, floating-point, monolith-first. Code was run in Python 3.14 and Node. Writing rules are in PRODUCT.md "TL;DR reads"; visuals are in DESIGN.md "TL;DR".
 
+## Content check (2026-10-19)
+
+- `npm run content:check` (see techContext.md) checks lesson and TL;DR structure, card wiring, and runs every JS/Python sample. 12 fragments are marked `run={false}` and 2 error demos `run="fails"`. It found two content bugs, now fixed: js-event-loop’s Going deeper checks were titled “Going deeper checkpoint” and “Predict it” (now checkpoint 1 and 2, which resets those two quiz records), and two-pointer-pattern had no Sources section.
+
 ## Known quirks
 
 - CI runs `npm ci` from scratch. A stale local `.svelte-kit/` can hide type errors, so clear it before trusting a local `npm run check`. `@types/node` is a direct dev dependency for vite.config.ts.

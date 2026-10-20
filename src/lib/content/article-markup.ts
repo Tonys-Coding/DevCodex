@@ -72,7 +72,7 @@ function layerAt(code: string): (pos: number) => Depth {
  * Reading size of a stretch of article source. Tags are dropped, a code sample counts
  * as six words a line (code reads slowly), and quiz prompts and options count as text.
  */
-const wordCount = (html: string) =>
+export const wordCount = (html: string) =>
 	html
 		.replace(/<Code\b[\s\S]*?code=\{`([\s\S]*?)`\}([\s\S]*?)\/>/g, (_, c: string, rest: string) =>
 			' w'.repeat(c.split('\n').length * 6) + ' ' + (rest.match(/caption="([^"]*)"/)?.[1] ?? '')

@@ -435,6 +435,7 @@ export function handle(req, res, next) {
 <Code
 	lang="js"
 	title="no-cors, as Chrome behaves"
+	run={false}
 	code={`await fetch(api, { mode: 'no-cors', method: 'PUT' });
 // TypeError: Failed to execute 'fetch' on 'Window': 'PUT' is unsupported in no-cors mode.
 

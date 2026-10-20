@@ -399,6 +399,7 @@ console.log(u.name);        // "Grace"`}
 
 <Code
 	lang="py"
+	run="fails"
 	code={`t = ([1], 2)
 t[0] = [9]        # TypeError: the tuple itself can't change
 t[0].append(9)    # allowed: the list inside it can

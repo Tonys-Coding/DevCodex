@@ -413,6 +413,7 @@ content-length: 312
 
 <Code
 	lang="js"
+	run={false}
 	code={`const [nav] = performance.getEntriesByType("navigation");
 console.table({
   dns: nav.domainLookupEnd - nav.domainLookupStart,

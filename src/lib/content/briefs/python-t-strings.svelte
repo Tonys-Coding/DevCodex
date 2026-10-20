@@ -37,6 +37,7 @@ greeting.strings                                 # ('<p>Hello, ', '!</p>')
 
 <Code
 	lang="py"
+	run={false}
 	code={`from string.templatelib import Template, Interpolation
 from html import escape
 

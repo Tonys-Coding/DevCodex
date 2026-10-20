@@ -366,6 +366,7 @@ etag: "v7-3f9a"`}
 <Code
 	lang="js"
 	title="server.js (Express)"
+	run={false}
 	code={`import express from 'express';
 const app = express();
 
