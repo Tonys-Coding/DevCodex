@@ -28,6 +28,7 @@ Learners may read a lesson in a longer desktop session or review a single concep
 - Learn is a grid of topics, each with its own page (lessons, progress, concept cards, practice, shorts, achievement), so the catalogue can grow to many topics.
 - Every lesson has two mid-lesson checkpoints (one question each) besides its quick check. Lessons can name prerequisites (`builds` in the catalog).
 - Packs are earned, not clicked: a lesson's pack opens only after most sections are read past, real time is spent (counted only while the tab is visible and the reader is active), and its quick checks are passed. All checks run on the device; there is no server to cheat against, so this is a guardrail for honest learners, not anti-tampering.
+- TL;DR is Learn's second view (Paths · TL;DR): short, ungrouped reads of about five minutes, newest first, with an RSS feed. The Binder shows the newest unread one. Reading one to the end counts as a learning day for the streak, but it earns no cards and doesn't count toward the weekly lesson goal.
 - The short feed uses swipeable visual explainers and engineering scenarios, not video at launch.
 - Initial topics span web fundamentals, programming concepts, and basic data structures.
 - Coding practice is a smaller section: write and run Python (Pyodide) and JavaScript (Web Worker) solutions in the browser against tests; problems are written in our own words and link out to LeetCode/NeetCode.
@@ -59,6 +60,27 @@ A lesson's `builds` lists the lessons it relies on, and its `assumes` line says 
 Finishing a layer (its sections read, its checks passed, and the Core already finished) collects its bonus cards: Going deeper cards are level 2, Under the hood cards are level 3 and rare. The learner's depth preference (onboarding and the You page) decides which layers open by default; every layer can be opened or closed in place.
 
 All layers use structure: tables, bullet and numbered lists, highlighted code (`teach/Code.svelte`), notes (`tone`: tip, warn, plain). Nothing missing, redundant or unverified: run every code sample and check every claim.
+
+## TL;DR reads
+
+Short, ungrouped reads for glancing through. Each one is a `BriefMeta` in `src/lib/content/briefs.ts` plus a body in `src/lib/content/briefs/<id>.svelte`.
+
+- **Kinds:**
+  - **What's new:** a recent release or standard, explained. It needs a `checked` date.
+  - **Small concept:** an idea too small for a lesson.
+  - **Incident story:** a real outage retold, with what changed afterwards.
+  - **How it works:** everyday tech, opened up.
+  - **Debate:** a trade-off with a clear answer, not "it depends".
+- **Shape:**
+  - a one-line `hook`
+  - exactly three TL;DR bullets, which must stand alone, because many readers stop there
+  - a body of about 800 words at most, with plain-language h2 sections and one code sample, table or diagram
+  - a "Why it matters to you" section
+  - sources
+  - `deeper` names a full lesson when one exists
+- **Voice:** Core-level plain words, as in lessons. Define any term on first use.
+- **Accuracy:** every code sample is run, and numbers come from a measurement or a cited source. Summaries are written in our own words; never copy or auto-generate from news feeds.
+- **Pace:** one or two a week, mostly pieces that stay true. Time-sensitive pieces carry their `checked` date.
 
 ## Brand Commitments
 

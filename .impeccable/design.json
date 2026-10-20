@@ -542,6 +542,14 @@
 			"description": "A lesson's concept difficulty, boxless: 1 to 3 pips and Easy, Medium or Hard in the level colour. Pairs with a 2px level-colour frame around the lesson.",
 			"html": "<span class=\"ds-level\"><span class=\"ds-pips\"><i class=\"on\"></i><i></i><i></i></span>Easy</span>",
 			"css": ".ds-level{display:inline-flex;align-items:center;gap:.45rem;color:#86e06f;font:800 .88rem/1.2 'Atkinson Hyperlegible Next Variable',system-ui,sans-serif;white-space:nowrap}.ds-grade{font-weight:600;opacity:.85}.ds-pips{display:inline-flex;align-items:flex-end;gap:2px}.ds-pips i{width:4px;border-radius:3px;background:currentColor;opacity:.3}.ds-pips i:nth-child(1){height:7px}.ds-pips i:nth-child(2){height:10px}.ds-pips i:nth-child(3){height:13px}.ds-pips i.on{opacity:1}"
+		},
+		{
+			"name": "TL;DR Summary",
+			"kind": "block",
+			"refersTo": "tldr-summary",
+			"description": "The three-bullet summary that opens every TL;DR read: a gold mono label and short gold dashes, set between 2px gold rules, never in a box.",
+			"html": "<section class=\"ds-tldr\"><p class=\"ds-tldr-label\">TL;DR</p><ul><li>One idea a reader can stop at.</li><li>A second, standing on its own.</li><li>A third, with the takeaway.</li></ul></section>",
+			"css": ".ds-tldr{display:grid;gap:.5rem;padding:1.1rem 0 1.2rem;border-block:2px solid #ffc94a;color:#f5f2f9;font:400 1.12rem/1.5 'Atkinson Hyperlegible Next Variable',system-ui,sans-serif}.ds-tldr-label{font:700 .95rem/1 'JetBrains Mono Variable',ui-monospace,monospace;letter-spacing:.08em;color:#ffc94a}.ds-tldr ul{display:grid;gap:.55rem;margin:0;padding:0;list-style:none}.ds-tldr li{position:relative;padding-left:1.3rem}.ds-tldr li::before{content:'';position:absolute;left:0;top:.66em;width:.55rem;height:3px;border-radius:3px;background:#ffc94a}"
 		}
 	],
 	"narrative": {

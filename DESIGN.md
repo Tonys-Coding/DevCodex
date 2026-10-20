@@ -319,6 +319,14 @@ Lit elements fill with the track colour, and message chips are ink pills with da
 - **Side column:** the topic's achievement medal with progress, related practice problems with difficulty and solved state, and how many shorts come from the topic.
 - **Adding a topic:** add it to `tracks` in the catalog and to the `TrackId` type, give it a `.t-<id>` colour pair in app.css and line art in `trackArt` (cardArt.ts), and an achievement title in achievements.ts. Without its own colour, a topic falls back to gold.
 
+### TL;DR (`/learn/tldr`)
+- **Paths · TL;DR switch** (`app/LearnSwitch.svelte`): two display-font text tabs under the Learn header, the current one underlined in gold, with "n unread" in gold beside TL;DR. TL;DR is a view of Learn, not a nav tab.
+- **List:** a kind filter as text tabs (gold underline). The newest read leads between two 2px gold rules: kind, date and minutes, a large title, the hook, the three TL;DR bullets (short gold dashes, under a gold mono "TL;DR" label) and a gold "Read it in n minutes" button. The rest is a plain list, in two columns from 900px: kind in gold with its icon, date, minutes, "Read" in teal, then title and hook. Read titles dim to soft ink. "Follow by RSS" links the feed (`/learn/tldr/feed.xml`).
+- **Kind icons:** spark (What's new), info (Small concept), flame (Incident story), search (How it works), flip (Debate). Kinds have no colours of their own; TL;DR's accent is gold.
+- **Reading page:** a back link, the meta row (with "Facts checked …" for time-sensitive pieces), a large title, the hook, then the TL;DR between gold rules ending "That's the short version. The rest takes about n minutes." The body is a 46rem prose column. At the end, a teal "Read" line and, when a full lesson exists, a "Go deeper" lesson link framed in its level colour. From 1100px a sticky "More TL;DR" column lists three more reads, unread first.
+- **Read rule:** a brief counts as read once its end has been in view at least 40 seconds after opening.
+- **Search:** Learn search also finds TL;DR reads by title, hook, bullets, section headings and key terms, labelled "TL;DR" in gold. They are left out when a difficulty is picked.
+
 ### Article reading aids
 - **Cover:** a back link to the article's topic page (the topic name in the tags links there too), "Builds on" links (plus a gold "New to this? Start with …" if the prerequisite isn't finished), and "Earn the pack:" with the three steps, ticked as they're met. On phones the summary clamps to three lines with More, which also reveals what the lesson assumes.
 - **While reading:** a 3px gold progress line under the header. Below 1100px, a line under it shows the current section and "Pack n/3"; tapping it opens a bottom sheet with the contents and the pack steps. From 1100px, the rail shows "Your pack" (live) above "On this page".
@@ -338,6 +346,7 @@ The dashboard leads with one next step and keeps everything else quieter. It ren
 - **Key numbers:** links (Lessons → Learn, Cards → Trivia, Problems → Practice, Streak → This week, Minutes → You), as one swipeable row on phones.
 - **Hero:** the single loud, track-filled surface. It resumes a lesson read in the last three days (where you stopped, percent read, a progress bar) or offers the next unstarted lesson on the path, easiest concepts first.
 - **This week:** Monday to Sunday dots (filled ember when learned, ringed for today, dashed for the future), the streak with an evening "learn today to keep it" nudge, and a gold weekly-goal ring with a stepper.
+- **TL;DR slot:** under This week, after a 2px gold rule: a gold mono "TL;DR" label, then the newest unread read (kind, date, minutes, title, hook), with "Read it" and "n unread".
 - **Also in progress:** other open lessons as hairline rows, with where you stopped, when, a level-colour progress line, Resume, and Remove.
 - **Your binder:** one row of clear pockets per track, which also serves as track progress. A finished lesson is a mini card (level frame, pips, art, gold date stamp) and slides in with a gold glow the first time it's seen. Empty pockets show the lesson's name; started ones get a level-colour edge, a progress line and "Resume →"; on hover or focus (and always on touch) the pocket shows its action. A pip legend spells out the difficulties.
 - **Card of the day:** one unlocked card, face down until "Reveal the answer", then Knew it / Not yet grades it like Trivia. Below it is a sized invitation: "Review 10 cards · about 4 minutes".

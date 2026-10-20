@@ -85,6 +85,14 @@ Phase 2 is built and verified. **Binder (direction C)** is the app. On 2026-10-1
 - Article back links and the dashboard binder's track headings point at topic pages. `/learn#topic-x` redirects.
 - Adding a topic means: tracks plus TrackId, a `.t-<id>` colour, `trackArt`, and an achievement title. A topic without a colour falls back to gold.
 
+## TL;DR (2026-10-19, approved)
+
+- Short, ungrouped reads of about five minutes, at `/learn/tldr` (list) and `/learn/tldr/[slug]`. A Paths · TL;DR switch (`app/LearnSwitch.svelte`) sits under the Learn header, and the Binder side column has a "TL;DR" slot (`home/FreshRead.svelte`). There is no new nav tab.
+- Data is in `src/lib/content/briefs.ts`; bodies are in `src/lib/content/briefs/*.svelte`, lazy-loaded, with the article-markup preprocessor applied. `brief-index.server.ts` indexes headings and key terms for Learn search; briefs are left out when a difficulty filter is on.
+- The RSS feed `/learn/tldr/feed.xml` is a prerendered `+server.ts`. Its links are built from the request path, because `resolve()` is relative while prerendering.
+- `progress.data.briefs[id]` records a brief as read once its end is in view at least 40 s after opening. It counts as a streak day; no cards.
+- Five samples: python-t-strings, regex-outage, passkeys, floating-point, monolith-first. Code was run in Python 3.14 and Node. Writing rules are in PRODUCT.md "TL;DR reads"; visuals are in DESIGN.md "TL;DR".
+
 ## Known quirks
 
 - CI runs `npm ci` from scratch. A stale local `.svelte-kit/` can hide type errors, so clear it before trusting a local `npm run check`. `@types/node` is a direct dev dependency for vite.config.ts.
