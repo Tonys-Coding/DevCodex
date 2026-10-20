@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import type { ArticleMeta, Track } from '../../content/types';
-	import { trackArt } from '../cardArt';
 	import { progress } from '../../progress/progress.svelte';
+	import { isoScenes, frames } from '../isoScenes';
+	import IsoArt from '../IsoArt.svelte';
 	import Icon from '../Icon.svelte';
 
 	/**
-	 * A topic on the Learn page, drawn as a landscape binder card in quiet colours.
-	 * It links to the topic's own page, so the Learn grid scales to any number of topics.
+	 * A topic on the Learn page: an isometric banner across the top, then the title,
+	 * blurb, progress and next step. It links to the topic's own page, so the Learn grid
+	 * scales to any number of topics.
 	 */
 	let {
 		track,
@@ -38,8 +40,8 @@
 	aria-describedby="topic-desc-{track.id}"
 >
 	<span class="face">
-		<span class="art" aria-hidden="true">
-			<svg viewBox="0 0 120 64">{@html trackArt[track.id] ?? ''}</svg>
+		<span class="banner" aria-hidden="true">
+			<span class="art"><IsoArt scene={isoScenes[track.id] ?? []} frame={frames.topic} /></span>
 		</span>
 		<span class="body">
 			<span class="head">
@@ -71,7 +73,7 @@
 </a>
 
 <style>
-	/* Same build as the binder's concept card (frame, face, art window, footer), turned sideways and quietened. */
+	/* Same build as the binder's concept card (frame, face, art window, footer), quietened. */
 	.topic {
 		display: block;
 		width: 100%;
@@ -102,45 +104,34 @@
 	}
 
 	.face {
-		display: grid;
-		grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-		gap: 1rem;
+		display: flex;
+		flex-direction: column;
 		height: 100%;
-		padding: 0.9rem;
 		border-radius: 10px;
 		background: var(--panel);
+		overflow: hidden;
 	}
 
-	.art {
-		display: grid;
-		place-items: center;
-		border-radius: 8px;
-		background: color-mix(in srgb, var(--t) 9%, var(--ground));
-	}
-
-	.art svg {
-		width: 82%;
-		overflow: visible;
-		fill: none;
-		stroke: color-mix(in srgb, var(--t) 70%, var(--ink-2));
-		stroke-width: 3.5;
-		stroke-linecap: round;
-		stroke-linejoin: round;
-	}
-
-	.art :global(.hot) {
-		fill: color-mix(in srgb, var(--t) 70%, var(--ink-2));
-	}
-
-	.art :global(.cut) {
-		stroke: var(--panel);
+	/* The banner: a faint isometric model of the topic on a soft glow of its colour. */
+	.banner {
+		position: relative;
+		--art-ground: color-mix(in srgb, var(--t) 6%, var(--ground));
+		display: block;
+		aspect-ratio: 16 / 7;
+		overflow: hidden;
+		background:
+			radial-gradient(ellipse at 50% 60%, color-mix(in srgb, var(--t) 14%, transparent), transparent 70%),
+			var(--art-ground);
+		opacity: 0.92;
 	}
 
 	.body {
 		display: flex;
 		flex-direction: column;
+		flex: 1;
 		gap: 0.5rem;
 		min-width: 0;
+		padding: 0.9rem 1rem 1rem;
 	}
 
 	.head {
@@ -178,6 +169,7 @@
 		display: grid;
 		grid-auto-flow: column;
 		gap: 4px;
+		margin-top: 0.2rem;
 	}
 
 	.segs i {
@@ -202,6 +194,7 @@
 		align-items: center;
 		gap: 0.5rem 1rem;
 		margin-top: auto;
+		padding-top: 0.2rem;
 	}
 
 	.foot .meta-row {
@@ -225,20 +218,21 @@
 		transform: translateX(3px);
 	}
 
-	/* Phones keep the sideways card: a narrower art window and a smaller title. */
+	/* The picture fills the banner's fixed shape instead of stretching it. */
+	.art {
+		position: absolute;
+		inset: 1.1rem 2.2rem 0.8rem;
+		display: block;
+	}
+
+	/* Phones: a shorter banner and a smaller title. */
 	@media (max-width: 480px) {
-		.face {
-			grid-template-columns: minmax(0, 0.6fr) minmax(0, 1.4fr);
-			gap: 0.8rem;
-			padding: 0.75rem;
+		.banner {
+			aspect-ratio: 5 / 2;
 		}
 
 		.title {
 			font-size: 1.2rem;
-		}
-
-		.blurb {
-			display: none;
 		}
 	}
 

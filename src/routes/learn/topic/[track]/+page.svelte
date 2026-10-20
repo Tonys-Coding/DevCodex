@@ -7,7 +7,8 @@
 	import { levels } from '#lib/content/levels.js';
 	import { progress } from '#lib/progress/progress.svelte.js';
 	import { achievements, earned } from '#lib/progress/achievements.js';
-	import { trackArt } from '#lib/components/cardArt.js';
+	import IsoArt from '#lib/components/IsoArt.svelte';
+	import { isoScenes, frames } from '#lib/components/isoScenes.js';
 	import Icon from '#lib/components/Icon.svelte';
 	import LevelTag from '#lib/components/app/LevelTag.svelte';
 	import LessonCard from '#lib/components/app/LessonCard.svelte';
@@ -68,7 +69,7 @@
 
 	<!-- Header: the topic's identity, its progress, and the one next step. -->
 	<header class="head">
-		<div class="art" aria-hidden="true"><svg viewBox="0 0 120 64">{@html trackArt[track.id] ?? ''}</svg></div>
+		<div class="art" aria-hidden="true"><span class="art-fit"><IsoArt scene={isoScenes[track.id] ?? []} frame={frames.header} /></span></div>
 		<div class="intro">
 			<h1>{track.title}</h1>
 			<p class="blurb">{track.blurb}</p>
@@ -242,31 +243,22 @@
 	}
 
 	.art {
-		display: grid;
-		place-items: center;
+		--art-ground: color-mix(in srgb, var(--t) 6%, var(--ground));
+		position: relative;
 		aspect-ratio: 2 / 1;
 		max-height: 9rem;
 		border-radius: 14px;
-		background: color-mix(in srgb, var(--t) 10%, var(--ground));
+		overflow: hidden;
+		background:
+			radial-gradient(ellipse at 50% 60%, color-mix(in srgb, var(--t) 14%, transparent), transparent 70%),
+			var(--art-ground);
 	}
 
-	.art svg {
-		height: 70%;
-		width: auto;
-		overflow: visible;
-		fill: none;
-		stroke: color-mix(in srgb, var(--t) 72%, var(--ink-2));
-		stroke-width: 3.5;
-		stroke-linecap: round;
-		stroke-linejoin: round;
-	}
-
-	.art :global(.hot) {
-		fill: color-mix(in srgb, var(--t) 72%, var(--ink-2));
-	}
-
-	.art :global(.cut) {
-		stroke: var(--panel);
+	/* The picture fills the art box's fixed shape instead of stretching it. */
+	.art-fit {
+		position: absolute;
+		inset: 0.6rem 0.8rem;
+		display: block;
 	}
 
 	h1 {

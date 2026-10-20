@@ -87,10 +87,3 @@ export const cardArt: Record<string, string> = {
 	'validate-bst': '<circle cx="60" cy="10" r="6"/><circle cx="34" cy="30" r="6"/><circle class="hot" cx="52" cy="52" r="6"/><path d="M55 14 39 26M38 35l10 12"/><path d="M80 24l12 12M92 24 80 36"/>',
 	'red-black': '<circle class="hot" cx="60" cy="12" r="7"/><circle cx="34" cy="34" r="7"/><circle class="hot" cx="86" cy="34" r="7"/><circle cx="20" cy="56" r="5"/><circle cx="48" cy="56" r="5"/><path d="M54 17 39 29M66 17l15 12M30 40l-7 11M38 40l7 11"/><path d="M98 50a10 10 0 1 1-2-8M98 40v4h-4"/>'
 };
-
-/** Art for the topic cards on the Learn page, on the same 120 × 64 grid. */
-export const trackArt: Record<string, string> = {
-	web: '<rect x="8" y="12" width="46" height="40" rx="5"/><path d="M8 22h46"/><path d="M15 32h28M15 40h20"/><path d="M60 32h16m-4-4 4 4-4 4"/><rect class="hot" x="82" y="16" width="30" height="32" rx="4"/><path class="cut" d="M88 26h18M88 34h18M88 42h10"/>',
-	programming: '<path d="M26 10c-9 0-9 7-9 13s-4 9-9 9c5 0 9 3 9 9s0 13 9 13"/><path d="M94 10c9 0 9 7 9 13s4 9 9 9c-5 0-9 3-9 9s0 13-9 13"/><rect x="36" y="14" width="48" height="9" rx="3"/><rect x="36" y="27" width="48" height="9" rx="3"/><rect class="hot" x="36" y="40" width="48" height="9" rx="3"/>',
-	structures: '<circle class="hot" cx="60" cy="11" r="6"/><circle cx="32" cy="33" r="6"/><circle cx="88" cy="33" r="6"/><circle cx="18" cy="54" r="5"/><circle cx="46" cy="54" r="5"/><circle cx="102" cy="54" r="5"/><path d="M55 15 37 29M65 15l18 14M28 38l-7 11M36 38l7 11M91 38l8 11"/>'
-};
