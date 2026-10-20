@@ -55,6 +55,8 @@
 			wire: 'read → style → place → paint'
 		}
 	];
+	import Layer from '../../components/teach/Layer.svelte';
+	import CorePack from '../../components/teach/CorePack.svelte';
 </script>
 
 <p>
@@ -329,3 +331,210 @@ content-length: 312
 		}
 	]}
 />
+
+<CorePack />
+
+<Layer depth="deeper" summary="Round trips, HTTP/1.1 versus HTTP/2 and HTTP/3, what blocks the first paint, and measuring a real page load with Navigation Timing.">
+<h2>Connections, round trip by round trip</h2>
+<p>
+	A <strong>round trip</strong> (RTT) is the time for a message to reach the server and a reply to come back: a few milliseconds nearby, 100 ms or
+	more across an ocean. Before a browser can send its first request on a new connection, it spends whole round trips just setting up.
+</p>
+
+<div class="table-wrap">
+	<table>
+		<thead><tr><th scope="col">Step</th><th scope="col">Messages</th><th scope="col">Round trips before the request</th></tr></thead>
+		<tbody>
+			<tr><th scope="row">TCP handshake</th><td><code>SYN</code> → <code>SYN-ACK</code> → <code>ACK</code></td><td>1</td></tr>
+			<tr><th scope="row">TLS 1.3 handshake</th><td><code>ClientHello</code> → <code>ServerHello</code> … <code>Finished</code></td><td>1 more (TLS 1.2 needed 2)</td></tr>
+			<tr><th scope="row">HTTP request</th><td><code>GET /</code> → response</td><td>The request finally goes out</td></tr>
+		</tbody>
+	</table>
+</div>
+
+<p>
+	So a fresh HTTPS connection over TCP and TLS 1.3 costs two round trips before the first byte of the request is sent. At 80 ms per round trip
+	that is 160 ms of pure waiting, which is why browsers keep connections open and reuse them for every file from the same host.
+</p>
+
+<h2>HTTP/1.1, HTTP/2 and HTTP/3</h2>
+<p>The messages mean the same thing in every version. What changed is how they travel.</p>
+
+<div class="table-wrap">
+	<table>
+		<thead><tr><th scope="col">Version</th><th scope="col">Runs on</th><th scope="col">Requests per connection</th><th scope="col">Main improvement</th></tr></thead>
+		<tbody>
+			<tr><th scope="row">HTTP/1.1</th><td>TCP</td><td>One at a time</td><td>Keep-alive: reuse a connection. Browsers open about six per host to download in parallel</td></tr>
+			<tr><th scope="row">HTTP/2</th><td>TCP</td><td>Many at once, as interleaved streams</td><td>Binary framing, multiplexing and header compression (HPACK) on a single connection</td></tr>
+			<tr><th scope="row">HTTP/3</th><td>QUIC, over UDP</td><td>Many at once, independent streams</td><td>A lost packet stalls only its own stream, and connection plus encryption set-up takes one round trip</td></tr>
+		</tbody>
+	</table>
+</div>
+
+<p>
+	A browser learns that a server speaks HTTP/3 from an <code>Alt-Svc</code> response header or from an HTTPS record in DNS, then tries it on later
+	connections. In DevTools, right-click the Network table’s column headers and turn on <strong>Protocol</strong> to see <code>h2</code> or
+	<code>h3</code> for each request.
+</p>
+
+<Quiz
+	variant="checkpoint"
+	title="Going deeper checkpoint 1"
+	questions={[
+		{
+			prompt: 'A brand-new HTTPS connection uses TCP and TLS 1.3. How many round trips pass before the first request byte is sent?',
+			options: ['One', 'Two', 'Three'],
+			answer: 1,
+			explain: 'One for the TCP handshake and one for TLS 1.3. With TLS 1.2 it was three.'
+		}
+	]}
+/>
+
+<h2>The critical rendering path</h2>
+<p>The Core said the browser reads, styles, places and paints. In practice those steps overlap, and some files hold everything up:</p>
+<ol>
+	<li><strong>HTML is parsed</strong> into the DOM as it streams in. A <strong>preload scanner</strong> races ahead to start downloading files the HTML mentions.</li>
+	<li><strong>CSS is render-blocking.</strong> Nothing is painted until the stylesheets in the <code>&lt;head&gt;</code> have arrived and been parsed into the CSSOM.</li>
+	<li><strong>Classic scripts are parser-blocking.</strong> A plain <code>&lt;script src&gt;</code> stops HTML parsing until it has downloaded and run.</li>
+	<li>Style, layout and paint run once the DOM and CSSOM are ready enough, and the first content appears.</li>
+</ol>
+
+<Code
+	lang="text"
+	title="Three ways to load a script"
+	code={`\x3Cscript src="app.js">\x3C/script>        <!-- stops parsing until downloaded and run -->
+\x3Cscript src="app.js" defer>\x3C/script>  <!-- downloads alongside, runs after parsing, in order -->
+\x3Cscript src="app.js" async>\x3C/script>  <!-- downloads alongside, runs as soon as it arrives -->`}
+	caption="defer suits most app code; async suits independent scripts such as analytics."
+/>
+
+<h2>Measuring a real page load</h2>
+<p>Every phase from the Core is recorded by the browser. The Navigation Timing API exposes them to your own code:</p>
+
+<Code
+	lang="js"
+	code={`const [nav] = performance.getEntriesByType("navigation");
+console.table({
+  dns: nav.domainLookupEnd - nav.domainLookupStart,
+  connect: nav.connectEnd - nav.connectStart,              // includes TLS
+  tls: nav.secureConnectionStart ? nav.connectEnd - nav.secureConnectionStart : 0,
+  waiting: nav.responseStart - nav.requestStart,           // time to first byte
+  download: nav.responseEnd - nav.responseStart,
+});`}
+	caption="Run it in the console on any page. Times are in milliseconds; a reused connection shows 0 for DNS and connect."
+/>
+
+<Quiz
+	variant="checkpoint"
+	title="Going deeper checkpoint 2"
+	questions={[
+		{
+			prompt: 'Which script tag downloads alongside parsing and runs only after the HTML is parsed, in order?',
+			options: ['<script src>', '<script src defer>', '<script src async>'],
+			answer: 1,
+			explain: 'defer keeps document order and waits for parsing to finish. async runs whenever it arrives.'
+		}
+	]}
+/>
+</Layer>
+
+<Layer depth="hood" summary="DNS from the stub resolver to authoritative servers, the TLS 1.3 handshake message by message, 0-RTT, and why HTTP/3 moved to QUIC.">
+<h2>DNS, all the way down</h2>
+<p>The Core’s “phone book” is really a chain of servers, each knowing where to ask next:</p>
+<ol>
+	<li>Your operating system’s <strong>stub resolver</strong> checks its cache, then asks a <strong>recursive resolver</strong> (your ISP’s, or a public one such as 1.1.1.1 or 8.8.8.8).</li>
+	<li>On a cache miss, the recursive resolver asks a <strong>root server</strong>, which points it at the servers for <code>.com</code>.</li>
+	<li>The <strong>TLD servers</strong> for <code>.com</code> point it at the domain’s <strong>authoritative servers</strong>.</li>
+	<li>The authoritative server answers with the records, each carrying a <strong>TTL</strong>: how many seconds everyone may cache the answer.</li>
+</ol>
+
+<div class="table-wrap">
+	<table>
+		<thead><tr><th scope="col">Record</th><th scope="col">Holds</th></tr></thead>
+		<tbody>
+			<tr><th scope="row"><code>A</code> / <code>AAAA</code></th><td>An IPv4 / IPv6 address</td></tr>
+			<tr><th scope="row"><code>CNAME</code></th><td>“This name is an alias for that name”</td></tr>
+			<tr><th scope="row"><code>HTTPS</code></th><td>Connection hints, such as which HTTP versions the server supports</td></tr>
+		</tbody>
+	</table>
+</div>
+
+<p>
+	There are 13 named root server identities, <code>a</code> to <code>m</code>, but each is anycast from many sites worldwide, so “the root” is
+	hundreds of machines. Classic DNS travels unencrypted over UDP port 53; DNS over HTTPS and DNS over TLS encrypt the questions.
+</p>
+
+<h2>Inside the TLS 1.3 handshake</h2>
+<ol>
+	<li><strong>ClientHello</strong>: the cipher suites the browser supports, a key share (for example X25519), and the hostname it wants, in the <strong>SNI</strong> field.</li>
+	<li><strong>ServerHello</strong>: the server’s chosen cipher and key share. Both sides can now derive the same secret keys, and everything after this is encrypted.</li>
+	<li>The server sends its <strong>certificate</strong> chain, a <strong>CertificateVerify</strong> signature proving it holds the certificate’s private key, and <strong>Finished</strong>.</li>
+	<li>The browser checks the chain up to a root it trusts, that the certificate covers the hostname and is in date, then sends its own <strong>Finished</strong>, together with the first request.</li>
+</ol>
+<p>
+	On a return visit, a pre-shared key from the last session allows <strong>0-RTT</strong>: the request rides along with the very first message.
+	The catch is that 0-RTT data can be replayed by an attacker, so servers should only accept it for requests that are safe to repeat. The SNI
+	hostname in step 1 is still sent in the clear; <strong>Encrypted Client Hello</strong> (ECH) hides it where both browser and server support it.
+</p>
+
+<h2>QUIC: why HTTP/3 left TCP</h2>
+<ul>
+	<li><strong>Head-of-line blocking.</strong> TCP delivers bytes strictly in order, so one lost packet stalls every HTTP/2 stream sharing the connection. QUIC streams are independent: a loss stalls only its own stream.</li>
+	<li><strong>Faster set-up.</strong> QUIC folds the transport and TLS 1.3 handshakes into one, so a new connection costs one round trip, and resumption can be 0-RTT.</li>
+	<li><strong>Connection migration.</strong> A QUIC connection is identified by a connection ID, not by IP address and port, so it can survive a switch from Wi-Fi to mobile data.</li>
+	<li><strong>Built on UDP</strong>, so it can be deployed without changing operating systems or middleboxes that only understand TCP.</li>
+</ul>
+
+<h2>Recap: the whole trip</h2>
+<ol>
+	<li>DNS resolves through stub, recursive, root, TLD and authoritative servers, cached by TTL at every step.</li>
+	<li>TCP plus TLS 1.3 costs two round trips before a request; QUIC costs one.</li>
+	<li>HTTP/2 multiplexes on one TCP connection; HTTP/3 moves to QUIC to avoid TCP head-of-line blocking.</li>
+	<li>CSS blocks rendering and classic scripts block parsing; <code>defer</code> and <code>async</code> change that.</li>
+</ol>
+
+<Quiz
+	title="Under the hood check"
+	questions={[
+		{
+			prompt: 'Which server finally answers with the record for example.com?',
+			options: ['A root server', 'The .com TLD server', 'The domain’s authoritative server'],
+			answer: 2,
+			explain: 'Roots point to TLD servers, TLD servers point to the authoritative servers, and those hold the actual records.'
+		},
+		{
+			prompt: 'In TLS 1.3, from which point is the handshake encrypted?',
+			options: ['From the ClientHello', 'After the ServerHello', 'Only after both Finished messages'],
+			answer: 1,
+			explain: 'Once both key shares are exchanged, the rest, including the certificate, is encrypted.'
+		},
+		{
+			prompt: 'Why is 0-RTT data only safe for some requests?',
+			options: ['It is not encrypted', 'An attacker can replay it', 'It skips certificate checks'],
+			answer: 1,
+			explain: '0-RTT data is encrypted but replayable, so it should only carry requests that are safe to repeat.'
+		},
+		{
+			prompt: 'An HTTP/2 connection loses one packet. What stalls?',
+			options: ['Only the stream that packet belonged to', 'Every stream on that TCP connection'],
+			answer: 1,
+			explain: 'TCP delivers in order, so a gap blocks everything after it. HTTP/3 over QUIC avoids that.'
+		},
+		{
+			prompt: 'What lets a QUIC connection survive moving from Wi-Fi to mobile data?',
+			options: ['Its connection ID', 'A longer TTL', 'TCP keep-alive'],
+			answer: 0,
+			explain: 'QUIC identifies the connection by an ID rather than by IP address and port, so it can migrate.'
+		}
+	]}
+/>
+
+<h2>Sources and further reading</h2>
+<ul>
+	<li><a href="https://www.rfc-editor.org/rfc/rfc9293" rel="external">RFC 9293: Transmission Control Protocol</a></li>
+	<li><a href="https://www.rfc-editor.org/rfc/rfc8446" rel="external">RFC 8446: TLS 1.3</a></li>
+	<li><a href="https://www.rfc-editor.org/rfc/rfc9113" rel="external">RFC 9113: HTTP/2</a></li>
+	<li><a href="https://www.rfc-editor.org/rfc/rfc9000" rel="external">RFC 9000: QUIC</a> and <a href="https://www.rfc-editor.org/rfc/rfc9114" rel="external">RFC 9114: HTTP/3</a></li>
+	<li><a href="https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path" rel="external">MDN: Critical rendering path</a></li>
+</ul>
+</Layer>

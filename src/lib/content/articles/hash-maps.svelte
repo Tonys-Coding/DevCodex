@@ -4,13 +4,208 @@
 	import Quiz from '../../components/teach/Quiz.svelte';
 	import Note from '../../components/teach/Note.svelte';
 	import Code from '../../components/teach/Code.svelte';
+	import Layer from '../../components/teach/Layer.svelte';
+	import CorePack from '../../components/teach/CorePack.svelte';
 </script>
 
 <p>
-	A hash map stores key–value pairs in an array of <em>m</em> slots and finds a key’s slot by computing it: <code>index = reduce(h(key), m)</code>.
-	Insert, lookup and delete are O(1) <strong>expected</strong>. That word carries real weight. The bound assumes the hash spreads the keys you
-	actually have, that the table is resized before it fills, and that nobody is choosing keys against you. Each assumption is an engineering
-	decision, and each fails in a recognisable way.
+	Say you have a list of 10,000 people and you want Ada’s phone number. If the list is in no particular order, you have to check names one by
+	one until you find her. A <strong>hash map</strong> lets you jump straight to Ada instead, almost instantly, no matter how long the list
+	is. It is one of the most used tools in all of programming.
+</p>
+<p>In this lesson you will learn:</p>
+<ul>
+	<li>what a hash map stores, and how it finds things by name,</li>
+	<li>what happens when two names want the same spot,</li>
+	<li>how to use one in Python and JavaScript, and</li>
+	<li>when you want a map and when you want a set.</li>
+</ul>
+
+<h2>Words you will meet</h2>
+<dl>
+	<div>
+		<dt>Key</dt>
+		<dd>The name you look something up by, such as <code>"ada"</code>. Each key appears once in a map.</dd>
+	</div>
+	<div>
+		<dt>Value</dt>
+		<dd>What is stored under a key, such as Ada’s phone number. Together they make a <strong>key–value pair</strong>.</dd>
+	</div>
+	<div>
+		<dt>Hash function</dt>
+		<dd>A small recipe that turns any key into a number. The same key always gives the same number.</dd>
+	</div>
+	<div>
+		<dt>Bucket</dt>
+		<dd>One of the numbered spots inside a hash map where pairs are kept.</dd>
+	</div>
+	<div>
+		<dt>Collision</dt>
+		<dd>Two different keys landing in the same bucket. It is normal and handled for you.</dd>
+	</div>
+</dl>
+
+<h2>A coat check for data</h2>
+<p>
+	Think of a coat check at a theatre. You hand over your coat and get a ticket with a number. Later, you show the ticket and the attendant walks
+	straight to hook number 42. Nobody searches every coat.
+</p>
+<p>
+	A hash map works the same way, except it makes the ticket number itself, from the key. It runs the key through a <strong>hash function</strong>,
+	which turns <code>"ada"</code> into a number, then uses that number to pick a bucket. To find Ada again later, it runs the same function, gets the
+	same number and goes straight to the same bucket.
+</p>
+
+<h2>See it work</h2>
+<p>
+	This lab uses a very simple hash function: add up the character codes of the letters, then take the remainder after dividing by the number of
+	buckets. Type a name and press Add to see which bucket it lands in, or Find to look one up.
+</p>
+
+<HashMapLab />
+
+<p>
+	Try adding <code>ada</code> and then <code>daa</code>. They have the same letters, so this simple recipe gives them the same number and they share a
+	bucket. Real hash functions mix the letters much more thoroughly, so similar keys spread out.
+</p>
+
+<h2>When two keys share a bucket</h2>
+<p>
+	A <strong>collision</strong> is not an error. The map simply keeps a short list in that bucket. When you look a key up, it goes to the right
+	bucket and checks the few keys there. As long as buckets stay short, that is still almost instant.
+</p>
+<p>
+	To keep buckets short, a map <strong>grows</strong> before it gets crowded. When it holds too many pairs for its number of buckets, it makes a
+	bigger set of buckets, usually twice as many, and moves every pair to its new spot. Press “Grow to 16 buckets” in the lab to watch that happen.
+	Your code never has to do this; the map does it on its own.
+</p>
+
+<h2>Using one in your language</h2>
+<p>Python calls its hash map a <strong>dictionary</strong>. JavaScript has <code>Map</code>. Both do the same four jobs: add, look up, check and remove.</p>
+
+<Code
+	lang="py"
+	title="Python dictionary"
+	code={`ages = {"ada": 36, "grace": 85}
+
+ages["linus"] = 21        # add (or change) a pair
+print(ages["ada"])        # 36: look up by key
+print("alan" in ages)     # False: is this key here?
+del ages["grace"]         # remove a pair`}
+/>
+
+<Code
+	lang="js"
+	title="JavaScript Map"
+	code={`const ages = new Map([["ada", 36], ["grace", 85]]);
+
+ages.set("linus", 21);    // add (or change) a pair
+ages.get("ada");          // 36: look up by key
+ages.has("alan");         // false: is this key here?
+ages.delete("grace");     // remove a pair`}
+/>
+
+<p>A classic first use is counting things. Each word becomes a key, and its count is the value:</p>
+
+<Code
+	lang="py"
+	code={`counts = {}
+for word in "the cat and the hat".split():
+    counts[word] = counts.get(word, 0) + 1
+
+print(counts)  # {'the': 2, 'cat': 1, 'and': 1, 'hat': 1}`}
+	caption="counts.get(word, 0) means “the count so far, or 0 if this word is new”."
+/>
+
+<h2>Map or set?</h2>
+<p>A <strong>set</strong> is a hash map with keys and no values. It answers one question very quickly: “have I seen this before?”</p>
+
+<div class="table-wrap">
+	<table>
+		<thead><tr><th scope="col">You want to…</th><th scope="col">Use</th><th scope="col">Python</th><th scope="col">JavaScript</th></tr></thead>
+		<tbody>
+			<tr><th scope="row">Store something under each name</th><td>A map</td><td><code>dict</code></td><td><code>Map</code></td></tr>
+			<tr><th scope="row">Only know if a name is there</th><td>A set</td><td><code>set</code></td><td><code>Set</code></td></tr>
+		</tbody>
+	</table>
+</div>
+
+<Note title="What about plain JavaScript objects?" tone="plain">
+	A JavaScript object like <code>{'{'} ada: 36 {'}'}</code> also maps names to values, and you will see it everywhere. It works well for a fixed set of
+	text keys. <code>Map</code> is the better choice when keys are added and removed while the program runs, or when they are not text.
+</Note>
+
+<h2>Why it is fast</h2>
+
+<div class="table-wrap">
+	<table>
+		<thead><tr><th scope="col">Job</th><th scope="col">Searching a plain list</th><th scope="col">Hash map</th></tr></thead>
+		<tbody>
+			<tr><th scope="row">Find one name</th><td>Gets slower as the list grows</td><td>About the same speed at any size</td></tr>
+			<tr><th scope="row">Add one</th><td>Quick</td><td>Quick</td></tr>
+			<tr><th scope="row">Check if a name is there</th><td>Gets slower as the list grows</td><td>About the same speed at any size</td></tr>
+		</tbody>
+	</table>
+</div>
+
+<p>
+	Programmers write “about the same speed at any size” as <strong>O(1)</strong>, and “slower as it grows” as <strong>O(n)</strong>. A hash map is O(1)
+	<em>on average</em>: if many keys crowd into one bucket, it slows down, which good hash functions make very unlikely. Going deeper explains how.
+</p>
+
+<h2>Recap</h2>
+<ol>
+	<li>A hash map stores <strong>key–value pairs</strong> and finds a key by name, not by position.</li>
+	<li>A <strong>hash function</strong> turns the key into a number that picks a bucket, the same bucket every time.</li>
+	<li>Two keys in one bucket is a <strong>collision</strong>; the map keeps a short list there.</li>
+	<li>The map <strong>grows</strong> before buckets get crowded, so lookups stay fast.</li>
+	<li>Python’s <code>dict</code> and JavaScript’s <code>Map</code> are hash maps; a <strong>set</strong> keeps keys only.</li>
+</ol>
+
+<Quiz
+	questions={[
+		{
+			prompt: 'Why can a hash map find "ada" without checking every key?',
+			options: ['It keeps the keys in alphabetical order', 'It works out which bucket "ada" must be in', 'It remembers the last key you used'],
+			answer: 1,
+			explain: 'The same hash function always turns "ada" into the same number, so the map goes straight to that one bucket.'
+		},
+		{
+			prompt: 'Two different keys land in the same bucket. What is that called?',
+			options: ['A collision', 'An overflow', 'A duplicate'],
+			answer: 0,
+			explain: 'A collision. It is normal: the map keeps both keys in a short list in that bucket.'
+		},
+		{
+			prompt: 'Why does a hash map grow before it is full?',
+			options: ['To keep buckets short, so lookups stay fast', 'To sort the keys', 'Because buckets can only hold one key'],
+			answer: 0,
+			explain: 'More buckets means fewer keys per bucket, so each lookup checks only a few keys.'
+		},
+		{
+			prompt: 'You only need to know “have I seen this word before?”. Which fits best?',
+			options: ['A map', 'A set', 'A list'],
+			answer: 1,
+			explain: 'A set keeps keys with no values, and answers “is it here?” just as fast as a map.'
+		},
+		{
+			prompt: 'In Python, counts = {} and then counts["cat"] = counts.get("cat", 0) + 1. What is counts["cat"]?',
+			options: ['0', '1', 'An error, because "cat" was not there'],
+			answer: 1,
+			explain: 'get returns 0 for a missing key, so the count becomes 0 + 1 = 1.'
+		}
+	]}
+/>
+
+<CorePack />
+
+
+<Layer depth="deeper" summary="How hash functions, collision schemes and resizing really work, the costs in Big-O, and a hash map built from scratch.">
+<p>
+	Under the bonnet, a hash map stores key–value pairs in an array of <em>m</em> slots and finds a key’s slot by computing it:
+	<code>index = reduce(h(key), m)</code>. Insert, lookup and delete are O(1) <strong>expected</strong>. That word carries real weight. The bound
+	assumes the hash spreads the keys you actually have, that the table is resized before it fills, and that nobody is choosing keys against you.
+	Each assumption is an engineering decision, and each fails in a recognisable way.
 </p>
 
 <h2>Four decisions</h2>
@@ -26,15 +221,6 @@
 		</tbody>
 	</table>
 </div>
-
-<h2>A deliberately bad hash</h2>
-<p>
-	The lab uses <code>h(k) = Σ charCodes(k)</code> with chaining and <code>mod m</code>. It is a terrible hash, chosen so you can see what bad
-	hashing looks like: it ignores order, so every anagram collides (<code>ada</code>, <code>daa</code>), and short ASCII keys crowd a narrow range of
-	sums. Add keys, push the load factor past 0.75, then grow to 16 buckets and watch every key re-hash.
-</p>
-
-<HashMapLab />
 
 <h2>Hash functions</h2>
 <p>Requirements, in order of non-negotiability:</p>
@@ -91,7 +277,7 @@ fnv1a('daa') % 8;  // 5: order now matters`}
 
 <Quiz
 	variant="checkpoint"
-	title="Checkpoint 1"
+	title="Going deeper checkpoint 1"
 	questions={[
 		{
 			prompt: 'A power-of-two table picks the slot with h & (m − 1). Which bits of the hash decide the slot?',
@@ -225,7 +411,7 @@ fnv1a('daa') % 8;  // 5: order now matters`}
 
 <Quiz
 	variant="checkpoint"
-	title="Checkpoint 2"
+	title="Going deeper checkpoint 2"
 	questions={[
 		{
 			prompt: 'Doubling the table whenever it fills makes a single insert…',
@@ -236,6 +422,46 @@ fnv1a('daa') % 8;  // 5: order now matters`}
 	]}
 />
 
+<h2>The equality–hash contract</h2>
+<p>A table finds candidates by hash and confirms them by equality. Break the link between the two and entries disappear:</p>
+
+<Code
+	lang="py"
+	code={`class Point:
+    def __init__(self, x, y):
+        self.x, self.y = x, y
+    def __eq__(self, other):
+        return isinstance(other, Point) and (self.x, self.y) == (other.x, other.y)
+    def __hash__(self):
+        return hash((self.x, self.y))   # equal points, equal hashes
+
+p = Point(1, 2)
+seen = {p}
+p.x = 5                 # mutate a key that is already stored
+p in seen               # False: searches near hash((5, 2))
+Point(1, 2) in seen     # False: right slot, but the key now equals (5, 2)
+Point(5, 2) in seen     # False: the entry is unreachable`}
+/>
+
+<ul>
+	<li><strong>Python</strong> sets <code>__hash__ = None</code> on any class that defines <code>__eq__</code> without <code>__hash__</code>, making it unhashable. That is why lists, which are mutable, can’t be dict keys and tuples can.</li>
+	<li><strong>CPython quirks:</strong> <code>hash(-1) == -2</code>, because -1 signals an error in the C API. Integers hash modulo the Mersenne prime 2⁶¹ − 1 on 64-bit builds, so <code>hash(2**61 - 1) == 0</code>.</li>
+	<li><strong>NaN:</strong> <code>float('nan') != float('nan')</code>, but CPython checks identity before equality, so <em>the same</em> NaN object can be found again and a different NaN cannot. JavaScript’s <code>Map</code> uses SameValueZero, so <code>new Map([[NaN, 1]]).get(NaN)</code> is <code>1</code>.</li>
+	<li><strong>JS objects are not maps.</strong> Plain-object keys are coerced to strings (every object key becomes <code>"[object Object]"</code>), and integer-like keys iterate first, in ascending order. Use <code>Map</code> for arbitrary keys; it compares objects by identity.</li>
+</ul>
+
+<h2>When not to use a hash map</h2>
+<ul>
+	<li><strong>You need order or ranges</strong> (“all keys between a and b”, “the next larger key”). Use a balanced tree, a B-tree or a sorted array.</li>
+	<li><strong>n is tiny.</strong> A linear scan over a contiguous array of a handful of entries often beats hashing on real hardware.</li>
+	<li><strong>Hard latency bounds.</strong> Rehash pauses and probabilistic worst cases may be unacceptable without incremental resizing.</li>
+	<li><strong>Memory is tight.</strong> Empty slots, metadata and per-entry overhead add up. A sorted array with binary search is far denser.</li>
+	<li><strong>Keys are small dense integers.</strong> A plain array indexed by the key is a perfect hash.</li>
+</ul>
+</Layer>
+
+
+<Layer depth="hood" summary="What CPython, Java, V8 and SwissTable actually do, the probe-count maths, and how hash flooding attacks break the O(1) promise.">
 <h2>What real implementations do</h2>
 
 <div class="table-wrap">
@@ -270,34 +496,6 @@ fnv1a('daa') % 8;  // 5: order now matters`}
 	</table>
 </div>
 
-<h2>The equality–hash contract</h2>
-<p>A table finds candidates by hash and confirms them by equality. Break the link between the two and entries disappear:</p>
-
-<Code
-	lang="py"
-	code={`class Point:
-    def __init__(self, x, y):
-        self.x, self.y = x, y
-    def __eq__(self, other):
-        return isinstance(other, Point) and (self.x, self.y) == (other.x, other.y)
-    def __hash__(self):
-        return hash((self.x, self.y))   # equal points, equal hashes
-
-p = Point(1, 2)
-seen = {p}
-p.x = 5                 # mutate a key that is already stored
-p in seen               # False: searches near hash((5, 2))
-Point(1, 2) in seen     # False: right slot, but the key now equals (5, 2)
-Point(5, 2) in seen     # False: the entry is unreachable`}
-/>
-
-<ul>
-	<li><strong>Python</strong> sets <code>__hash__ = None</code> on any class that defines <code>__eq__</code> without <code>__hash__</code>, making it unhashable. That is why lists, which are mutable, can’t be dict keys and tuples can.</li>
-	<li><strong>CPython quirks:</strong> <code>hash(-1) == -2</code>, because -1 signals an error in the C API. Integers hash modulo the Mersenne prime 2⁶¹ − 1 on 64-bit builds, so <code>hash(2**61 - 1) == 0</code>.</li>
-	<li><strong>NaN:</strong> <code>float('nan') != float('nan')</code>, but CPython checks identity before equality, so <em>the same</em> NaN object can be found again and a different NaN cannot. JavaScript’s <code>Map</code> uses SameValueZero, so <code>new Map([[NaN, 1]]).get(NaN)</code> is <code>1</code>.</li>
-	<li><strong>JS objects are not maps.</strong> Plain-object keys are coerced to strings (every object key becomes <code>"[object Object]"</code>), and integer-like keys iterate first, in ascending order. Use <code>Map</code> for arbitrary keys; it compares objects by identity.</li>
-</ul>
-
 <h2>Hash flooding</h2>
 <p>
 	If an attacker can predict the hash, they can send n keys that all land in one slot. Each insert then scans the whole chain or probe sequence,
@@ -323,16 +521,7 @@ Point(5, 2) in seen     # False: the entry is unreachable`}
 	only to debug reproducibility, never in production.
 </Note>
 
-<h2>When not to use a hash map</h2>
-<ul>
-	<li><strong>You need order or ranges</strong> (“all keys between a and b”, “the next larger key”). Use a balanced tree, a B-tree or a sorted array.</li>
-	<li><strong>n is tiny.</strong> A linear scan over a contiguous array of a handful of entries often beats hashing on real hardware.</li>
-	<li><strong>Hard latency bounds.</strong> Rehash pauses and probabilistic worst cases may be unacceptable without incremental resizing.</li>
-	<li><strong>Memory is tight.</strong> Empty slots, metadata and per-entry overhead add up. A sorted array with binary search is far denser.</li>
-	<li><strong>Keys are small dense integers.</strong> A plain array indexed by the key is a perfect hash.</li>
-</ul>
-
-<h2>Recap</h2>
+<h2>Recap: the engineering view</h2>
 <ol>
 	<li>O(1) is an expectation that depends on the hash function, the index reduction, the collision scheme and the resize policy.</li>
 	<li>Masking for power-of-two tables needs good low bits; mix first.</li>
@@ -343,6 +532,7 @@ Point(5, 2) in seen     # False: the entry is unreachable`}
 </ol>
 
 <Quiz
+	title="Under the hood check"
 	questions={[
 		{
 			prompt: 'A power-of-two table indexes with h & (m − 1). Keys are multiples of 64 and h(k) = k. With m = 64, what happens?',
@@ -391,3 +581,4 @@ Point(5, 2) in seen     # False: the entry is unreachable`}
 	<li><a href="https://v8.dev/blog/hash-code" rel="external">V8 blog: Optimizing hash tables, hiding the hash code</a></li>
 	<li><a href="https://www.aumasson.jp/siphash/siphash.pdf" rel="external">Aumasson and Bernstein: SipHash, a fast short-input PRF</a></li>
 </ul>
+</Layer>

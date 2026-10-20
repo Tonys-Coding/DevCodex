@@ -67,8 +67,154 @@
 			wire: 'HTTP/2 304\ncache-control: public, max-age=3600\netag: "v7-3f9a"'
 		}
 	];
+	import Layer from '../../components/teach/Layer.svelte';
+	import CorePack from '../../components/teach/CorePack.svelte';
 </script>
 
+<p>
+	The second time you open a website, it usually loads faster. That’s because your browser kept copies of the files it downloaded the first
+	time: the styles, the scripts, the pictures. Keeping copies to reuse later is called <strong>caching</strong>. The interesting part is how the
+	browser knows a copy is still good, and who decides how long it can keep it.
+</p>
+<p>In this lesson you will learn:</p>
+<ul>
+	<li>where copies of a file are kept on their way to you,</li>
+	<li>what “fresh” and “stale” mean, and how a stale copy is checked cheaply,</li>
+	<li>the four caching instructions you will see most, and</li>
+	<li>how websites ship updates when browsers hold on to old copies.</li>
+</ul>
+
+<h2>Words you will meet</h2>
+<dl>
+	<div>
+		<dt>Cache</dt>
+		<dd>A store of copies kept so they can be reused instead of downloaded again.</dd>
+	</div>
+	<div>
+		<dt>Header</dt>
+		<dd>A short note sent with a response, in the form <code>name: value</code>. Caching instructions travel as headers.</dd>
+	</div>
+	<div>
+		<dt>Fresh and stale</dt>
+		<dd>A <strong>fresh</strong> copy can be reused without asking anyone. A <strong>stale</strong> copy has passed its time limit and should be checked first.</dd>
+	</div>
+	<div>
+		<dt>CDN</dt>
+		<dd>A content delivery network: servers in many cities that keep copies of a site’s files close to its visitors.</dd>
+	</div>
+	<div>
+		<dt>Origin</dt>
+		<dd>The website’s own server, where the original files live.</dd>
+	</div>
+</dl>
+
+<h2>Follow one file</h2>
+<p>
+	A copy can be kept in two places on its way to you: in your browser, and at a CDN server near you. Step through one stylesheet’s first visit,
+	its reuse, and the check that happens once its time is up.
+</p>
+
+<StepFlow title="One file, two caches, one origin" {tiles} {steps} />
+
+<h2>Fresh, then stale, then checked</h2>
+<p>Every copy comes with a time limit set by the website. The browser then follows three simple rules:</p>
+<ol>
+	<li><strong>Still fresh?</strong> Use the copy straight away. Nothing is sent over the network.</li>
+	<li><strong>Stale?</strong> Ask the server a tiny question: “I have version v7. Has it changed?”</li>
+	<li><strong>Not changed?</strong> The server answers <code>304 Not Modified</code> with no file attached, and the copy gets a new time limit. If it did change, the server sends the new version.</li>
+</ol>
+<p>
+	That check is the clever part. A 304 answer is a few hundred bytes instead of the whole file, so even a stale copy saves most of the download.
+	The version label the browser sends is called an <strong>ETag</strong>.
+</p>
+
+<h2>The four instructions you will see most</h2>
+<p>
+	The website sets these rules with one header, <code>Cache-Control</code>. Four values cover most of what you will meet. The number after
+	<code>max-age</code> is in seconds.
+</p>
+
+<div class="table-wrap">
+	<table>
+		<thead><tr><th scope="col">Instruction</th><th scope="col">In plain words</th><th scope="col">Good for</th></tr></thead>
+		<tbody>
+			<tr><th scope="row"><code>max-age=3600</code></th><td>Reuse it for an hour without asking</td><td>Files that change rarely</td></tr>
+			<tr><th scope="row"><code>no-cache</code></th><td>Keep it, but check with the server every time before using it</td><td>Web pages that must show updates at once</td></tr>
+			<tr><th scope="row"><code>no-store</code></th><td>Don’t keep a copy at all</td><td>Bank balances and other private data</td></tr>
+			<tr><th scope="row"><code>private</code></th><td>Only this person’s browser may keep it, not a shared CDN</td><td>Pages about one signed-in user</td></tr>
+		</tbody>
+	</table>
+</div>
+
+<Note title="The most misread word in caching" tone="warn">
+	<code>no-cache</code> does <em>not</em> mean “don’t cache”. It means “check before reusing”. The instruction that really means “don’t keep it” is
+	<code>no-store</code>.
+</Note>
+
+<h2>Shipping an update</h2>
+<p>
+	If a browser may keep a file for a year, how does anyone get a fix? Websites change the file’s <strong>name</strong>. Build tools add a short
+	fingerprint of the contents to each name, so <code>app.3f9a1c.js</code> becomes <code>app.b72e04.js</code> when anything inside changes. The page
+	itself is checked every time, so it can point to the new name, and no browser has an old copy of a name it has never seen. This is called
+	<strong>cache busting</strong>.
+</p>
+
+<h2>See it yourself</h2>
+<p>
+	Open your browser’s developer tools, choose the <strong>Network</strong> tab and reload a site you have visited before. Look at two columns:
+</p>
+<ul>
+	<li><strong>Status</strong> shows <code>200</code> for a full download and <code>304</code> for “not changed, keep yours”.</li>
+	<li><strong>Size</strong> shows “(disk cache)” or “(memory cache)” for files that never left your computer.</li>
+</ul>
+
+<h2>Recap</h2>
+<ol>
+	<li>Browsers and CDNs keep copies of files so they don’t have to download them again.</li>
+	<li>A <strong>fresh</strong> copy is reused without asking. A <strong>stale</strong> one is checked, and a <code>304</code> answer means “keep yours”.</li>
+	<li><code>Cache-Control</code> sets the rules: <code>max-age</code>, <code>no-cache</code>, <code>no-store</code> and <code>private</code> cover most cases.</li>
+	<li>Sites ship updates by giving changed files new names.</li>
+</ol>
+
+<Quiz
+	questions={[
+		{
+			prompt: 'A file came with max-age=600 (ten minutes). You reload after five minutes. What happens?',
+			options: ['It is downloaded again', 'The browser uses its copy without asking', 'The browser checks with the server first'],
+			answer: 1,
+			explain: 'Five minutes is inside the ten-minute limit, so the copy is still fresh and nothing is sent.'
+		},
+		{
+			prompt: 'The server answers 304 Not Modified. What does that mean?',
+			options: ['The file is missing', 'Your copy is still correct, keep using it', 'The file changed and is attached'],
+			answer: 1,
+			explain: '304 means nothing changed. No file is sent, and your copy gets a new time limit.'
+		},
+		{
+			prompt: 'Which instruction really means “don’t keep a copy”?',
+			options: ['no-cache', 'no-store', 'max-age=0'],
+			answer: 1,
+			explain: 'no-store forbids keeping it. no-cache keeps it but checks before every use.'
+		},
+		{
+			prompt: 'A page shows one user’s account details. Which instruction stops a shared CDN from keeping it?',
+			options: ['private', 'max-age=60', 'no-cache'],
+			answer: 0,
+			explain: 'private means only that person’s browser may keep a copy, never a shared cache.'
+		},
+		{
+			prompt: 'app.js is cached for a year and you fix a bug in it. What gets the fix to everyone?',
+			options: ['Ask users to clear their cache', 'Publish it under a new name, like app.b72e04.js', 'Nothing; wait a year'],
+			answer: 1,
+			explain: 'Browsers never ask about the old name again for a year, but a new name has no old copy anywhere.'
+		}
+	]}
+/>
+
+<CorePack />
+
+
+<Layer depth="deeper" summary="Private and shared caches, validators, every Cache-Control directive you will use, real server configuration and the mistakes that leak data.">
 <p>
 	A typical page pulls in dozens of subresources: scripts, stylesheets, fonts, images. Between two visits, almost none of them change. HTTP caching,
 	specified in <a href="https://www.rfc-editor.org/rfc/rfc9111" rel="external">RFC 9111</a>, lets the server state up front how long each response
@@ -99,59 +245,6 @@
 	caption="Steps 3 and 4 only happen on a miss or a stale copy. Most repeat requests are answered on the device, by the service worker or the HTTP cache."
 />
 
-<p>Step through one stylesheet’s journey across those layers:</p>
-
-<StepFlow title="One file, two caches, one origin" {tiles} {steps} />
-
-<h2>Freshness: how long a copy may be reused</h2>
-<p>
-	A stored response is <strong>fresh</strong> while its <strong>age</strong> is less than its <strong>freshness lifetime</strong>. A fresh response is
-	served without contacting the server at all. Once the age passes the lifetime, the response is <strong>stale</strong> and must normally be
-	revalidated before reuse.
-</p>
-<p>The cache works out the freshness lifetime from the first of these that is present:</p>
-<ol>
-	<li><code>s-maxage=N</code> in <code>Cache-Control</code>. Shared caches only; browsers ignore it.</li>
-	<li><code>max-age=N</code> in <code>Cache-Control</code>, in seconds.</li>
-	<li>The <code>Expires</code> header minus the <code>Date</code> header. This is the older mechanism, and <code>max-age</code> overrides it.</li>
-	<li>
-		A <strong>heuristic</strong>, if none of the above exist. Caches may guess, and the RFC suggests 10% of the time since
-		<code>Last-Modified</code> as a typical value. A file last changed 10 days ago could be treated as fresh for a day. That is why “I set no
-		caching headers” does not mean “not cached”.
-	</li>
-</ol>
-
-<h3>Age is not just time in your cache</h3>
-<p>
-	A shared cache sends an <code>Age</code> header saying how many seconds the response has already spent in caches upstream. That time counts
-	against the lifetime:
-</p>
-
-<div class="table-wrap">
-	<table>
-		<caption>A response with max-age=600, received from a CDN with Age: 120</caption>
-		<thead><tr><th scope="col">Time in browser</th><th scope="col">Current age</th><th scope="col">State</th><th scope="col">Next use</th></tr></thead>
-		<tbody>
-			<tr><th scope="row">0 s</th><td>120 s</td><td>Fresh</td><td>Served from cache</td></tr>
-			<tr><th scope="row">300 s</th><td>420 s</td><td>Fresh</td><td>Served from cache</td></tr>
-			<tr><th scope="row">480 s</th><td>600 s</td><td>Stale</td><td>Revalidate first</td></tr>
-		</tbody>
-	</table>
-</div>
-
-
-<Quiz
-	variant="checkpoint"
-	title="Checkpoint 1"
-	questions={[
-		{
-			prompt: 'A response has max-age=60 and arrived from the CDN with Age: 20. How long is it fresh in the browser?',
-			options: ['60 seconds', '40 seconds', '80 seconds'],
-			answer: 1,
-			explain: 'Age counts against the lifetime: 60 − 20 leaves 40 seconds of freshness.'
-		}
-	]}
-/>
 
 <h2>Validation: checking a stale copy cheaply</h2>
 <p>
@@ -251,7 +344,7 @@ etag: "v7-3f9a"`}
 
 <Quiz
 	variant="checkpoint"
-	title="Checkpoint 2"
+	title="Going deeper checkpoint"
 	questions={[
 		{
 			prompt: 'Which directive keeps a response out of CDNs but still lets the browser cache it?',
@@ -261,22 +354,6 @@ etag: "v7-3f9a"`}
 		}
 	]}
 />
-
-<h2>How a cache decides, step by step</h2>
-<ol>
-	<li><strong>Look up the cache key.</strong> By default that is the method and URL. If the stored response had a <code>Vary</code> header, the listed request headers must match too.</li>
-	<li><strong>Fresh?</strong> If the age is under the freshness lifetime and nothing forbids reuse, serve it. No network.</li>
-	<li><strong>Stale, with a validator?</strong> Send a conditional request with <code>If-None-Match</code> or <code>If-Modified-Since</code>.</li>
-	<li><strong>304?</strong> Update the stored headers and serve the stored body. <strong>200?</strong> Replace the stored response and serve the new one.</li>
-	<li><strong>Stale, no validator?</strong> Make an ordinary request and store the result if its headers allow.</li>
-</ol>
-
-<h3>Vary: when one URL has several right answers</h3>
-<p>
-	If a server picks the representation based on a request header, such as language or compression, the cache must key on that header too, or
-	it will hand a French page to an English reader. <code>Vary: Accept-Language</code> tells caches exactly that. Keep the list short: each
-	header you vary on multiplies the number of copies a CDN stores and lowers the hit rate.
-</p>
 
 <h2>Cache busting: how “forever” stays safe</h2>
 <p>
@@ -323,14 +400,83 @@ app.use((req, res) => {
 	<li><strong>Different headers for browsers and CDNs, by accident.</strong> Use <code>s-maxage</code>, or the <code>CDN-Cache-Control</code> header from RFC 9213, when you want the CDN to cache longer than browsers.</li>
 </ul>
 
-<h2>See it in DevTools</h2>
+<h2>Reading caching in DevTools</h2>
 <ol>
 	<li>Open the Network tab and reload. Check <strong>Status</strong> (200 or 304) and <strong>Size</strong>, which shows “(disk cache)” or “(memory cache)” for requests that never left the browser.</li>
 	<li>Click a request and read the response headers: <code>cache-control</code>, <code>etag</code>, <code>age</code>, plus any provider-specific hit or miss header your CDN adds.</li>
 	<li>Tick <strong>Disable cache</strong> to see a cold load. A hard reload (Shift + reload) also bypasses the browser cache for that one load.</li>
 </ol>
+</Layer>
 
-<h2>Recap</h2>
+
+<Layer depth="hood" summary="The exact freshness rules from RFC 9111: Age, s-maxage, Expires and heuristic lifetimes, then the full decision a cache makes, including Vary.">
+<h2>Freshness: how long a copy may be reused</h2>
+<p>
+	A stored response is <strong>fresh</strong> while its <strong>age</strong> is less than its <strong>freshness lifetime</strong>. A fresh response is
+	served without contacting the server at all. Once the age passes the lifetime, the response is <strong>stale</strong> and must normally be
+	revalidated before reuse.
+</p>
+<p>The cache works out the freshness lifetime from the first of these that is present:</p>
+<ol>
+	<li><code>s-maxage=N</code> in <code>Cache-Control</code>. Shared caches only; browsers ignore it.</li>
+	<li><code>max-age=N</code> in <code>Cache-Control</code>, in seconds.</li>
+	<li>The <code>Expires</code> header minus the <code>Date</code> header. This is the older mechanism, and <code>max-age</code> overrides it.</li>
+	<li>
+		A <strong>heuristic</strong>, if none of the above exist. Caches may guess, and the RFC suggests 10% of the time since
+		<code>Last-Modified</code> as a typical value. A file last changed 10 days ago could be treated as fresh for a day. That is why “I set no
+		caching headers” does not mean “not cached”.
+	</li>
+</ol>
+
+<h3>Age is not just time in your cache</h3>
+<p>
+	A shared cache sends an <code>Age</code> header saying how many seconds the response has already spent in caches upstream. That time counts
+	against the lifetime:
+</p>
+
+<div class="table-wrap">
+	<table>
+		<caption>A response with max-age=600, received from a CDN with Age: 120</caption>
+		<thead><tr><th scope="col">Time in browser</th><th scope="col">Current age</th><th scope="col">State</th><th scope="col">Next use</th></tr></thead>
+		<tbody>
+			<tr><th scope="row">0 s</th><td>120 s</td><td>Fresh</td><td>Served from cache</td></tr>
+			<tr><th scope="row">300 s</th><td>420 s</td><td>Fresh</td><td>Served from cache</td></tr>
+			<tr><th scope="row">480 s</th><td>600 s</td><td>Stale</td><td>Revalidate first</td></tr>
+		</tbody>
+	</table>
+</div>
+
+
+<Quiz
+	variant="checkpoint"
+	title="Under the hood checkpoint"
+	questions={[
+		{
+			prompt: 'A response has max-age=60 and arrived from the CDN with Age: 20. How long is it fresh in the browser?',
+			options: ['60 seconds', '40 seconds', '80 seconds'],
+			answer: 1,
+			explain: 'Age counts against the lifetime: 60 − 20 leaves 40 seconds of freshness.'
+		}
+	]}
+/>
+
+<h2>How a cache decides, step by step</h2>
+<ol>
+	<li><strong>Look up the cache key.</strong> By default that is the method and URL. If the stored response had a <code>Vary</code> header, the listed request headers must match too.</li>
+	<li><strong>Fresh?</strong> If the age is under the freshness lifetime and nothing forbids reuse, serve it. No network.</li>
+	<li><strong>Stale, with a validator?</strong> Send a conditional request with <code>If-None-Match</code> or <code>If-Modified-Since</code>.</li>
+	<li><strong>304?</strong> Update the stored headers and serve the stored body. <strong>200?</strong> Replace the stored response and serve the new one.</li>
+	<li><strong>Stale, no validator?</strong> Make an ordinary request and store the result if its headers allow.</li>
+</ol>
+
+<h3>Vary: when one URL has several right answers</h3>
+<p>
+	If a server picks the representation based on a request header, such as language or compression, the cache must key on that header too, or
+	it will hand a French page to an English reader. <code>Vary: Accept-Language</code> tells caches exactly that. Keep the list short: each
+	header you vary on multiplies the number of copies a CDN stores and lowers the hit rate.
+</p>
+
+<h2>Recap: the full rules</h2>
 <ul>
 	<li>Fresh copies are reused with no request. Stale copies are revalidated with a conditional request that usually returns a small 304.</li>
 	<li><code>max-age</code> sets the lifetime, <code>s-maxage</code> overrides it for shared caches, and <code>Age</code> counts time already spent upstream.</li>
@@ -339,6 +485,7 @@ app.use((req, res) => {
 </ul>
 
 <Quiz
+	title="Under the hood check"
 	questions={[
 		{
 			prompt: 'A response has max-age=600 and arrived with Age: 0. You reuse it 5 minutes later. What happens on the network?',
@@ -381,3 +528,4 @@ app.use((req, res) => {
 	<li><a href="https://www.rfc-editor.org/rfc/rfc9213" rel="external">RFC 9213: Targeted HTTP cache control (CDN-Cache-Control)</a></li>
 	<li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching" rel="external">MDN: HTTP caching</a></li>
 </ul>
+</Layer>

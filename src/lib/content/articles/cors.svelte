@@ -4,8 +4,170 @@
 	import Note from '../../components/teach/Note.svelte';
 	import Code from '../../components/teach/Code.svelte';
 	import Diagram from '../../components/teach/Diagram.svelte';
+	import Layer from '../../components/teach/Layer.svelte';
+	import CorePack from '../../components/teach/CorePack.svelte';
 </script>
 
+<p>
+	You’re signed in to your email in one tab. In another tab, you open some random website. Could that website’s code quietly fetch your inbox,
+	using your signed-in cookies, and read it? Browsers say no. That rule is the <strong>same-origin policy</strong>, and <strong>CORS</strong> is the
+	way a server says “it’s fine, this other site may read my answers”.
+</p>
+<p>In this lesson you will learn:</p>
+<ul>
+	<li>what an <strong>origin</strong> is, and what the browser stops,</li>
+	<li>how a server gives permission with one header,</li>
+	<li>what the extra “preflight” request is for, and</li>
+	<li>how to read a CORS error and fix it in the right place.</li>
+</ul>
+
+<h2>Words you will meet</h2>
+<dl>
+	<div>
+		<dt>Origin</dt>
+		<dd>Where a page comes from: its scheme, host and port together, like <code>https://app.example</code>.</dd>
+	</div>
+	<div>
+		<dt>Same-origin policy</dt>
+		<dd>The browser rule that a page’s scripts may only read responses from their own origin, unless told otherwise.</dd>
+	</div>
+	<div>
+		<dt>CORS</dt>
+		<dd>Cross-Origin Resource Sharing: headers a server sends to let other origins read its responses.</dd>
+	</div>
+	<div>
+		<dt>Preflight</dt>
+		<dd>A permission check the browser sends before certain requests, asking the server “may I send this?”.</dd>
+	</div>
+</dl>
+
+<h2>Same origin or not?</h2>
+<p>Two addresses have the same origin only if all three parts match exactly:</p>
+
+<div class="table-wrap">
+	<table>
+		<thead><tr><th scope="col">Compared with <code>https://app.example</code></th><th scope="col">Same origin?</th><th scope="col">Why</th></tr></thead>
+		<tbody>
+			<tr><th scope="row"><code>https://app.example/settings</code></th><td>Yes</td><td>Only the path differs</td></tr>
+			<tr><th scope="row"><code>https://api.example</code></th><td>No</td><td>Different host</td></tr>
+			<tr><th scope="row"><code>http://app.example</code></th><td>No</td><td>Different scheme (http, not https)</td></tr>
+			<tr><th scope="row"><code>https://app.example:8443</code></th><td>No</td><td>Different port</td></tr>
+		</tbody>
+	</table>
+</div>
+
+<h2>What the browser actually stops</h2>
+<p>
+	The surprising part: for ordinary requests, the browser still <em>sends</em> them to the other origin. What it stops is your script
+	<em>reading</em> the answer. Unless the server says otherwise, the response is kept from the page, and your code gets an error instead.
+</p>
+<p>
+	This protects you, the user. The browser attaches your cookies to requests, so without this rule any site could read anything you can see
+	while signed in elsewhere.
+</p>
+
+<h2>How a server says yes</h2>
+<p>A server that wants another site to read its answers adds one header to the response:</p>
+
+<Code
+	lang="http"
+	title="A response that allows app.example to read it"
+	code={`HTTP/2 200
+content-type: application/json
+access-control-allow-origin: https://app.example`}
+	caption="The browser sees its own page’s origin listed, so it lets the script read the response."
+/>
+
+<p>
+	The value can be one exact origin, as here, or <code>*</code> for “any site”, which is fine for public data that needs no sign-in.
+</p>
+
+<h2>The preflight: asking first</h2>
+<p>
+	Some requests could change things on the server, like a <code>PUT</code> or <code>DELETE</code>, or a <code>POST</code> sending JSON. For those, the
+	browser asks permission <em>before</em> sending them. It sends an <code>OPTIONS</code> request, the <strong>preflight</strong>, saying which method and
+	headers it wants to use. Only if the server’s answer allows them does the real request go out.
+</p>
+
+<Diagram
+	name="cors-preflight"
+	alt="Sequence diagram with three lanes: a script on app.example, the browser, and api.example. A GET is sent straight to the API with an Origin header, the API answers 200 with Access-Control-Allow-Origin, the browser's CORS check passes and the script can read the response. A PUT with JSON first makes the browser send OPTIONS to the same URL; the API answers 204 with the allowed methods and headers; the browser caches that for this URL, then sends the PUT, checks the response and hands it to the script."
+	caption="Your script never sees the preflight. The browser sends it, checks the answer and remembers it for a while."
+/>
+
+<p>Try it: change the method, the Content-Type or the headers, and see whether the browser sends a preflight and what each side says.</p>
+
+<CorsLab />
+
+<h2>Reading a CORS error</h2>
+<p>When the server hasn’t given permission, the browser console shows a message like this one from Chrome:</p>
+
+<Code
+	lang="text"
+	code={`Access to fetch at 'https://api.example/items' from origin 'https://app.example'
+has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is
+present on the requested resource.`}
+/>
+
+<ul>
+	<li><strong>The fix belongs on the server</strong> you are calling: it needs to send the right <code>Access-Control-Allow-*</code> headers. Nothing in your page’s code can grant permission on its behalf.</li>
+	<li><strong>Only browsers enforce CORS.</strong> The same request from <code>curl</code>, a server or a mobile app works, which is why “it works in Postman” doesn’t mean the browser will allow it.</li>
+	<li><strong>Look at the Network tab.</strong> If there is a failed <code>OPTIONS</code> request, the preflight is what the server needs to answer.</li>
+</ul>
+
+<Note title="mode: 'no-cors' is not a fix" tone="warn">
+	Adding <code>mode: 'no-cors'</code> to <code>fetch</code> makes the error go away, but the response you get is empty and unreadable. It is meant for
+	requests whose answer you never need to see.
+</Note>
+
+<h2>Recap</h2>
+<ol>
+	<li>An <strong>origin</strong> is scheme, host and port together.</li>
+	<li>The <strong>same-origin policy</strong> stops scripts reading responses from other origins, to protect signed-in users.</li>
+	<li>A server allows it with <code>Access-Control-Allow-Origin</code>.</li>
+	<li>Requests that might change things get a <strong>preflight</strong> <code>OPTIONS</code> check first.</li>
+	<li>CORS errors are fixed on the server you are calling; only browsers enforce them.</li>
+</ol>
+
+<Quiz
+	questions={[
+		{
+			prompt: 'Are https://app.example and https://api.example the same origin?',
+			options: ['Yes, same scheme and same site', 'No, the hosts differ'],
+			answer: 1,
+			explain: 'Origin is scheme, host and port. app.example and api.example are different hosts.'
+		},
+		{
+			prompt: 'For an ordinary GET to another origin, what does the same-origin policy stop?',
+			options: ['The request being sent', 'Your script reading the response', 'The server receiving your cookies'],
+			answer: 1,
+			explain: 'The request goes out; without the server’s permission, the browser keeps the response from your script.'
+		},
+		{
+			prompt: 'Which response header lets https://app.example read the response?',
+			options: ['Access-Control-Allow-Origin: https://app.example', 'Origin: https://app.example', 'Content-Type: application/json'],
+			answer: 0,
+			explain: 'Access-Control-Allow-Origin is the server’s permission. Origin is what the browser sends to say where the page is from.'
+		},
+		{
+			prompt: 'A page sends a PUT with JSON to another origin. What does the browser send first?',
+			options: ['Nothing; it sends the PUT straight away', 'An OPTIONS preflight asking permission'],
+			answer: 1,
+			explain: 'PUT and a JSON body both need permission first, so the browser sends an OPTIONS preflight.'
+		},
+		{
+			prompt: 'Your page gets a CORS error calling someone’s API. Where does the fix go?',
+			options: ['In your page’s JavaScript', 'On the API server, in its response headers', 'In the browser settings'],
+			answer: 1,
+			explain: 'Only the server being called can grant permission, by sending the right Access-Control-Allow-* headers.'
+		}
+	]}
+/>
+
+<CorePack />
+
+
+<Layer depth="deeper" summary="The exact rules from the Fetch Standard: which requests skip the preflight, how the preflight is checked and cached, credentials, and a correct server.">
 <p>
 	The <strong>same-origin policy</strong> stops a script from one origin reading responses from another. Without it, any page you visit could
 	<code>fetch('https://mail.example/inbox')</code> with your cookies attached and read the result. <strong>CORS</strong> (Cross-Origin Resource
@@ -47,7 +209,7 @@
 
 <Quiz
 	variant="checkpoint"
-	title="Checkpoint 1"
+	title="Going deeper checkpoint 1"
 	questions={[
 		{
 			prompt: 'What does the same-origin policy mainly stop a cross-origin script from doing?',
@@ -120,15 +282,6 @@
 	<li>Caches the result for <code>Max-Age</code> seconds, then sends the real request, which goes through the CORS check again.</li>
 </ol>
 
-<Diagram
-	name="cors-preflight"
-	alt="Sequence diagram with three lanes: a script on app.example, the browser, and api.example. A GET is sent straight to the API with an Origin header, the API answers 200 with Access-Control-Allow-Origin, the browser's CORS check passes and the script can read the response. A PUT with JSON first makes the browser send OPTIONS to the same URL; the API answers 204 with the allowed methods and headers; the browser caches that for this URL, then sends the PUT, checks the response and hands it to the script."
-	caption="The script never sees the preflight. Only the browser sends it, checks it and caches it, per URL."
-/>
-
-<p>Build a request and see the exact exchange:</p>
-
-<CorsLab />
 
 <Note title="Authorization and the wildcard: spec versus browsers" tone="warn">
 	The Fetch Standard says <code>Access-Control-Allow-Headers: *</code> does not cover <code>Authorization</code>. In practice no major engine
@@ -154,7 +307,7 @@
 
 <Quiz
 	variant="checkpoint"
-	title="Checkpoint 2"
+	title="Going deeper checkpoint 2"
 	questions={[
 		{
 			prompt: 'Which of these cross-origin fetches triggers a preflight?',
@@ -192,6 +345,62 @@
 	<li><strong>CORS does not override cookie policy.</strong> A cookie is attached only if its own rules allow it. If the API is cross-<em>site</em> from the page, its cookies are third-party: they need <code>SameSite=None; Secure</code>, and Safari blocks them while Firefox partitions them by default. Put a credentialed API on a same-site host, such as <code>api.app.example</code> for <code>app.example</code>.</li>
 </ul>
 
+<h2>A correct server</h2>
+<p>This runs on Node 24 with no dependencies and is the configuration we tested against Chrome:</p>
+
+<Code
+	lang="js"
+	title="cors.js"
+	code={`const ALLOWED = new Set(['https://app.example.com', 'https://admin.example.com']);
+
+function cors(req, res) {
+  res.setHeader('Vary', 'Origin');           // always: the answer depends on Origin
+  const origin = req.headers.origin;
+  if (!origin || !ALLOWED.has(origin)) return false;   // exact string match
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  return true;
+}
+
+function isPreflight(req) {
+  return req.method === 'OPTIONS' && req.headers['access-control-request-method'] !== undefined;
+}
+
+export function handle(req, res, next) {
+  const allowed = cors(req, res);
+  if (isPreflight(req)) {                    // answer before any auth middleware
+    if (!allowed) return res.writeHead(403).end();
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Max-Age', '7200');
+    return res.writeHead(204).end();
+  }
+  if (allowed) res.setHeader('Access-Control-Expose-Headers', 'X-Request-Id');
+  next();                                    // the real handler, with auth
+}`}
+	caption="The 403 is for clarity in logs; omitting the headers is what actually denies access. Vary: Origin goes on every response so no cache serves one origin’s answer to another."
+/>
+
+<p>The decisions behind it:</p>
+<ul>
+	<li><strong>Exact matching against a set.</strong> Parsing and pattern-matching origins is where vulnerabilities come from; see the next section.</li>
+	<li><strong>Preflight before authentication.</strong> A preflight carries no cookies and no <code>Authorization</code>, so auth middleware that answers 401 first breaks every preflighted call.</li>
+	<li><strong>One <code>Allow-Origin</code> value.</strong> Sending two, or a comma-separated list, fails the check: the browser compares the combined header value with one origin. Verified in Chrome.</li>
+	<li><strong><code>Vary: Origin</code> even on denials.</strong> Otherwise a CDN may cache a response without CORS headers and serve it to an allowed origin, or the reverse.</li>
+</ul>
+
+<h2>Debugging a CORS error</h2>
+<ol>
+	<li><strong>Read the console, not the exception.</strong> The console message names the failing rule: missing <code>Allow-Origin</code>, wildcard with credentials, a header missing from <code>Allow-Headers</code>, or a preflight that “does not have HTTP ok status”.</li>
+	<li><strong>Find the preflight</strong> in the Network tab. Chrome lists it as a separate <code>OPTIONS</code> row, type <code>preflight</code>. Check its status before anything else.</li>
+	<li><strong>Compare the request with the response</strong> line by line: <code>Origin</code> against <code>Allow-Origin</code>, <code>Access-Control-Request-Headers</code> against <code>Allow-Headers</code>.</li>
+	<li><strong>Check that the error response has CORS headers too.</strong> Frameworks often skip middleware on 404, 500 and auth failures, so the real error shows up as a CORS error.</li>
+	<li><strong>Replay with curl</strong> to see exactly what the server returns: <code>curl -si -X OPTIONS -H 'Origin: https://app.example.com' -H 'Access-Control-Request-Method: PUT' https://api.example.com/items/1</code>.</li>
+</ol>
+</Layer>
+
+
+<Layer depth="hood" summary="Reading headers, redirects, opaque responses and HTML elements, the misconfigurations that become vulnerabilities, and neighbouring rules that are not CORS.">
 <h2>Reading the response</h2>
 <p>
 	A shared response exposes its body, its status, whatever that status is (a 500 with valid CORS headers is readable, with <code>ok</code> false),
@@ -254,50 +463,6 @@ r.status;   // 0
 </ul>
 <p>Some loads are always CORS regardless of attributes: module scripts (<code>&lt;script type="module"&gt;</code>), web fonts from <code>@font-face</code>, and <code>fetch</code> / <code>XMLHttpRequest</code> in their default mode.</p>
 
-<h2>A correct server</h2>
-<p>This runs on Node 24 with no dependencies and is the configuration we tested against Chrome:</p>
-
-<Code
-	lang="js"
-	title="cors.js"
-	code={`const ALLOWED = new Set(['https://app.example.com', 'https://admin.example.com']);
-
-function cors(req, res) {
-  res.setHeader('Vary', 'Origin');           // always: the answer depends on Origin
-  const origin = req.headers.origin;
-  if (!origin || !ALLOWED.has(origin)) return false;   // exact string match
-  res.setHeader('Access-Control-Allow-Origin', origin);
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  return true;
-}
-
-function isPreflight(req) {
-  return req.method === 'OPTIONS' && req.headers['access-control-request-method'] !== undefined;
-}
-
-export function handle(req, res, next) {
-  const allowed = cors(req, res);
-  if (isPreflight(req)) {                    // answer before any auth middleware
-    if (!allowed) return res.writeHead(403).end();
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.setHeader('Access-Control-Max-Age', '7200');
-    return res.writeHead(204).end();
-  }
-  if (allowed) res.setHeader('Access-Control-Expose-Headers', 'X-Request-Id');
-  next();                                    // the real handler, with auth
-}`}
-	caption="The 403 is for clarity in logs; omitting the headers is what actually denies access. Vary: Origin goes on every response so no cache serves one origin’s answer to another."
-/>
-
-<p>The decisions behind it:</p>
-<ul>
-	<li><strong>Exact matching against a set.</strong> Parsing and pattern-matching origins is where vulnerabilities come from; see the next section.</li>
-	<li><strong>Preflight before authentication.</strong> A preflight carries no cookies and no <code>Authorization</code>, so auth middleware that answers 401 first breaks every preflighted call.</li>
-	<li><strong>One <code>Allow-Origin</code> value.</strong> Sending two, or a comma-separated list, fails the check: the browser compares the combined header value with one origin. Verified in Chrome.</li>
-	<li><strong><code>Vary: Origin</code> even on denials.</strong> Otherwise a CDN may cache a response without CORS headers and serve it to an allowed origin, or the reverse.</li>
-</ul>
-
 <h2>Misconfigurations that become vulnerabilities</h2>
 
 <div class="table-wrap">
@@ -337,16 +502,7 @@ export function handle(req, res, next) {
 	</table>
 </div>
 
-<h2>Debugging a CORS error</h2>
-<ol>
-	<li><strong>Read the console, not the exception.</strong> The console message names the failing rule: missing <code>Allow-Origin</code>, wildcard with credentials, a header missing from <code>Allow-Headers</code>, or a preflight that “does not have HTTP ok status”.</li>
-	<li><strong>Find the preflight</strong> in the Network tab. Chrome lists it as a separate <code>OPTIONS</code> row, type <code>preflight</code>. Check its status before anything else.</li>
-	<li><strong>Compare the request with the response</strong> line by line: <code>Origin</code> against <code>Allow-Origin</code>, <code>Access-Control-Request-Headers</code> against <code>Allow-Headers</code>.</li>
-	<li><strong>Check that the error response has CORS headers too.</strong> Frameworks often skip middleware on 404, 500 and auth failures, so the real error shows up as a CORS error.</li>
-	<li><strong>Replay with curl</strong> to see exactly what the server returns: <code>curl -si -X OPTIONS -H 'Origin: https://app.example.com' -H 'Access-Control-Request-Method: PUT' https://api.example.com/items/1</code>.</li>
-</ol>
-
-<h2>Recap</h2>
+<h2>Recap: the full rules</h2>
 <ul>
 	<li>The same-origin policy blocks reading, not sending. CORS lets a server grant read access, origin by origin, and is enforced only by browsers.</li>
 	<li>No preflight only for GET, HEAD or POST with safelisted headers within the length limits. JSON and <code>Authorization</code> always preflight.</li>
@@ -356,6 +512,7 @@ export function handle(req, res, next) {
 </ul>
 
 <Quiz
+	title="Under the hood check"
 	questions={[
 		{
 			prompt: 'fetch(url, { method: "POST", headers: { "Content-Type": "text/plain" }, body: json }) to another origin. What reaches the server?',
@@ -404,3 +561,4 @@ export function handle(req, res, next) {
 	<li><a href="https://portswigger.net/web-security/cors" rel="external">PortSwigger Web Security Academy: CORS vulnerabilities</a></li>
 	<li><a href="https://developer.chrome.com/blog/local-network-access" rel="external">Chrome: Local Network Access</a></li>
 </ul>
+</Layer>

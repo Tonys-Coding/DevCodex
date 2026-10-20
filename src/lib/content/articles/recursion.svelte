@@ -62,6 +62,8 @@ console.log(factorial(3));`;
 			output: '6'
 		}
 	];
+	import Layer from '../../components/teach/Layer.svelte';
+	import CorePack from '../../components/teach/CorePack.svelte';
 </script>
 
 <p>
@@ -509,3 +511,243 @@ fib(40);   // 102334155, in 79 calls instead of 331 million`}
 		}
 	]}
 />
+
+<CorePack />
+
+<Layer depth="deeper" summary="Real recursion limits, rewriting recursion as a loop with your own stack, divide and conquer with merge sort, and backtracking.">
+<h2>Limits in practice</h2>
+<p>Every language puts a ceiling on recursion depth, and you hit it sooner than you might expect:</p>
+
+<div class="table-wrap">
+	<table>
+		<thead><tr><th scope="col">Language</th><th scope="col">Limit</th><th scope="col">What you see</th></tr></thead>
+		<tbody>
+			<tr><th scope="row">Python</th><td>1,000 frames by default (<code>sys.getrecursionlimit()</code>)</td><td><code>RecursionError: maximum recursion depth exceeded</code></td></tr>
+			<tr><th scope="row">JavaScript</th><td>Set by the engine and the size of each frame, typically some thousands</td><td><code>RangeError: Maximum call stack size exceeded</code></td></tr>
+		</tbody>
+	</table>
+</div>
+
+<p>
+	Python lets you raise the limit with <code>sys.setrecursionlimit</code>, but that only moves the guard rail: go deep enough and the process can
+	crash outright. For input that may be thousands of levels deep, such as a long linked list, prefer a loop.
+</p>
+
+<h2>Turning recursion into a loop</h2>
+<p>
+	The call stack is just a to-do list the language keeps for you. You can keep it yourself instead, in an ordinary array. Here is the Core’s
+	<code>sumAll</code> with no recursion at all:
+</p>
+
+<Code
+	lang="js"
+	code={`function sumAllIterative(list) {
+  let total = 0;
+  const stack = [list];             // the to-do list the calls used to keep for us
+  while (stack.length) {
+    const item = stack.pop();
+    if (Array.isArray(item)) stack.push(...item);
+    else total += item;
+  }
+  return total;
+}
+
+sumAllIterative([1, [2, [3, 4]], 5]);   // 15`}
+	caption="Same answer, no depth limit beyond memory. The order items are visited changes, which doesn’t matter for a sum."
+/>
+
+<Quiz
+	variant="checkpoint"
+	title="Going deeper checkpoint 1"
+	questions={[
+		{
+			prompt: 'A recursive Python function is called on a linked list 5,000 nodes long, one call per node. What happens with default settings?',
+			options: ['It works, just slowly', 'RecursionError, because the default limit is 1,000', 'It silently returns None'],
+			answer: 1,
+			explain: 'Each node adds a frame, and Python stops at about 1,000. A loop handles any length.'
+		}
+	]}
+/>
+
+<h2>Divide and conquer</h2>
+<p>
+	Some of the fastest algorithms are recursive because they split a problem in half, solve each half the same way, and combine the answers.
+	Merge sort is the classic:
+</p>
+
+<Code
+	lang="py"
+	code={`def merge_sort(items):
+    if len(items) <= 1:                 # base case: already sorted
+        return items
+    mid = len(items) // 2
+    left = merge_sort(items[:mid])      # sort each half the same way
+    right = merge_sort(items[mid:])
+    merged, i, j = [], 0, 0             # merge two sorted halves
+    while i < len(left) and j < len(right):
+        if left[i] <= right[j]:
+            merged.append(left[i]); i += 1
+        else:
+            merged.append(right[j]); j += 1
+    return merged + left[i:] + right[j:]
+
+print(merge_sort([5, 2, 9, 1, 5, 6]))   # [1, 2, 5, 5, 6, 9]`}
+/>
+
+<p>
+	Halving means only about log₂ n levels of calls, and each level does n units of merging work in total, so the whole sort is O(n log n). The
+	depth is tiny: a million items need only about 20 levels.
+</p>
+
+<h2>Backtracking: try, recurse, undo</h2>
+<p>
+	To list every possibility, recursion can make one choice, explore everything that follows, then undo the choice and try the next. Each call
+	decides about one item, in or out:
+</p>
+
+<Code
+	lang="py"
+	code={`def subsets(items):
+    out = []
+    def go(i, chosen):
+        if i == len(items):             # decided about every item
+            out.append(chosen[:])
+            return
+        go(i + 1, chosen)               # leave items[i] out
+        chosen.append(items[i])
+        go(i + 1, chosen)               # put items[i] in
+        chosen.pop()                    # undo, so the caller's list is unchanged
+    go(0, [])
+    return out
+
+print(subsets(["a", "b", "c"]))   # 8 subsets, from [] to ['a', 'b', 'c']`}
+	caption="The same try–recurse–undo shape solves permutations, Sudoku and N-queens."
+/>
+
+<Quiz
+	variant="checkpoint"
+	title="Going deeper checkpoint 2"
+	questions={[
+		{
+			prompt: 'Merge sort on 1,000,000 items. Roughly how many levels deep does the recursion go?',
+			options: ['About 20', 'About 1,000', 'About 1,000,000'],
+			answer: 0,
+			explain: 'Each level halves the list, and 2²⁰ is about a million, so about 20 levels.'
+		}
+	]}
+/>
+</Layer>
+
+<Layer depth="hood" summary="What a stack frame holds and how big the stack is, tail calls and who supports them, and solving recurrences for running time.">
+<h2>What a stack frame holds</h2>
+<p>
+	Each call gets a <strong>frame</strong>: where to return to, the arguments, the local variables and some saved bookkeeping. In compiled languages
+	these frames sit on the thread’s native stack, a fixed block of memory reserved when the thread starts.
+</p>
+
+<div class="table-wrap">
+	<table>
+		<thead><tr><th scope="col">Platform</th><th scope="col">Typical default stack size</th></tr></thead>
+		<tbody>
+			<tr><th scope="row">Linux, main thread</th><td>8 MB (<code>ulimit -s</code>)</td></tr>
+			<tr><th scope="row">macOS, main thread / other threads</th><td>8 MB / 512 KB</td></tr>
+			<tr><th scope="row">Windows</th><td>1 MB</td></tr>
+		</tbody>
+	</table>
+</div>
+
+<p>
+	Frame size times depth must fit, which is why a function with large local arrays overflows at a smaller depth. Interpreters add their own
+	limits on top: CPython’s recursion limit guards both its own frames and the native stack beneath them.
+</p>
+
+<h2>Tail calls</h2>
+<p>
+	A call is a <strong>tail call</strong> when it is the very last thing a function does, with nothing left to compute afterwards. Then the current
+	frame isn’t needed any more and can be reused, so deep recursion uses constant stack space:
+</p>
+
+<Code
+	lang="js"
+	code={`"use strict";
+// Not a tail call: the multiplication happens after the call returns.
+const fact = (n) => (n <= 1 ? 1 : n * fact(n - 1));
+
+// A tail call: the running product travels in an accumulator.
+const factTail = (n, acc = 1) => (n <= 1 ? acc : factTail(n - 1, n * acc));`}
+/>
+
+<ul>
+	<li><strong>JavaScript:</strong> ES2015 specifies proper tail calls in strict mode, but only Safari’s JavaScriptCore implements them. Chrome, Firefox and Node will still overflow.</li>
+	<li><strong>Python:</strong> no tail-call elimination, by design, so tracebacks always show every frame.</li>
+	<li><strong>Scheme</strong> and many functional languages require it, which is why loops there are written as recursion.</li>
+</ul>
+
+<h2>How fast is a recursive function?</h2>
+<p>Write the running time as a <strong>recurrence</strong>, the work at one level plus the cost of the calls it makes, then solve it:</p>
+
+<div class="table-wrap">
+	<table>
+		<thead><tr><th scope="col">Function</th><th scope="col">Recurrence</th><th scope="col">Solves to</th></tr></thead>
+		<tbody>
+			<tr><th scope="row">Factorial, sum of a list</th><td>T(n) = T(n − 1) + O(1)</td><td>O(n)</td></tr>
+			<tr><th scope="row">Binary search</th><td>T(n) = T(n/2) + O(1)</td><td>O(log n)</td></tr>
+			<tr><th scope="row">Merge sort</th><td>T(n) = 2T(n/2) + O(n)</td><td>O(n log n)</td></tr>
+			<tr><th scope="row">Naive Fibonacci</th><td>T(n) = T(n − 1) + T(n − 2) + O(1)</td><td>O(φⁿ), about 1.618ⁿ</td></tr>
+			<tr><th scope="row">Memoised Fibonacci</th><td>Each n computed once</td><td>O(n)</td></tr>
+		</tbody>
+	</table>
+</div>
+
+<p>The halving recurrences are cases of the <strong>master theorem</strong>, which gives the answer for any T(n) = aT(n/b) + f(n) by comparing f(n) with n^(log_b a).</p>
+
+<h2>Recap: recursion under the hood</h2>
+<ol>
+	<li>Each call costs a frame on a fixed-size stack, so depth is limited by frame size and stack size.</li>
+	<li>Tail calls can reuse the frame, but only Safari implements that in JavaScript, and Python never does.</li>
+	<li>Running time comes from the recurrence: halving gives logs, branching twice per level gives exponentials.</li>
+</ol>
+
+<Quiz
+	title="Under the hood check"
+	questions={[
+		{
+			prompt: 'Which JavaScript engine implements ES2015 proper tail calls?',
+			options: ['V8 (Chrome, Node)', 'SpiderMonkey (Firefox)', 'JavaScriptCore (Safari)'],
+			answer: 2,
+			explain: 'Only JavaScriptCore ships proper tail calls; the others removed or never shipped them.'
+		},
+		{
+			prompt: 'Is n * fact(n - 1) a tail call?',
+			options: ['Yes', 'No, the multiplication happens after the call returns'],
+			answer: 1,
+			explain: 'Work remains after the call, so the frame must stay. Carrying the product in an accumulator makes it a tail call.'
+		},
+		{
+			prompt: 'T(n) = 2T(n/2) + O(n) solves to…',
+			options: ['O(n)', 'O(n log n)', 'O(n²)'],
+			answer: 1,
+			explain: 'log n levels, each doing O(n) work in total: O(n log n), as in merge sort.'
+		},
+		{
+			prompt: 'Why does naive recursive Fibonacci take exponential time?',
+			options: ['Each call makes two calls, recomputing the same values', 'The numbers get very large', 'The stack is too deep'],
+			answer: 0,
+			explain: 'The call tree branches twice per level and repeats work; memoising computes each value once.'
+		},
+		{
+			prompt: 'Two recursive functions reach the same depth. Why might only one overflow?',
+			options: ['Its frames are larger, for example big local arrays', 'It returns a bigger number', 'It was called first'],
+			answer: 0,
+			explain: 'The stack is a fixed size, so bigger frames mean fewer of them fit.'
+		}
+	]}
+/>
+
+<h2>Sources and further reading</h2>
+<ul>
+	<li><a href="https://docs.python.org/3/library/sys.html#sys.setrecursionlimit" rel="external">Python: sys.setrecursionlimit</a></li>
+	<li><a href="https://webkit.org/blog/6240/ecmascript-6-proper-tail-calls-in-webkit/" rel="external">WebKit: ECMAScript 6 proper tail calls</a></li>
+	<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Too_much_recursion" rel="external">MDN: InternalError: too much recursion</a></li>
+</ul>
+</Layer>

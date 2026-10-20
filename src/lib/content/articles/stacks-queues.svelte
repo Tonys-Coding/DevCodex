@@ -4,6 +4,8 @@
 	import Note from '../../components/teach/Note.svelte';
 	import Code from '../../components/teach/Code.svelte';
 	import Term from '../../components/teach/Term.svelte';
+	import Layer from '../../components/teach/Layer.svelte';
+	import CorePack from '../../components/teach/CorePack.svelte';
 </script>
 
 <p>
@@ -464,3 +466,241 @@ redo();   // text is "Hi there"`}
 		}
 	]}
 />
+
+<CorePack />
+
+<Layer depth="deeper" summary="A queue built from two stacks, monotonic stacks for “next bigger” questions, and how queues and stacks drive BFS and DFS.">
+<h2>A queue built from two stacks</h2>
+<p>
+	A favourite interview question: build a queue using only stacks. The trick is two of them. New items go on an <em>inbox</em> stack. When you need
+	the front item and the <em>outbox</em> is empty, pour the inbox into it, which reverses the order so the oldest item ends up on top.
+</p>
+
+<Code
+	lang="py"
+	code={`class TwoStackQueue:
+    def __init__(self):
+        self.inbox, self.outbox = [], []
+
+    def enqueue(self, item):
+        self.inbox.append(item)
+
+    def dequeue(self):
+        if not self.outbox:
+            while self.inbox:                   # move everything over, reversing it
+                self.outbox.append(self.inbox.pop())
+        return self.outbox.pop()                # IndexError if both are empty`}
+	caption="Each item is moved from inbox to outbox at most once, so a dequeue costs O(1) on average, though one dequeue can do a big pour."
+/>
+
+<p>That “on average” is called <strong>amortised</strong> O(1): an occasional expensive step is paid for by many cheap ones.</p>
+
+<h2>Monotonic stacks</h2>
+<p>
+	A stack that is kept in order, always increasing or always decreasing, answers “what is the next bigger value?” for every item in one pass.
+	Indexes wait on the stack until a larger value arrives and settles them:
+</p>
+
+<Code
+	lang="py"
+	code={`def next_greater(nums):
+    answer = [-1] * len(nums)
+    stack = []                               # indexes still waiting for a bigger value
+    for i, n in enumerate(nums):
+        while stack and nums[stack[-1]] < n:
+            answer[stack.pop()] = n          # n is the first bigger value they meet
+        stack.append(i)
+    return answer
+
+print(next_greater([2, 1, 5, 3, 4, 1]))   # [5, 5, -1, 4, -1, -1]`}
+	caption="Each index is pushed once and popped at most once, so the whole thing is O(n), not O(n²)."
+/>
+
+<p>Practice’s “Days until it gets warmer” is the same pattern with a twist: it asks how many days away the warmer day is.</p>
+
+<Quiz
+	variant="checkpoint"
+	title="Going deeper checkpoint 1"
+	questions={[
+		{
+			prompt: 'In the two-stack queue, when are items moved from the inbox to the outbox?',
+			options: ['On every enqueue', 'Only when a dequeue finds the outbox empty', 'Never; items stay put'],
+			answer: 1,
+			explain: 'Pouring only when the outbox is empty means each item is moved once, which keeps dequeue O(1) on average.'
+		}
+	]}
+/>
+
+<h2>Queues and stacks drive search</h2>
+<p>
+	Exploring a map of connected places, such as a maze, a road map or links between pages, comes down to which list holds the places still to
+	visit. A <strong>queue</strong> explores in rings, nearest first: breadth-first search (<strong>BFS</strong>). A <strong>stack</strong> dives down one path
+	before backing up: depth-first search (<strong>DFS</strong>).
+</p>
+
+<Code
+	lang="py"
+	code={`from collections import deque
+
+graph = {"A": ["B", "C"], "B": ["D"], "C": ["D", "E"], "D": ["F"], "E": ["F"], "F": []}
+
+def bfs(start):
+    seen, order, queue = {start}, [], deque([start])
+    while queue:
+        node = queue.popleft()                # oldest first
+        order.append(node)
+        for nxt in graph[node]:
+            if nxt not in seen:
+                seen.add(nxt)
+                queue.append(nxt)
+    return order
+
+def dfs(start):
+    seen, order, stack = set(), [], [start]
+    while stack:
+        node = stack.pop()                    # newest first
+        if node in seen:
+            continue
+        seen.add(node)
+        order.append(node)
+        for nxt in reversed(graph[node]):     # so neighbours come off in listed order
+            stack.append(nxt)
+    return order
+
+print(bfs("A"))   # ['A', 'B', 'C', 'D', 'E', 'F']
+print(dfs("A"))   # ['A', 'B', 'D', 'F', 'C', 'E']`}
+	caption="The two functions are almost identical. Swapping the queue for a stack is the whole difference between BFS and DFS."
+/>
+
+<Quiz
+	variant="checkpoint"
+	title="Going deeper checkpoint 2"
+	questions={[
+		{
+			prompt: 'You want the fewest steps from A to F in a maze where every step costs the same. Which search fits?',
+			options: ['DFS, with a stack', 'BFS, with a queue'],
+			answer: 1,
+			explain: 'BFS visits places in order of distance, so the first time it reaches F is by a shortest route.'
+		}
+	]}
+/>
+</Layer>
+
+<Layer depth="hood" summary="Ring buffers, how CPython’s deque is really built, why array push is amortised O(1), and heaps for priority queues.">
+<h2>Ring buffers</h2>
+<p>
+	When a queue has a known maximum size, such as audio samples, network packets or the last 100 log lines, a <strong>ring buffer</strong> uses one
+	fixed array and two numbers. The front moves forward, and positions wrap around to the start with <code>%</code>, so nothing is ever shifted or
+	reallocated:
+</p>
+
+<Code
+	lang="py"
+	code={`class RingBuffer:
+    def __init__(self, capacity):
+        self.items = [None] * capacity
+        self.head = 0                           # index of the front item
+        self.count = 0
+
+    def enqueue(self, item):
+        if self.count == len(self.items):
+            raise OverflowError("full")
+        tail = (self.head + self.count) % len(self.items)
+        self.items[tail] = item
+        self.count += 1
+
+    def dequeue(self):
+        if self.count == 0:
+            raise IndexError("empty")
+        item = self.items[self.head]
+        self.items[self.head] = None            # let the item be garbage-collected
+        self.head = (self.head + 1) % len(self.items)
+        self.count -= 1
+        return item`}
+	caption="Keeping a count, not just head and tail, is what tells a full buffer apart from an empty one."
+/>
+
+<h2>Inside CPython’s deque</h2>
+<p>
+	<code>collections.deque</code> is a doubly linked list of fixed-size <strong>blocks</strong> of 64 slots each, not a list of single nodes. Adding or
+	removing at either end only touches the end blocks, so both are O(1), and items are packed densely, so it doesn’t pay one pointer pair per item.
+	The trade-off is indexing: <code>d[i]</code> has to walk blocks, which is O(n) in the middle. The documentation also notes that appends and pops
+	at either end are thread-safe.
+</p>
+
+<h2>Why push is O(1) on a growing array</h2>
+<p>
+	A dynamic array, like a Python list or JavaScript array, keeps spare capacity. When it runs out, it allocates a bigger block and copies every
+	item across, which is O(n) for that one push. Because the capacity grows by a fixed proportion each time, the copies add up to a constant
+	amount per push overall: <strong>amortised O(1)</strong>. CPython over-allocates lists by about an eighth of their size; V8 grows arrays by about
+	half. The exact factor is an implementation detail; the proportional growth is what matters.
+</p>
+
+<h2>Priority queues are not queues</h2>
+<p>
+	A <strong>priority queue</strong> hands back the smallest (or most urgent) item, not the oldest. It is usually a binary <strong>heap</strong>: an array
+	arranged as a tree where each parent is no bigger than its children. Push and pop are O(log n).
+</p>
+
+<Code
+	lang="py"
+	code={`import heapq
+
+tasks = []
+for priority in [5, 1, 4, 2]:
+    heapq.heappush(tasks, priority)
+
+print([heapq.heappop(tasks) for _ in range(4)])   # [1, 2, 4, 5]`}
+/>
+
+<h2>Recap: stacks and queues underneath</h2>
+<ol>
+	<li>Ring buffers give fixed-size queues with no shifting and no allocation.</li>
+	<li>CPython’s deque is a linked list of 64-slot blocks: O(1) at the ends, O(n) in the middle.</li>
+	<li>Dynamic arrays grow proportionally, which makes push amortised O(1).</li>
+	<li>Priority queues are heaps, with O(log n) push and pop, and order by priority, not arrival.</li>
+</ol>
+
+<Quiz
+	title="Under the hood check"
+	questions={[
+		{
+			prompt: 'A ring buffer of capacity 4 has head = 3 and count = 2. Where does the next item go?',
+			options: ['Index 5', 'Index 1', 'Index 0'],
+			answer: 1,
+			explain: '(3 + 2) % 4 = 1: the position wraps around to the start of the array.'
+		},
+		{
+			prompt: 'Why does a ring buffer keep a count as well as head?',
+			options: ['To tell a full buffer from an empty one', 'To sort the items', 'To make indexing O(1)'],
+			answer: 0,
+			explain: 'When full and when empty, head and tail point at the same slot; the count tells the two apart.'
+		},
+		{
+			prompt: 'What is d[len(d) // 2] on a large CPython deque?',
+			options: ['O(1)', 'O(n): it walks through blocks'],
+			answer: 1,
+			explain: 'A deque is a chain of blocks, so reaching the middle means walking about half of them.'
+		},
+		{
+			prompt: 'Pushing onto a full dynamic array copies every item. Why is push still called O(1)?',
+			options: ['Copies are free', 'Capacity grows proportionally, so copies average out to a constant per push', 'Arrays never fill up'],
+			answer: 1,
+			explain: 'Proportional growth means each item is copied only a constant number of times on average: amortised O(1).'
+		},
+		{
+			prompt: 'heappush 5, 1, 4, 2 onto an empty heap, then heappop once. What comes out?',
+			options: ['5, the first in', '1, the smallest', '2, the last in'],
+			answer: 1,
+			explain: 'A min-heap always returns the smallest item, whatever order the items arrived in.'
+		}
+	]}
+/>
+
+<h2>Sources and further reading</h2>
+<ul>
+	<li><a href="https://docs.python.org/3/library/collections.html#collections.deque" rel="external">Python: collections.deque</a></li>
+	<li><a href="https://github.com/python/cpython/blob/main/Modules/_collectionsmodule.c" rel="external">CPython: Modules/_collectionsmodule.c (deque)</a></li>
+	<li><a href="https://docs.python.org/3/library/heapq.html" rel="external">Python: heapq</a></li>
+</ul>
+</Layer>

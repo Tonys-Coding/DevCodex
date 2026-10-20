@@ -50,8 +50,147 @@ console.log("D");`;
 		{ line: 2, note: 'Next loop iteration: the loop picks one task, the timer callback, which logs B.', stack: ['cb → B'], apis: [], micro: [], tasks: [], out: ['A', 'D', 'C', 'B'] },
 		{ note: 'Final order A, D, C, B: synchronous code, then all microtasks, then tasks one at a time.', stack: [], apis: [], micro: [], tasks: [], out: ['A', 'D', 'C', 'B'] }
 	];
+	import Layer from '../../components/teach/Layer.svelte';
+	import CorePack from '../../components/teach/CorePack.svelte';
 </script>
 
+<p>
+	JavaScript in a web page does one thing at a time. Yet a page can wait for a download, count down a timer and react to your clicks, all
+	without freezing. How? JavaScript doesn’t do the waiting itself. It hands the waiting to the browser and gets told when something is ready.
+	The <strong>event loop</strong> is the rule that decides what runs next.
+</p>
+<p>In this lesson you will learn:</p>
+<ul>
+	<li>the four places your code and its callbacks pass through,</li>
+	<li>why <code>setTimeout(fn, 0)</code> doesn’t run straight away,</li>
+	<li>why a promise’s <code>.then</code> runs before a timer that was set first, and</li>
+	<li>why one slow loop freezes the whole page.</li>
+</ul>
+
+<h2>Words you will meet</h2>
+<dl>
+	<div>
+		<dt>Callback</dt>
+		<dd>A function you hand over to be run later, such as “run this when the timer ends”.</dd>
+	</div>
+	<div>
+		<dt>Call stack</dt>
+		<dd>The list of functions running right now. If <code>a()</code> calls <code>b()</code>, which calls <code>c()</code>, then <code>c()</code> is on top and finishes first.</dd>
+	</div>
+	<div>
+		<dt>Task</dt>
+		<dd>A callback waiting its turn, such as a timer or a click handler.</dd>
+	</div>
+	<div>
+		<dt>Microtask</dt>
+		<dd>A smaller, more urgent kind of waiting callback. Promise <code>.then</code> callbacks are microtasks.</dd>
+	</div>
+</dl>
+
+<h2>Four places, one thread</h2>
+<ul>
+	<li><strong>The call stack</strong> runs your code, one function at a time.</li>
+	<li><strong>The browser</strong> does the waiting: it counts down timers, waits for network replies and listens for clicks.</li>
+	<li><strong>The microtask queue</strong> holds urgent callbacks, mostly from promises.</li>
+	<li><strong>The task queue</strong> holds everything else that is ready: timers that have finished, clicks, and so on.</li>
+</ul>
+<p>Before you step through this snippet, guess what it prints. Most people say A, B, C, D.</p>
+
+<EventLoopSim {code} {steps} />
+
+<h2>The loop, in one sentence</h2>
+<p>
+	When the call stack is empty, run <strong>every</strong> waiting microtask, then take <strong>one</strong> task, and repeat. That is the whole rule,
+	and it explains the snippet above:
+</p>
+<ol>
+	<li>The script runs first, top to bottom, and prints A and D.</li>
+	<li>The timer and the promise callback both had to wait for the script to finish.</li>
+	<li>Microtasks go before tasks, so the promise’s C prints next.</li>
+	<li>Only then does the timer’s B get its turn.</li>
+</ol>
+
+<Note title="setTimeout(fn, 0) means “soon”, not “now”" tone="plain">
+	A delay of 0 means “as soon as possible after the current code”. The callback still waits until the call stack is empty and every microtask has
+	run.
+</Note>
+
+<h2>Don’t block the loop</h2>
+<p>
+	While your code is running, nothing else can: clicks wait, animations freeze, and the page feels broken. A loop that takes three seconds means
+	three seconds where the page can’t respond.
+</p>
+
+<Code
+	lang="js"
+	code={`button.addEventListener("click", () => {
+  // Runs for 3 seconds. Nothing else on the page can happen meanwhile.
+  const end = Date.now() + 3000;
+  while (Date.now() < end) {}
+  console.log("done");
+});`}
+	caption="Try something like this in a console and the page stops responding until it finishes."
+/>
+
+<p>Two common fixes:</p>
+<ul>
+	<li><strong>Split the work</strong> into small pieces, and let the loop take a breath between them so clicks and drawing can happen.</li>
+	<li><strong>Move it off the main thread</strong> to a <strong>Web Worker</strong>, a separate thread with its own loop, which can’t freeze the page.</li>
+</ul>
+
+<Note title="DevCodex uses a worker">
+	Practice runs your code in a Web Worker. If you write a loop that never ends, only the worker gets stuck. The page stays responsive, notices the
+	time limit and stops the worker for you.
+</Note>
+
+<h2>Recap</h2>
+<ol>
+	<li>JavaScript runs one thing at a time, on the <strong>call stack</strong>.</li>
+	<li>The browser does the waiting, then queues the <strong>callback</strong>.</li>
+	<li>When the stack is empty: all <strong>microtasks</strong> first, then one <strong>task</strong>, then repeat.</li>
+	<li>Promise callbacks are microtasks; timers and clicks are tasks.</li>
+	<li>Long-running code blocks everything, so split it up or move it to a worker.</li>
+</ol>
+
+<Quiz
+	questions={[
+		{
+			prompt: 'What does this print? setTimeout(() => log(1), 0); log(2);',
+			options: ['1 then 2', '2 then 1', 'Only 2'],
+			answer: 1,
+			explain: 'The timer callback waits until the current code, including log(2), has finished.'
+		},
+		{
+			prompt: 'A resolved promise’s .then and a 0 ms setTimeout are both waiting. Which runs first?',
+			options: ['The setTimeout callback', 'The promise callback', 'Whichever was registered first'],
+			answer: 1,
+			explain: 'Promise callbacks are microtasks, and every waiting microtask runs before the next task.'
+		},
+		{
+			prompt: 'a() calls b(), which calls c(). Which function finishes first?',
+			options: ['a()', 'b()', 'c()'],
+			answer: 2,
+			explain: 'c() is on top of the call stack, so it finishes first; then b(), then a().'
+		},
+		{
+			prompt: 'Who counts down a setTimeout?',
+			options: ['JavaScript, on the call stack', 'The browser, outside your code'],
+			answer: 1,
+			explain: 'Timers are run by the browser. JavaScript only hears about it when the callback is ready to queue.'
+		},
+		{
+			prompt: 'A click handler runs a loop for 3 seconds. What happens to other clicks meanwhile?',
+			options: ['They run at the same time', 'They wait until the loop finishes', 'They are ignored forever'],
+			answer: 1,
+			explain: 'Only one thing runs at a time on the main thread, so the other clicks queue up as tasks.'
+		}
+	]}
+/>
+
+<CorePack />
+
+
+<Layer depth="deeper" summary="The event loop as the HTML Standard defines it: the processing model, where every API’s callback goes, a harder ordering puzzle, timers, long tasks and workers.">
 <p>
 	JavaScript has <strong>run-to-completion</strong> semantics: once a function starts, nothing else in the same realm runs until the call stack
 	unwinds. There is no preemption and no shared-memory threading of ordinary objects. All concurrency comes from the <strong>host</strong>, the
@@ -76,9 +215,6 @@ console.log("D");`;
 	</table>
 </div>
 
-<p>Predict the output before stepping through. The usual first guess is A, B, C, D.</p>
-
-<EventLoopSim {code} {steps} />
 
 <h2>The processing model</h2>
 <p>Stripped of detail, one iteration of a window event loop is:</p>
@@ -114,7 +250,7 @@ console.log("D");`;
 
 <Quiz
 	variant="checkpoint"
-	title="Checkpoint 1"
+	title="Going deeper checkpoint"
 	questions={[
 		{
 			prompt: 'One task has just finished. What runs before the loop takes the next task?',
@@ -188,6 +324,54 @@ console.log(8);`}
 	<code>await Promise.resolve()</code> or <code>await null</code> keeps the page just as frozen. You must yield to a <em>task</em>.
 </Note>
 
+<h2>Timers are minimums</h2>
+<ul>
+	<li><strong>Clamping.</strong> Once timers are nested more than five levels deep, the HTML Standard raises any delay below 4 ms to 4 ms. A chain of <code>setTimeout(f, 0)</code> therefore settles at roughly 4 ms per hop.</li>
+	<li><strong>Background throttling.</strong> Hidden tabs throttle timers heavily, commonly to once per second or less, and pause <code>requestAnimationFrame</code> entirely.</li>
+	<li><strong>Drift.</strong> <code>setInterval</code> fires no earlier than scheduled and slips whenever the loop is busy. For animation, use <code>requestAnimationFrame</code> and compute from its timestamp rather than counting ticks.</li>
+</ul>
+
+<h2>Long tasks and responsiveness</h2>
+<p>
+	Any task over 50 ms counts as a <strong>long task</strong>. Input arriving during it waits. <strong>Interaction to Next Paint</strong> (INP), the
+	Core Web Vital that replaced First Input Delay in March 2024, measures the time from an interaction to the next frame painted after it; 200 ms or
+	less at the 75th percentile counts as good. The remedy is to break work into tasks and yield between them:
+</p>
+
+<Code
+	lang="js"
+	code={`function yieldToMain() {
+  // scheduler.yield() resumes ahead of other tasks of the same priority.
+  // Not every browser has it yet, so feature-detect.
+  if (globalThis.scheduler?.yield) return scheduler.yield();
+  return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
+async function processAll(items) {
+  let deadline = performance.now() + 10;
+  for (const item of items) {
+    process(item);
+    if (performance.now() > deadline) {
+      await yieldToMain();              // input and rendering run here
+      deadline = performance.now() + 10;
+    }
+  }
+}`}
+	caption="Yielding on a time budget, not every item, keeps the overhead of extra tasks small."
+/>
+
+<h2>Workers: a second loop, not a second stack</h2>
+<p>
+	A Web Worker is a separate thread with its own realm, heap, call stack and event loop. Communication is by <code>postMessage</code>, which
+	structured-clones data, or transfers ownership of <code>ArrayBuffer</code>s with no copy. True shared memory requires
+	<code>SharedArrayBuffer</code> plus <code>Atomics</code>, and browsers only expose it on cross-origin-isolated pages, served with
+	<code>Cross-Origin-Opener-Policy: same-origin</code> and <code>Cross-Origin-Embedder-Policy: require-corp</code>.
+</p>
+
+</Layer>
+
+
+<Layer depth="hood" summary="When microtask checkpoints really happen, starvation, rendering and forced layout, and how Node.js runs a different loop.">
 <h2>Microtask checkpoints are more frequent than you think</h2>
 <p>
 	A checkpoint runs whenever a callback finishes and the JS stack becomes empty. That makes this code behave differently depending on who
@@ -230,13 +414,6 @@ function spinTask() { setTimeout(spinTask); }
 spinTask();  // wasteful, but rendering and input still get turns`}
 />
 
-<h2>Timers are minimums</h2>
-<ul>
-	<li><strong>Clamping.</strong> Once timers are nested more than five levels deep, the HTML Standard raises any delay below 4 ms to 4 ms. A chain of <code>setTimeout(f, 0)</code> therefore settles at roughly 4 ms per hop.</li>
-	<li><strong>Background throttling.</strong> Hidden tabs throttle timers heavily, commonly to once per second or less, and pause <code>requestAnimationFrame</code> entirely.</li>
-	<li><strong>Drift.</strong> <code>setInterval</code> fires no earlier than scheduled and slips whenever the loop is busy. For animation, use <code>requestAnimationFrame</code> and compute from its timestamp rather than counting ticks.</li>
-</ul>
-
 <h2>Rendering and forced layout</h2>
 <p>
 	Style and layout are normally computed once per frame, lazily. Reading a geometry property such as <code>offsetWidth</code> after a style write
@@ -261,7 +438,7 @@ for (const el of items) {
 
 <Quiz
 	variant="checkpoint"
-	title="Checkpoint 2"
+	title="Under the hood checkpoint"
 	questions={[
 		{
 			prompt: 'Timers nested more than five levels deep with a 0 ms delay run at least how far apart?',
@@ -271,48 +448,6 @@ for (const el of items) {
 		}
 	]}
 />
-
-<h2>Long tasks and responsiveness</h2>
-<p>
-	Any task over 50 ms counts as a <strong>long task</strong>. Input arriving during it waits. <strong>Interaction to Next Paint</strong> (INP), the
-	Core Web Vital that replaced First Input Delay in March 2024, measures the time from an interaction to the next frame painted after it; 200 ms or
-	less at the 75th percentile counts as good. The remedy is to break work into tasks and yield between them:
-</p>
-
-<Code
-	lang="js"
-	code={`function yieldToMain() {
-  // scheduler.yield() resumes ahead of other tasks of the same priority.
-  // Not every browser has it yet, so feature-detect.
-  if (globalThis.scheduler?.yield) return scheduler.yield();
-  return new Promise((resolve) => setTimeout(resolve, 0));
-}
-
-async function processAll(items) {
-  let deadline = performance.now() + 10;
-  for (const item of items) {
-    process(item);
-    if (performance.now() > deadline) {
-      await yieldToMain();              // input and rendering run here
-      deadline = performance.now() + 10;
-    }
-  }
-}`}
-	caption="Yielding on a time budget, not every item, keeps the overhead of extra tasks small."
-/>
-
-<h2>Workers: a second loop, not a second stack</h2>
-<p>
-	A Web Worker is a separate thread with its own realm, heap, call stack and event loop. Communication is by <code>postMessage</code>, which
-	structured-clones data, or transfers ownership of <code>ArrayBuffer</code>s with no copy. True shared memory requires
-	<code>SharedArrayBuffer</code> plus <code>Atomics</code>, and browsers only expose it on cross-origin-isolated pages, served with
-	<code>Cross-Origin-Opener-Policy: same-origin</code> and <code>Cross-Origin-Embedder-Policy: require-corp</code>.
-</p>
-
-<Note title="DevCodex uses one">
-	Practice runs your code in a worker. A <code>while (true)</code> blocks only the worker’s loop; the page’s loop keeps handling input, notices the
-	time limit, and calls <code>terminate()</code>, the only way to stop a stack that never unwinds.
-</Note>
 
 <h2>Node.js: same idea, different loop</h2>
 <p>Node runs libuv’s loop, which cycles through fixed phases. Each phase has its own FIFO queue of callbacks:</p>
@@ -353,7 +488,7 @@ console.log('sync');`}
 	<li><strong>Recursive <code>process.nextTick</code></strong> starves I/O exactly like recursive microtasks starve rendering.</li>
 </ul>
 
-<h2>Recap</h2>
+<h2>Recap: the full model</h2>
 <ol>
 	<li>One stack per agent; host APIs do the waiting and enqueue callbacks.</li>
 	<li>Per iteration: one task, a full microtask drain, then maybe a rendering update.</li>
@@ -364,6 +499,7 @@ console.log('sync');`}
 </ol>
 
 <Quiz
+	title="Under the hood check"
 	questions={[
 		{
 			prompt: 'A resolved promise’s .then and an already-expired setTimeout(…, 0) are both waiting. Which runs first?',
@@ -406,3 +542,4 @@ console.log('sync');`}
 	<li><a href="https://web.dev/articles/inp" rel="external">web.dev: Interaction to Next Paint</a></li>
 	<li><a href="https://web.dev/articles/optimize-long-tasks" rel="external">web.dev: Optimize long tasks</a></li>
 </ul>
+</Layer>

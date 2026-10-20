@@ -4,8 +4,167 @@
 	import Note from '../../components/teach/Note.svelte';
 	import Code from '../../components/teach/Code.svelte';
 	import Diagram from '../../components/teach/Diagram.svelte';
+	import Layer from '../../components/teach/Layer.svelte';
+	import CorePack from '../../components/teach/CorePack.svelte';
 </script>
 
+<p>
+	The web forgets you between clicks. Each request your browser sends is a stranger to the server: nothing in HTTP says “this is the same person
+	as a second ago”. Yet you sign in once and stay signed in for weeks. The trick is a <strong>cookie</strong>, a small note the server asks your
+	browser to keep and show again on every visit.
+</p>
+<p>In this lesson you will learn:</p>
+<ul>
+	<li>how a cookie is handed out and sent back,</li>
+	<li>what a <strong>session</strong> is, and why the cookie holds only a random ID,</li>
+	<li>the three settings that keep a sign-in cookie safe, and</li>
+	<li>how signing out and expiry work.</li>
+</ul>
+
+<h2>Words you will meet</h2>
+<dl>
+	<div>
+		<dt>Stateless</dt>
+		<dd>Remembering nothing between requests. HTTP is stateless, so each request has to carry anything the server needs to know.</dd>
+	</div>
+	<div>
+		<dt>Cookie</dt>
+		<dd>A small name and value, like <code>theme=dark</code>, that the server asks the browser to store and send back.</dd>
+	</div>
+	<div>
+		<dt>Session</dt>
+		<dd>The server’s record of a signed-in visit: who you are and when it expires, found using an ID from a cookie.</dd>
+	</div>
+	<div>
+		<dt>Session ID</dt>
+		<dd>A long random code that means nothing on its own. It is the key to your session record on the server.</dd>
+	</div>
+</dl>
+
+<h2>A wristband for the web</h2>
+<p>
+	Think of a festival wristband. At the gate, staff check your ticket once and give you a wristband. After that, you just show the wristband to get
+	into each stage. Nobody asks for your ticket again.
+</p>
+<p>
+	Cookies work the same way. When you sign in, the server checks your password once, then asks your browser to keep a cookie. From then on, your
+	browser shows that cookie automatically with every request to that site.
+</p>
+
+<Code
+	lang="http"
+	title="The server hands out a cookie"
+	code={`HTTP/2 200
+set-cookie: sid=k3v9Qp7xT2…; Secure; HttpOnly; SameSite=Lax`}
+/>
+
+<Code
+	lang="http"
+	title="The browser shows it on every later request"
+	code={`GET /account HTTP/2
+host: example.com
+cookie: sid=k3v9Qp7xT2…`}
+	caption="Set-Cookie comes from the server; Cookie goes back from the browser, automatically."
+/>
+
+<h2>Sessions: the cookie is only a key</h2>
+<p>
+	The cookie doesn’t contain your name or your account. It holds a long random <strong>session ID</strong>. The server keeps a list of session IDs
+	and who each one belongs to. When a request arrives, the server looks the ID up and knows who you are.
+</p>
+
+<Diagram
+	name="cookies-sessions-sign-in"
+	alt="Sequence diagram. The browser posts credentials to the app server, which checks the password, saves a new session ID with the user and expiry in the session store, and replies 303 with a __Host-sid cookie. Later requests carry the cookie; the server looks the ID up in the store and serves the user's page. Logging out deletes the ID from the store and expires the cookie."
+	caption="The cookie only ever carries the ID. Who you are, and whether the session is still valid, lives on the server."
+/>
+
+<p>
+	Keeping the details on the server has a big advantage: the server can end a session at any moment, just by deleting its record. That is how
+	“sign out of all devices” works.
+</p>
+
+<h2>Three settings that keep it safe</h2>
+<p>A sign-in cookie is as good as a password while it lasts, so it should always come with these three settings:</p>
+
+<div class="table-wrap">
+	<table>
+		<thead><tr><th scope="col">Setting</th><th scope="col">What it does</th><th scope="col">What it protects against</th></tr></thead>
+		<tbody>
+			<tr><th scope="row"><code>HttpOnly</code></th><td>Page JavaScript can’t read the cookie</td><td>A script injected into the page stealing it</td></tr>
+			<tr><th scope="row"><code>Secure</code></th><td>Only sent over HTTPS</td><td>Someone on the same Wi-Fi reading it</td></tr>
+			<tr><th scope="row"><code>SameSite=Lax</code></th><td>Not sent with most requests started by other websites</td><td>Another site making you do things while signed in</td></tr>
+		</tbody>
+	</table>
+</div>
+
+<Note title="Cookies are not a place for secrets" tone="warn">
+	Anything in a cookie can be seen and changed on the user’s own device. Keep passwords and personal data on the server; the cookie should hold
+	only the random ID that points to them.
+</Note>
+
+<h2>Signing out and expiry</h2>
+<ul>
+	<li><strong>Signing out</strong> deletes the session on the server and tells the browser to drop the cookie. Even if a copy of the cookie survived somewhere, it now points to nothing.</li>
+	<li><strong>Expiry</strong> limits how long a session lasts. The cookie can carry an expiry time for the browser, and the server keeps its own, which is the one that counts.</li>
+	<li><strong>Remember me</strong> usually just means a longer expiry.</li>
+</ul>
+
+<h2>See your own cookies</h2>
+<p>
+	Open your browser’s developer tools and look for <strong>Application</strong> (Chrome and Edge) or <strong>Storage</strong> (Firefox and Safari), then
+	Cookies. You will see each cookie’s name, value and settings. Typing <code>document.cookie</code> in the console lists the ones page scripts can
+	read; <code>HttpOnly</code> cookies are missing, which is exactly the point.
+</p>
+
+<h2>Recap</h2>
+<ol>
+	<li>HTTP is <strong>stateless</strong>, so the server hands your browser a <strong>cookie</strong> to show on every visit.</li>
+	<li>The server sends <code>Set-Cookie</code>; the browser sends <code>Cookie</code> back automatically.</li>
+	<li>A sign-in cookie holds only a random <strong>session ID</strong>; the server looks up who you are.</li>
+	<li>Always set <code>HttpOnly</code>, <code>Secure</code> and <code>SameSite</code> on sign-in cookies.</li>
+	<li>Signing out deletes the session on the server, which is what really ends it.</li>
+</ol>
+
+<Quiz
+	questions={[
+		{
+			prompt: 'Without cookies, does a web server remember your previous request?',
+			options: ['Yes, always', 'No, each request stands alone'],
+			answer: 1,
+			explain: 'HTTP is stateless. The cookie is what lets the server connect one request to the next.'
+		},
+		{
+			prompt: 'Which header does the browser use to send a cookie back to the server?',
+			options: ['Set-Cookie', 'Cookie', 'Authorization'],
+			answer: 1,
+			explain: 'The server sets it with Set-Cookie; the browser returns it in the Cookie header on later requests.'
+		},
+		{
+			prompt: 'What should a sign-in cookie contain?',
+			options: ['The user’s password', 'The user’s name and email', 'A long random session ID'],
+			answer: 2,
+			explain: 'The ID points to the session on the server. It reveals nothing by itself and can be cancelled at any time.'
+		},
+		{
+			prompt: 'Which setting stops page JavaScript from reading a cookie?',
+			options: ['Secure', 'HttpOnly', 'SameSite=Lax'],
+			answer: 1,
+			explain: 'HttpOnly hides the cookie from scripts. Secure is about HTTPS, and SameSite is about other sites.'
+		},
+		{
+			prompt: 'What really ends a session when you sign out?',
+			options: ['The browser forgetting the cookie', 'The server deleting the session record'],
+			answer: 1,
+			explain: 'Once the server deletes the record, the ID points to nothing, even if a copy of the cookie still exists.'
+		}
+	]}
+/>
+
+<CorePack />
+
+
+<Layer depth="deeper" summary="Every cookie attribute and prefix, a working session store in plain Node, signed tokens versus server sessions, and the mistakes people make.">
 <p>
 	HTTP is <strong>stateless</strong>: each request stands alone, and nothing in the protocol says two requests came from the same person. Yet you
 	sign in once and stay signed in for weeks. The bridge is the <strong>cookie</strong>, a small name–value pair the server asks the browser to
@@ -84,7 +243,7 @@ cookie: __Host-sid=k3v9Qp…; theme=dark`}
 
 <Quiz
 	variant="checkpoint"
-	title="Checkpoint 1"
+	title="Going deeper checkpoint 1"
 	questions={[
 		{
 			prompt: 'Which cookie attribute stops page JavaScript from reading the cookie through document.cookie?',
@@ -94,88 +253,6 @@ cookie: __Host-sid=k3v9Qp…; theme=dark`}
 		}
 	]}
 />
-
-<h2>Same-site is not same-origin</h2>
-<p>
-	<code>SameSite</code> is about <strong>sites</strong>, which are coarser than origins. An <strong>origin</strong> is scheme + host + port. A
-	<strong>site</strong> is the scheme plus the <em>registrable domain</em>: one label below a public suffix such as <code>.com</code> or
-	<code>.co.uk</code>. The list of public suffixes is the community-maintained Public Suffix List, and it includes hosting platforms whose users
-	must not share cookies.
-</p>
-
-<div class="table-wrap">
-	<table>
-		<thead><tr><th scope="col">Page</th><th scope="col">Request to</th><th scope="col">Same origin?</th><th scope="col">Same site?</th></tr></thead>
-		<tbody>
-			<tr><th scope="row"><code>https://app.example.com</code></th><td><code>https://api.example.com</code></td><td>No: different host</td><td>Yes: both under <code>example.com</code></td></tr>
-			<tr><th scope="row"><code>https://example.com</code></th><td><code>https://example.com:8443</code></td><td>No: different port</td><td>Yes: ports are ignored</td></tr>
-			<tr><th scope="row"><code>http://example.com</code></th><td><code>https://example.com</code></td><td>No: different scheme</td><td>No under the current “schemeful” definition, which Chrome applies to SameSite. Older definitions ignored the scheme</td></tr>
-			<tr><th scope="row"><code>https://alice.github.io</code></th><td><code>https://bob.github.io</code></td><td>No</td><td>No: <code>github.io</code> is a public suffix</td></tr>
-			<tr><th scope="row"><code>https://shop.com</code></th><td><code>https://pay-provider.com</code></td><td>No</td><td>No</td></tr>
-		</tbody>
-	</table>
-</div>
-
-<Note title="Same-site does not mean trusted" tone="warn">
-	Every subdomain is same-site with every other. A forgotten marketing subdomain, or one taken over through a dangling DNS record, can send
-	same-site requests carrying your <code>SameSite=Strict</code> cookies, and without the <code>__Host-</code> prefix it can also plant cookies of
-	its own on the parent domain.
-</Note>
-
-<h2>SameSite: when cookies cross sites</h2>
-<p>
-	A <strong>cross-site request</strong> is one initiated by a page on another site: a link, a form submission, an <code>&lt;img&gt;</code>, an
-	iframe or a <code>fetch</code>. <code>SameSite</code> decides which of those carry the cookie. Pick a value to see what it does:
-</p>
-
-<Choice
-	codeLabels
-	title="Pick a SameSite value"
-	options={[
-		{
-			label: 'Strict',
-			code: 'set-cookie: __Host-sid=…; Path=/; Secure; HttpOnly; SameSite=Strict',
-			lang: 'http',
-			body: 'Never sent on a request that starts from another site, not even when the user clicks a link to you. Someone following a link from email or chat lands on your site looking signed out until the next same-site request.',
-			verdict: 'Use for: cookies that authorise state-changing actions, often paired with a Lax cookie for reading.'
-		},
-		{
-			label: 'Lax',
-			code: 'set-cookie: __Host-sid=…; Path=/; Secure; HttpOnly; SameSite=Lax',
-			lang: 'http',
-			body: 'Sent on top-level navigations with a safe method, like clicking a link (GET). Withheld from cross-site POST forms, iframes, images and fetch. This blocks the classic CSRF form post while keeping inbound links signed in.',
-			verdict: 'Use for: most session cookies.'
-		},
-		{
-			label: 'None',
-			code: 'set-cookie: widget_sid=…; Secure; SameSite=None; Partitioned',
-			lang: 'http',
-			body: 'Sent on every request, including from pages on other sites, where the browser allows third-party cookies at all. Requires Secure. Your server now relies entirely on other CSRF defences.',
-			verdict: 'Use for: embedded widgets and cross-site flows that genuinely need it, ideally Partitioned.'
-		},
-		{
-			label: '(omitted)',
-			code: 'set-cookie: sid=…; Path=/; Secure; HttpOnly',
-			lang: 'http',
-			body: 'Chrome and Edge treat it as Lax, with a two-minute exception that still sends brand-new cookies on top-level cross-site POSTs. Firefox and Safari do not default to Lax, so the cookie goes cross-site like None.',
-			verdict: 'Use for: nothing. Always state the value you mean.'
-		}
-	]}
-/>
-
-<div class="table-wrap">
-	<table>
-		<caption>Is a cookie set by your site sent when a page on another site triggers the request?</caption>
-		<thead><tr><th scope="col">Request from the other site</th><th scope="col">Strict</th><th scope="col">Lax</th><th scope="col">None</th></tr></thead>
-		<tbody>
-			<tr><th scope="row">User clicks a link to you (top-level GET)</th><td>No</td><td>Yes</td><td>Yes</td></tr>
-			<tr><th scope="row">Form POST to you (top-level)</th><td>No</td><td>No</td><td>Yes</td></tr>
-			<tr><th scope="row">Your page inside their iframe</th><td>No</td><td>No</td><td>Yes*</td></tr>
-			<tr><th scope="row"><code>&lt;img&gt;</code>, <code>fetch()</code>, script to your URL</th><td>No</td><td>No</td><td>Yes*</td></tr>
-		</tbody>
-	</table>
-</div>
-<p>* Only where the browser allows third-party cookies, which Safari and Firefox block or partition by default.</p>
 
 <h2>Sessions: what “signed in” means</h2>
 <p>A server-side session splits the job: the browser holds a random, meaningless identifier, and the server holds everything else.</p>
@@ -187,11 +264,6 @@ cookie: __Host-sid=k3v9Qp…; theme=dark`}
 	<li>Signing out deletes the record on the server and expires the cookie in the browser.</li>
 </ol>
 
-<Diagram
-	name="cookies-sessions-sign-in"
-	alt="Sequence diagram. The browser posts credentials to the app server, which checks the password, saves a new session ID with the user and expiry in the session store, and replies 303 with a __Host-sid cookie. Later requests carry the cookie; the server looks the ID up in the store and serves the user's page. Logging out deletes the ID from the store and expires the cookie."
-	caption="The cookie only ever carries the ID. Who you are, and whether the session is still valid, lives in the store."
-/>
 <p>The ID itself must be unguessable. OWASP asks for at least 64 bits of entropy from a cryptographically secure generator; 256 bits costs nothing extra. Never derive it from a user ID, a timestamp or <code>Math.random()</code>.</p>
 
 <h3>A session store in plain Node</h3>
@@ -275,7 +347,7 @@ server.listen(3000);
 
 <Quiz
 	variant="checkpoint"
-	title="Checkpoint 2"
+	title="Going deeper checkpoint 2"
 	questions={[
 		{
 			prompt: 'With SameSite=Lax, is the cookie sent when someone follows a link from another site to yours (a top-level GET)?',
@@ -341,6 +413,108 @@ verify(cookie.replace('u_1', 'u_2'));       // null: tampered`}
 	they are usually short-lived and paired with a revocable refresh session.
 </p>
 
+<h2>Common mistakes</h2>
+<ul>
+	<li><strong>Tokens in <code>localStorage</code>.</strong> Any script can read it, so one XSS bug leaks every session. An <code>HttpOnly</code> cookie is strictly harder to steal.</li>
+	<li><strong><code>Domain=example.com</code> by habit.</strong> It widens the cookie to every subdomain, including ones run by other teams or vendors. Omit <code>Domain</code> unless you need it.</li>
+	<li><strong>Relying on <code>Path</code> for security.</strong> Pages on the same origin can read each other’s cookies through the DOM, so <code>Path</code> is an organising tool, not an isolation boundary.</li>
+	<li><strong>Deleting with the wrong attributes.</strong> A cookie is replaced only by one with the same name, domain and path. A logout that sets <code>sid=; Max-Age=0</code> with a different <code>Path</code> creates a second cookie and leaves the first.</li>
+	<li><strong>Trusting cookie values.</strong> Anything in a cookie can be edited by the user. Unsigned <code>role=admin</code> is a privilege escalation waiting to happen.</li>
+	<li><strong>Endless sessions.</strong> A session that never times out turns one stolen cookie into permanent access. Set an idle timeout and an absolute lifetime.</li>
+</ul>
+
+<h2>Inspecting cookies in DevTools</h2>
+<ol>
+	<li>DevTools → <strong>Application</strong> (Chrome, Edge) or <strong>Storage</strong> (Firefox, Safari) → Cookies lists every cookie with its attributes.</li>
+	<li>In the <strong>Network</strong> tab, open a request and choose its Cookies view. Chrome shows cookies that were blocked and the reason, such as a SameSite mismatch.</li>
+	<li>Type <code>document.cookie</code> in the console. <code>HttpOnly</code> cookies are missing from the result, which is the point.</li>
+</ol>
+</Layer>
+
+
+<Layer depth="hood" summary="Where same-site and same-origin differ, the exact SameSite rules, CSRF, XSS and fixation defences, third-party cookies today, and browser limits.">
+<h2>Same-site is not same-origin</h2>
+<p>
+	<code>SameSite</code> is about <strong>sites</strong>, which are coarser than origins. An <strong>origin</strong> is scheme + host + port. A
+	<strong>site</strong> is the scheme plus the <em>registrable domain</em>: one label below a public suffix such as <code>.com</code> or
+	<code>.co.uk</code>. The list of public suffixes is the community-maintained Public Suffix List, and it includes hosting platforms whose users
+	must not share cookies.
+</p>
+
+<div class="table-wrap">
+	<table>
+		<thead><tr><th scope="col">Page</th><th scope="col">Request to</th><th scope="col">Same origin?</th><th scope="col">Same site?</th></tr></thead>
+		<tbody>
+			<tr><th scope="row"><code>https://app.example.com</code></th><td><code>https://api.example.com</code></td><td>No: different host</td><td>Yes: both under <code>example.com</code></td></tr>
+			<tr><th scope="row"><code>https://example.com</code></th><td><code>https://example.com:8443</code></td><td>No: different port</td><td>Yes: ports are ignored</td></tr>
+			<tr><th scope="row"><code>http://example.com</code></th><td><code>https://example.com</code></td><td>No: different scheme</td><td>No under the current “schemeful” definition, which Chrome applies to SameSite. Older definitions ignored the scheme</td></tr>
+			<tr><th scope="row"><code>https://alice.github.io</code></th><td><code>https://bob.github.io</code></td><td>No</td><td>No: <code>github.io</code> is a public suffix</td></tr>
+			<tr><th scope="row"><code>https://shop.com</code></th><td><code>https://pay-provider.com</code></td><td>No</td><td>No</td></tr>
+		</tbody>
+	</table>
+</div>
+
+<Note title="Same-site does not mean trusted" tone="warn">
+	Every subdomain is same-site with every other. A forgotten marketing subdomain, or one taken over through a dangling DNS record, can send
+	same-site requests carrying your <code>SameSite=Strict</code> cookies, and without the <code>__Host-</code> prefix it can also plant cookies of
+	its own on the parent domain.
+</Note>
+
+<h2>SameSite: when cookies cross sites</h2>
+<p>
+	A <strong>cross-site request</strong> is one initiated by a page on another site: a link, a form submission, an <code>&lt;img&gt;</code>, an
+	iframe or a <code>fetch</code>. <code>SameSite</code> decides which of those carry the cookie. Pick a value to see what it does:
+</p>
+
+<Choice
+	codeLabels
+	title="Pick a SameSite value"
+	options={[
+		{
+			label: 'Strict',
+			code: 'set-cookie: __Host-sid=…; Path=/; Secure; HttpOnly; SameSite=Strict',
+			lang: 'http',
+			body: 'Never sent on a request that starts from another site, not even when the user clicks a link to you. Someone following a link from email or chat lands on your site looking signed out until the next same-site request.',
+			verdict: 'Use for: cookies that authorise state-changing actions, often paired with a Lax cookie for reading.'
+		},
+		{
+			label: 'Lax',
+			code: 'set-cookie: __Host-sid=…; Path=/; Secure; HttpOnly; SameSite=Lax',
+			lang: 'http',
+			body: 'Sent on top-level navigations with a safe method, like clicking a link (GET). Withheld from cross-site POST forms, iframes, images and fetch. This blocks the classic CSRF form post while keeping inbound links signed in.',
+			verdict: 'Use for: most session cookies.'
+		},
+		{
+			label: 'None',
+			code: 'set-cookie: widget_sid=…; Secure; SameSite=None; Partitioned',
+			lang: 'http',
+			body: 'Sent on every request, including from pages on other sites, where the browser allows third-party cookies at all. Requires Secure. Your server now relies entirely on other CSRF defences.',
+			verdict: 'Use for: embedded widgets and cross-site flows that genuinely need it, ideally Partitioned.'
+		},
+		{
+			label: '(omitted)',
+			code: 'set-cookie: sid=…; Path=/; Secure; HttpOnly',
+			lang: 'http',
+			body: 'Chrome and Edge treat it as Lax, with a two-minute exception that still sends brand-new cookies on top-level cross-site POSTs. Firefox and Safari do not default to Lax, so the cookie goes cross-site like None.',
+			verdict: 'Use for: nothing. Always state the value you mean.'
+		}
+	]}
+/>
+
+<div class="table-wrap">
+	<table>
+		<caption>Is a cookie set by your site sent when a page on another site triggers the request?</caption>
+		<thead><tr><th scope="col">Request from the other site</th><th scope="col">Strict</th><th scope="col">Lax</th><th scope="col">None</th></tr></thead>
+		<tbody>
+			<tr><th scope="row">User clicks a link to you (top-level GET)</th><td>No</td><td>Yes</td><td>Yes</td></tr>
+			<tr><th scope="row">Form POST to you (top-level)</th><td>No</td><td>No</td><td>Yes</td></tr>
+			<tr><th scope="row">Your page inside their iframe</th><td>No</td><td>No</td><td>Yes*</td></tr>
+			<tr><th scope="row"><code>&lt;img&gt;</code>, <code>fetch()</code>, script to your URL</th><td>No</td><td>No</td><td>Yes*</td></tr>
+		</tbody>
+	</table>
+</div>
+<p>* Only where the browser allows third-party cookies, which Safari and Firefox block or partition by default.</p>
+
 <h2>Attacks and the defences that work</h2>
 
 <div class="table-wrap">
@@ -393,24 +567,7 @@ verify(cookie.replace('u_1', 'u_2'));       // null: tampered`}
 	</table>
 </div>
 
-<h2>Common mistakes</h2>
-<ul>
-	<li><strong>Tokens in <code>localStorage</code>.</strong> Any script can read it, so one XSS bug leaks every session. An <code>HttpOnly</code> cookie is strictly harder to steal.</li>
-	<li><strong><code>Domain=example.com</code> by habit.</strong> It widens the cookie to every subdomain, including ones run by other teams or vendors. Omit <code>Domain</code> unless you need it.</li>
-	<li><strong>Relying on <code>Path</code> for security.</strong> Pages on the same origin can read each other’s cookies through the DOM, so <code>Path</code> is an organising tool, not an isolation boundary.</li>
-	<li><strong>Deleting with the wrong attributes.</strong> A cookie is replaced only by one with the same name, domain and path. A logout that sets <code>sid=; Max-Age=0</code> with a different <code>Path</code> creates a second cookie and leaves the first.</li>
-	<li><strong>Trusting cookie values.</strong> Anything in a cookie can be edited by the user. Unsigned <code>role=admin</code> is a privilege escalation waiting to happen.</li>
-	<li><strong>Endless sessions.</strong> A session that never times out turns one stolen cookie into permanent access. Set an idle timeout and an absolute lifetime.</li>
-</ul>
-
-<h2>Inspecting cookies</h2>
-<ol>
-	<li>DevTools → <strong>Application</strong> (Chrome, Edge) or <strong>Storage</strong> (Firefox, Safari) → Cookies lists every cookie with its attributes.</li>
-	<li>In the <strong>Network</strong> tab, open a request and choose its Cookies view. Chrome shows cookies that were blocked and the reason, such as a SameSite mismatch.</li>
-	<li>Type <code>document.cookie</code> in the console. <code>HttpOnly</code> cookies are missing from the result, which is the point.</li>
-</ol>
-
-<h2>Recap</h2>
+<h2>Recap: the full picture</h2>
 <ul>
 	<li>The server sets cookies with <code>Set-Cookie</code>; the browser sends back names and values only, on every matching request.</li>
 	<li>Session cookies should be <code>__Host-</code> prefixed, <code>Secure</code>, <code>HttpOnly</code> and <code>SameSite=Lax</code> or <code>Strict</code>.</li>
@@ -421,6 +578,7 @@ verify(cookie.replace('u_1', 'u_2'));       // null: tampered`}
 </ul>
 
 <Quiz
+	title="Under the hood check"
 	questions={[
 		{
 			prompt: 'A cookie is set with SameSite=Lax. A user on news.com clicks a link to your site. Is the cookie sent with that navigation?',
@@ -466,3 +624,4 @@ verify(cookie.replace('u_1', 'u_2'));       // null: tampered`}
 	<li><a href="https://developer.chrome.com/blog/cookie-max-age-expires" rel="external">Chrome: the 400-day cookie lifetime cap</a></li>
 	<li><a href="https://privacysandbox.com/news/privacy-sandbox-next-steps/" rel="external">Google: Next steps for Privacy Sandbox and tracking protections in Chrome (April 2025)</a></li>
 </ul>
+</Layer>

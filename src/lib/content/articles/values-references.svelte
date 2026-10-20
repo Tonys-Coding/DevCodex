@@ -54,6 +54,8 @@ fresh.push("grace");`;
 			output: 'team  → ["ada", "linus"]\nfresh → ["ada", "linus", "grace"]'
 		}
 	];
+	import Layer from '../../components/teach/Layer.svelte';
+	import CorePack from '../../components/teach/CorePack.svelte';
 </script>
 
 <p>
@@ -354,3 +356,207 @@ console.log(yours, boosted); // [70] [70, 100]`}
 		}
 	]}
 />
+
+<CorePack />
+
+<Layer depth="deeper" summary="Pass by sharing, immutability you choose, what deep copies keep and lose, and Python’s mutable default-argument trap.">
+<h2>Pass by sharing</h2>
+<p>
+	Both JavaScript and Python pass arguments the same way, often called <strong>call by sharing</strong>: the function receives a copy of whatever the
+	caller’s variable holds. For a number that is the number; for an object it is the reference. Two consequences follow, and both surprise people:
+</p>
+
+<Code
+	lang="js"
+	code={`function swap(a, b) { const t = a; a = b; b = t; }
+let x = 1, y = 2;
+swap(x, y);
+console.log(x, y);          // 1 2: swap only moved its own names
+
+function rename(user) {
+  user.name = "Grace";      // changes the caller's object
+  user = { name: "Linus" }; // points the local name elsewhere; caller unaffected
+}
+const u = { name: "Ada" };
+rename(u);
+console.log(u.name);        // "Grace"`}
+	caption="Mutating through a parameter is visible to the caller; reassigning the parameter is not."
+/>
+
+<h2>Immutability on purpose</h2>
+<p>The safest shared object is one nobody can change. Both languages give you tools, with different strengths:</p>
+
+<div class="table-wrap">
+	<table>
+		<thead><tr><th scope="col">Tool</th><th scope="col">What it guarantees</th><th scope="col">The catch</th></tr></thead>
+		<tbody>
+			<tr><th scope="row"><code>Object.freeze(obj)</code></th><td>The object’s own properties can’t be added, removed or changed</td><td>Shallow: nested objects stay mutable. Writes fail silently outside strict mode and throw a <code>TypeError</code> inside it</td></tr>
+			<tr><th scope="row">Python <code>tuple</code>, <code>frozenset</code></th><td>The container can’t change</td><td>A tuple can still hold a list, and that list can change</td></tr>
+			<tr><th scope="row">Update by copying</th><td><code>{'{'} ...user, name: "Ada" {'}'}</code> or <code>[...list, item]</code> make new objects instead of changing old ones</td><td>Each update allocates; fine for app state, costly in tight loops</td></tr>
+		</tbody>
+	</table>
+</div>
+
+<Code
+	lang="py"
+	code={`t = ([1], 2)
+t[0] = [9]        # TypeError: the tuple itself can't change
+t[0].append(9)    # allowed: the list inside it can
+print(t)          # ([1, 9], 2)`}
+/>
+
+<h2>Deep copies and their limits</h2>
+<p><code>structuredClone</code> and Python’s <code>copy.deepcopy</code> copy everything reachable, including cycles. The common shortcut <code>JSON.parse(JSON.stringify(x))</code> is not a substitute:</p>
+
+<div class="table-wrap">
+	<table>
+		<thead><tr><th scope="col">Value inside</th><th scope="col"><code>JSON</code> round trip</th><th scope="col"><code>structuredClone</code></th></tr></thead>
+		<tbody>
+			<tr><th scope="row"><code>Date</code></th><td>Becomes a string</td><td>Stays a <code>Date</code></td></tr>
+			<tr><th scope="row"><code>Map</code>, <code>Set</code></th><td>Becomes <code>{'{'}{'}'}</code></td><td>Copied</td></tr>
+			<tr><th scope="row"><code>undefined</code> property</th><td>Dropped</td><td>Kept</td></tr>
+			<tr><th scope="row">A cycle (<code>a.self = a</code>)</th><td>Throws</td><td>Copied, cycle intact</td></tr>
+			<tr><th scope="row">A function</th><td>Dropped</td><td>Throws <code>DataCloneError</code></td></tr>
+		</tbody>
+	</table>
+</div>
+
+<Quiz
+	variant="checkpoint"
+	title="Going deeper checkpoint 1"
+	questions={[
+		{
+			prompt: 'const o = Object.freeze({ tags: ["a"] }); o.tags.push("b"). What is o.tags?',
+			options: ['["a"]', '["a", "b"]', 'It throws'],
+			answer: 1,
+			explain: 'freeze is shallow: o can’t get new properties, but the array it points to is still mutable.'
+		}
+	]}
+/>
+
+<h2>Python’s default-argument trap</h2>
+<p>Default values are created once, when the function is defined, not on every call. A mutable default is therefore shared by every call that uses it:</p>
+
+<Code
+	lang="py"
+	code={`def add(item, items=[]):
+    items.append(item)
+    return items
+
+print(add(1), add(2))      # [1, 2] [1, 2]: one list, shared
+
+def add_fixed(item, items=None):
+    if items is None:
+        items = []         # a new list on every call
+    items.append(item)
+    return items
+
+print(add_fixed(1), add_fixed(2))   # [1] [2]`}
+	caption="Linters flag this pattern; None-then-create is the standard fix."
+/>
+
+<Quiz
+	variant="checkpoint"
+	title="Going deeper checkpoint 2"
+	questions={[
+		{
+			prompt: 'Inside a function, which change does the caller see?',
+			options: ['param = []', 'param.append(1)', 'Neither'],
+			answer: 1,
+			explain: 'append changes the shared list. param = [] only points the function’s own name at a new list.'
+		}
+	]}
+/>
+</Layer>
+
+<Layer depth="hood" summary="What a Python name is, CPython’s small-int cache and interning, how V8 stores values, and JavaScript’s three kinds of equality.">
+<h2>What a Python name really is</h2>
+<p>
+	In Python every value is an object on the heap, and a variable is a name bound to one. <code>id(x)</code> gives the object’s identity and
+	<code>x is y</code> compares identities. Numbers and strings only <em>behave</em> like values because they can’t be changed.
+</p>
+<p>CPython adds caches that make identity misleading for immutable values. These are implementation details, not language rules:</p>
+<ul>
+	<li><strong>Small integers</strong> from −5 to 256 are created once and reused, so <code>256 is int("256")</code> is <code>True</code> but <code>257 is int("257")</code> is <code>False</code>.</li>
+	<li><strong>Some strings are interned</strong>, such as identifiers and constants in the same code object, so <code>is</code> may happen to work on them.</li>
+</ul>
+<p>The rule that follows: use <code>==</code> for values and keep <code>is</code> for singletons like <code>None</code>.</p>
+
+<h2>How JavaScript engines hold values</h2>
+<p>
+	The language spec only says primitives behave as values and objects as references. Engines are free to store them however they like. V8, for
+	example, stores small integers (<strong>Smis</strong>) directly in the pointer-sized slot, while heap numbers, strings and objects live on the heap
+	behind a pointer. Strings are immutable, so an engine can share one copy among many variables without anyone being able to tell.
+</p>
+
+<h2>Equality in depth</h2>
+
+<div class="table-wrap">
+	<table>
+		<thead><tr><th scope="col">Comparison</th><th scope="col"><code>NaN</code> vs <code>NaN</code></th><th scope="col"><code>0</code> vs <code>-0</code></th><th scope="col">Used by</th></tr></thead>
+		<tbody>
+			<tr><th scope="row"><code>===</code></th><td><code>false</code></td><td><code>true</code></td><td>Your code, <code>indexOf</code></td></tr>
+			<tr><th scope="row"><code>Object.is</code> (SameValue)</th><td><code>true</code></td><td><code>false</code></td><td>React’s state comparisons</td></tr>
+			<tr><th scope="row">SameValueZero</th><td><code>true</code></td><td><code>true</code></td><td><code>includes</code>, <code>Map</code> and <code>Set</code> keys</td></tr>
+		</tbody>
+	</table>
+</div>
+
+<p>
+	That is why <code>[NaN].includes(NaN)</code> is <code>true</code> while <code>[NaN].indexOf(NaN)</code> is <code>-1</code>. In Python, <code>==</code> calls
+	<code>__eq__</code>, which classes define for value equality; a <code>@dataclass</code> generates one from its fields, so <code>P(1) == P(1)</code> is
+	<code>True</code> while <code>P(1) is P(1)</code> is <code>False</code>.
+</p>
+
+<h2>Recap: what is really going on</h2>
+<ol>
+	<li>Arguments are passed by sharing: a copy of the reference, so mutation is shared and reassignment is not.</li>
+	<li><code>Object.freeze</code> and tuples are shallow; deep copies need <code>structuredClone</code> or <code>deepcopy</code>, not JSON.</li>
+	<li>Python names bind objects; CPython caches small ints and interns some strings, so never use <code>is</code> for values.</li>
+	<li>JavaScript has three equalities: <code>===</code>, SameValue and SameValueZero.</li>
+</ol>
+
+<Quiz
+	title="Under the hood check"
+	questions={[
+		{
+			prompt: 'In CPython, x = 257 and y = int("257"). What is x is y?',
+			options: ['True', 'False'],
+			answer: 1,
+			explain: 'Only −5 to 256 are cached, so these are two different int objects that happen to be equal.'
+		},
+		{
+			prompt: 'What does [NaN].includes(NaN) return?',
+			options: ['true', 'false'],
+			answer: 0,
+			explain: 'includes uses SameValueZero, which treats NaN as equal to itself. indexOf uses === and returns -1.'
+		},
+		{
+			prompt: 'JSON.parse(JSON.stringify({ when: new Date(0) })).when is…',
+			options: ['A Date', 'A string', 'undefined'],
+			answer: 1,
+			explain: 'JSON has no date type, so the Date is serialised as an ISO string and stays a string.'
+		},
+		{
+			prompt: 'Which comparison does a JavaScript Map use for its keys?',
+			options: ['===', 'SameValueZero', 'Object.is'],
+			answer: 1,
+			explain: 'SameValueZero: NaN can be a key and finds itself, and 0 and -0 are the same key.'
+		},
+		{
+			prompt: 'A function swap(a, b) reassigns its two parameters. Does it swap the caller’s variables?',
+			options: ['Yes', 'No'],
+			answer: 1,
+			explain: 'Parameters are the function’s own names. Reassigning them never changes the caller’s variables.'
+		}
+	]}
+/>
+
+<h2>Sources and further reading</h2>
+<ul>
+	<li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/structuredClone" rel="external">MDN: structuredClone</a></li>
+	<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Equality_comparisons_and_sameness" rel="external">MDN: Equality comparisons and sameness</a></li>
+	<li><a href="https://docs.python.org/3/reference/datamodel.html" rel="external">Python: the data model</a></li>
+	<li><a href="https://v8.dev/blog/pointer-compression" rel="external">V8 blog: Pointer compression</a></li>
+</ul>
+</Layer>
