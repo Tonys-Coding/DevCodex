@@ -3,7 +3,7 @@
 	import { cards } from '#lib/content/cards.js';
 	import { problems } from '#lib/content/problems.js';
 	import { progress } from '#lib/progress/progress.svelte.js';
-	import { levels } from '#lib/content/levels.js';
+	import { depths } from '#lib/content/levels.js';
 	import { downloadBackup } from '#lib/progress/dashboard.js';
 	import Icon from '#lib/components/Icon.svelte';
 	import Medals from '#lib/components/home/Medals.svelte';
@@ -83,16 +83,16 @@
 		</form>
 
 		<fieldset class="field">
-			<legend>Where your path starts</legend>
+			<legend>How deep lessons open</legend>
 			<div class="choices">
-				{#each levels as l (l.id)}
-					<label class="lv-{l.id}" class:on={progress.data.profile?.level === l.id}>
-						<input type="radio" name="you-level" class="visually-hidden" checked={progress.data.profile?.level === l.id} onchange={() => progress.setLevel(l.id)} />
-						{l.label}
+				{#each depths as d (d.id)}
+					<label class:on={progress.data.profile?.depth === d.id}>
+						<input type="radio" name="you-depth" class="visually-hidden" checked={progress.data.profile?.depth === d.id} onchange={() => progress.setDepth(d.id)} />
+						{d.label}
 					</label>
 				{/each}
 			</div>
-			<p class="hint">The dashboard features lessons at this level and above first. Every lesson stays open to you.</p>
+			<p class="hint">Core always opens. Pick Going deeper or Under the hood to open those layers by default too.</p>
 		</fieldset>
 
 		<div class="field">
@@ -325,14 +325,14 @@
 		align-items: center;
 		min-height: 2.75rem;
 		border-bottom: 3px solid transparent;
-		color: color-mix(in srgb, var(--lv) 75%, var(--ink-3));
+		color: var(--ink-2);
 		font-weight: 800;
 		cursor: pointer;
 	}
 
 	.choices label.on {
-		color: var(--lv);
-		border-bottom-color: var(--lv);
+		color: var(--ink);
+		border-bottom-color: var(--gold);
 	}
 
 	.choices label:has(:focus-visible) {

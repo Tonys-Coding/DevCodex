@@ -1,6 +1,9 @@
 <script lang="ts">
-	import { setContext, untrack, type Snippet } from 'svelte';
+	import { setContext, tick, untrack, type Snippet } from 'svelte';
+	import { depthById } from '../../content/levels';
+	import type { LayerContext } from '../teach/Layer.svelte';
 	import { resolve } from '$app/paths';
+	import { goto } from '$app/navigation';
 	import type { ArticleMeta } from '../../content/types';
 	import { trackById, nextArticle, practiceFor, articleById } from '../../content/catalog';
 	import { cardsUnlockedBy } from '../../content/cards';
@@ -12,7 +15,12 @@
 	import type { TocEntry } from '../../content/article-markup';
 	import { requirements, requiredSeconds, type QuizInfo } from '../../progress/requirements';
 
-	let { meta, toc = [], children }: { meta: ArticleMeta; toc?: TocEntry[]; children: Snippet } = $props();
+	let {
+		meta,
+		toc = [],
+		quizInfo = [],
+		children
+	}: { meta: ArticleMeta; toc?: TocEntry[]; quizInfo?: QuizInfo[]; children: Snippet } = $props();
 
 	const track = $derived(trackById(meta.track));
 	const pack = $derived(cardsUnlockedBy(meta.id));
@@ -35,15 +43,71 @@
 		opening = true;
 	}
 
-	// Quick checks inside the article record their scores against this id, and register so the pack can wait for them.
-	setContext('devcodex:article', () => meta.id);
-	let quizzes = $state<QuizInfo[]>([]);
-	setContext('devcodex:quizzes', (quiz: QuizInfo) => {
-		if (!quizzes.some((q) => q.key === quiz.key)) quizzes = [...quizzes, quiz];
-	});
+	// The article places the pack where its Core ends, with <CorePack />.
+	setContext('devcodex:core-pack', corePack);
 
-	/** What still stands between the reader and the pack. */
-	const checklist = $derived(requirements(progress.data, meta, toc.map((t) => t.id), quizzes));
+	// Quick checks inside the article record their scores against this id.
+	setContext('devcodex:article', () => meta.id);
+	// Every check in the article, with its layer, comes from the build-time markup pass.
+	const quizzes = $derived(quizInfo);
+
+	/** What still stands between the reader and the pack: the Core's sections, time and checks. */
+	const checklist = $derived(requirements(progress.data, meta, toc, quizzes));
+
+	/**
+	 * Layers: Core is always open; Going deeper and Under the hood open by the reader's
+	 * depth preference, when a link points inside them, or when the reader opens them.
+	 */
+	let openLayers = $state<Record<'deeper' | 'hood', boolean>>({ deeper: false, hood: false });
+	setContext<LayerContext>('devcodex:layers', {
+		isOpen: (d) => openLayers[d],
+		setOpen: (d, v) => (openLayers[d] = v),
+		article: () => meta,
+		sections: () => toc,
+		quizzes: () => quizzes
+	});
+	let prefApplied = false;
+	$effect(() => {
+		if (prefApplied || !progress.loaded) return;
+		prefApplied = true;
+		const pref = progress.data.profile?.depth;
+		untrack(() => {
+			if (pref === 'deeper' || pref === 'hood') openLayers.deeper = true;
+			if (pref === 'hood') openLayers.hood = true;
+		});
+	});
+	const layersIn = $derived((['deeper', 'hood'] as const).filter((d) => toc.some((t) => t.depth === d)));
+	const layerMinutes = (d: 'deeper' | 'hood') => Math.max(1, Math.round(toc.filter((t) => t.depth === d).reduce((n, t) => n + t.words, 0) / 160));
+
+	/** Opens the layer holding a section, then scrolls to it. Used by every in-page link. */
+	async function reveal(id: string, smooth = true) {
+		const depth = toc.find((t) => t.id === id)?.depth;
+		if (depth === 'deeper' || depth === 'hood') openLayers[depth] = true;
+		await tick();
+		document.getElementById(id)?.scrollIntoView({ behavior: smooth && !matchMedia('(prefers-reduced-motion: reduce)').matches ? 'smooth' : 'auto' });
+		goto(`#${id}`, { shallow: true, replace: true });
+	}
+	$effect(() => {
+		const onClick = (e: MouseEvent) => {
+			const a = (e.target as HTMLElement).closest?.('a[href^="#"]') as HTMLAnchorElement | null;
+			const id = a?.getAttribute('href')?.slice(1);
+			if (!id || !toc.some((t) => t.id === id)) return;
+			e.preventDefault();
+			reveal(id);
+		};
+		/** A URL hash into a closed layer (on load, or changed in place) opens that layer. */
+		const fromHash = () => {
+			const id = decodeURIComponent(location.hash.slice(1));
+			if (toc.some((t) => t.id === id && t.depth !== 'core')) reveal(id, false);
+		};
+		document.addEventListener('click', onClick);
+		window.addEventListener('hashchange', fromHash);
+		if (location.hash) fromHash();
+		return () => {
+			document.removeEventListener('click', onClick);
+			window.removeEventListener('hashchange', fromHash);
+		};
+	});
 	const unlocked = $derived(checklist.every((r) => r.met));
 
 	/**
@@ -82,9 +146,9 @@
 		});
 	});
 	function resume() {
-		const target = resumeAt && document.getElementById(resumeAt.id);
+		const id = resumeAt?.id;
 		resumeAt = null;
-		target?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+		if (id) reveal(id);
 	}
 
 	/** Phones: the current section sits in a line under the header; tapping it opens the contents and pack checklist. */
@@ -107,7 +171,8 @@
 			let at = '';
 			for (const tocId of ids) {
 				const el = document.getElementById(tocId);
-				if (el && el.getBoundingClientRect().top < window.innerHeight * 0.3) at = tocId;
+				// Sections inside a closed layer have no box, so they never count as read.
+				if (el && el.getClientRects().length && el.getBoundingClientRect().top < window.innerHeight * 0.3) at = tocId;
 			}
 			current = at;
 			if (proseEl) {
@@ -151,88 +216,27 @@
 
 {#snippet sections()}
 	<ol class="sections-list">
-		{#each toc as t (t.id)}
+		{#each toc.filter((t) => t.depth === 'core') as t (t.id)}
 			<li><a href="#{t.id}" aria-current={current === t.id ? 'location' : undefined}>{t.text}</a></li>
 		{/each}
 		<li class="to-pack"><a href="#pack-title"><Icon name="cards" size={16} stroke={2} /> {done ? 'Your cards' : 'Open your pack'}</a></li>
+		{#each layersIn as d (d)}
+			<li class="layer-group">
+				<span class="group-name">
+					{depthById(d).label}
+					{#if progress.layerDone(meta.id, d)}<Icon name="check" size={14} stroke={3} />{:else if !openLayers[d]}<span class="closed">closed</span>{/if}
+				</span>
+				<ol>
+					{#each toc.filter((t) => t.depth === d) as t (t.id)}
+						<li><a href="#{t.id}" class:dim={!openLayers[d]} aria-current={current === t.id ? 'location' : undefined}>{t.text}</a></li>
+					{/each}
+				</ol>
+			</li>
+		{/each}
 	</ol>
 {/snippet}
 
-<article class="read t-{meta.track}">
-	{#if !done}
-		<div class="readbar" aria-hidden="true"><i style="transform: scaleX({readNow})"></i></div>
-	{/if}
-	{#if currentText}
-		<button type="button" class="where-bar" onclick={() => sheet?.showModal()} aria-haspopup="dialog">
-			<span class="where-text">{currentText}</span>
-			{#if !done}<span class="where-pack">Pack {checklist.filter((r) => r.met).length}/3</span>{/if}
-			<Icon name="chevron-right" size={18} stroke={2.5} />
-		</button>
-	{/if}
-
-	<a class="back" href={resolve('/learn/topic/[track]', { track: meta.track })}><Icon name="arrow-left" size={18} stroke={2} /> {track.title}</a>
-	<header class="cover lv-{meta.level}">
-		<p class="tags meta-row">
-			<LevelTag level={meta.level} />
-			<a class="topic-link" href={resolve('/learn/topic/[track]', { track: meta.track })}>{track.title}</a>
-		</p>
-		<h1>{meta.title}</h1>
-		<p class="dek" class:open={dekOpen}>{meta.dek}</p>
-		<button type="button" class="more" onclick={() => (dekOpen = !dekOpen)} aria-expanded={dekOpen}>{dekOpen ? 'Less' : 'More'}</button>
-		<div class="facts" class:open={dekOpen}>
-			<p class="assumes"><strong>Assumes:</strong> {meta.assumes}</p>
-			{#if builds.length}
-				<p class="builds">
-					<strong>Builds on:</strong>
-					{#each builds as b, i (b.id)}<a href={resolve('/learn/[slug]', { slug: b.id })}>{b.title}</a>{i < builds.length - 1 ? '; ' : '.'}{/each}
-					{#if unfinishedPrereq}<span class="nudge">New to this? Start with “{unfinishedPrereq.title}”.</span>{/if}
-				</p>
-			{/if}
-			<p class="chips meta-row">
-				<span><Icon name="clock" size={16} stroke={2} /> {meta.minutes} min</span>
-				<span>{toc.length} sections</span>
-				{#if done}
-					<span class="done"><Icon name="check" size={16} stroke={2.5} /> Finished</span>
-				{:else}
-					<span class="gold"><Icon name="cards" size={16} stroke={2} /> {pack.length} cards inside</span>
-				{/if}
-			</p>
-			{#if !done}
-				<p class="earn">
-					<span class="earn-label">Earn the pack:</span>
-					{#each checklist as r (r.id)}
-						<span class:met={r.met}>
-							{#if r.met}<Icon name="check" size={15} stroke={3} />{/if}
-							{r.id === 'sections' ? 'read it through' : r.id === 'time' ? `about ${Math.ceil(requiredSeconds(meta.minutes) / 60)} min with it` : quizzes.length > 1 ? 'pass the checks' : 'pass the quick check'}
-						</span>
-					{/each}
-				</p>
-			{/if}
-		</div>
-	</header>
-
-	{#if resumeAt && !current}
-		<p class="resume-line">
-			<span>You stopped at <strong>“{resumeAt.text}”</strong> ({Math.round(resumeAt.percent * 100)}% read).</span>
-			<button type="button" class="resume-go" onclick={resume}>Continue there <Icon name="arrow-right" size={16} stroke={2.5} /></button>
-			<button type="button" class="resume-x" onclick={() => (resumeAt = null)} aria-label="Start from the top instead"><Icon name="close" size={18} stroke={2} /></button>
-		</p>
-	{/if}
-
-	<div class="layout">
-		<div class="main">
-			{#if toc.length}
-				<details class="toc-inline">
-					<summary>On this page <span>{toc.length} sections</span></summary>
-					<nav aria-label="On this page">{@render sections()}</nav>
-				</details>
-			{/if}
-
-			<div class="prose" bind:this={proseEl}>
-				{@render children()}
-			</div>
-
-			<section class="packzone" aria-labelledby="pack-title">
+{#snippet packContent()}
 				{#if !done}
 					<h2 id="pack-title">{unlocked ? 'Your pack is ready' : 'Earn your pack'}</h2>
 					<p>
@@ -283,7 +287,100 @@
 						{/if}
 					</div>
 				{/if}
-			</section>
+{/snippet}
+
+{#snippet corePack()}
+	<section class="packzone" aria-labelledby="pack-title">
+		{@render packContent()}
+	</section>
+{/snippet}
+
+<article class="read t-{meta.track}">
+	{#if !done}
+		<div class="readbar" aria-hidden="true"><i style="transform: scaleX({readNow})"></i></div>
+	{/if}
+	{#if currentText}
+		<button type="button" class="where-bar" onclick={() => sheet?.showModal()} aria-haspopup="dialog">
+			<span class="where-text">{currentText}</span>
+			{#if !done}<span class="where-pack">Pack {checklist.filter((r) => r.met).length}/3</span>{/if}
+			<Icon name="chevron-right" size={18} stroke={2.5} />
+		</button>
+	{/if}
+
+	<a class="back" href={resolve('/learn/topic/[track]', { track: meta.track })}><Icon name="arrow-left" size={18} stroke={2} /> {track.title}</a>
+	<header class="cover lv-{meta.level}">
+		<p class="tags meta-row">
+			<LevelTag level={meta.level} />
+			<a class="topic-link" href={resolve('/learn/topic/[track]', { track: meta.track })}>{track.title}</a>
+		</p>
+		<h1>{meta.title}</h1>
+		<p class="dek" class:open={dekOpen}>{meta.dek}</p>
+		<button type="button" class="more" onclick={() => (dekOpen = !dekOpen)} aria-expanded={dekOpen}>{dekOpen ? 'Less' : 'More'}</button>
+		<div class="facts" class:open={dekOpen}>
+			<p class="assumes"><strong>Assumes:</strong> {meta.assumes}</p>
+			{#if builds.length}
+				<p class="builds">
+					<strong>Builds on:</strong>
+					{#each builds as b, i (b.id)}<a href={resolve('/learn/[slug]', { slug: b.id })}>{b.title}</a>{i < builds.length - 1 ? '; ' : '.'}{/each}
+					{#if unfinishedPrereq}<span class="nudge">New to this? Start with “{unfinishedPrereq.title}”.</span>{/if}
+				</p>
+			{/if}
+			<p class="chips meta-row">
+				<span><Icon name="clock" size={16} stroke={2} /> {meta.minutes} min</span>
+				<span>{toc.filter((t) => t.depth === 'core').length} sections</span>
+				{#if done}
+					<span class="done"><Icon name="check" size={16} stroke={2.5} /> Finished</span>
+				{:else}
+					<span class="gold"><Icon name="cards" size={16} stroke={2} /> {pack.length} cards inside</span>
+				{/if}
+			</p>
+			{#if layersIn.length}
+				<p class="layers-line">
+					<span class="earn-label">Layers:</span>
+					<span class="met">Core · {meta.minutes} min</span>
+					{#each layersIn as d (d)}
+						<a href="#layer-{d}-title" class:met={progress.layerDone(meta.id, d)} onclick={(e) => { e.preventDefault(); openLayers[d] = true; tick().then(() => document.getElementById(`layer-${d}-title`)?.scrollIntoView({ block: 'start' })); }}>
+							{#if progress.layerDone(meta.id, d)}<Icon name="check" size={15} stroke={3} />{/if}{depthById(d).label} · {layerMinutes(d)} min
+						</a>
+					{/each}
+				</p>
+			{/if}
+			{#if !done}
+				<p class="earn">
+					<span class="earn-label">Earn the pack:</span>
+					{#each checklist as r (r.id)}
+						<span class:met={r.met}>
+							{#if r.met}<Icon name="check" size={15} stroke={3} />{/if}
+							{r.id === 'sections' ? 'read it through' : r.id === 'time' ? `about ${Math.ceil(requiredSeconds(meta.minutes) / 60)} min with it` : quizzes.length > 1 ? 'pass the checks' : 'pass the quick check'}
+						</span>
+					{/each}
+				</p>
+			{/if}
+		</div>
+	</header>
+
+	{#if resumeAt && !current}
+		<p class="resume-line">
+			<span>You stopped at <strong>“{resumeAt.text}”</strong> ({Math.round(resumeAt.percent * 100)}% read).</span>
+			<button type="button" class="resume-go" onclick={resume}>Continue there <Icon name="arrow-right" size={16} stroke={2.5} /></button>
+			<button type="button" class="resume-x" onclick={() => (resumeAt = null)} aria-label="Start from the top instead"><Icon name="close" size={18} stroke={2} /></button>
+		</p>
+	{/if}
+
+	<div class="layout">
+		<div class="main">
+			{#if toc.length}
+				<details class="toc-inline">
+					<summary>On this page <span>{toc.length} sections</span></summary>
+					<nav aria-label="On this page">{@render sections()}</nav>
+				</details>
+			{/if}
+
+			<div class="prose" bind:this={proseEl}>
+				{@render children()}
+			</div>
+
+
 
 			{#if practice.length}
 				<section class="practice" aria-labelledby="practice-title">
@@ -696,6 +793,57 @@
 		display: block;
 		color: var(--gold);
 		font-weight: 700;
+	}
+
+	.layers-line {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.2rem 1rem;
+		margin-top: 0.8rem;
+		font-size: 0.98rem;
+		color: var(--ink-2);
+	}
+
+	.layers-line a {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		color: var(--ink);
+		text-decoration-color: var(--gold);
+		text-decoration-thickness: 2px;
+		text-underline-offset: 0.2em;
+	}
+
+	.layers-line .met {
+		color: var(--structures);
+	}
+
+	/* Contents grouped by layer: Core first, then each deeper layer under its name. */
+	.layer-group {
+		margin-top: 0.6rem;
+	}
+
+	.group-name {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.2rem 0.6rem;
+		font-family: var(--display);
+		font-size: 0.95rem;
+		font-weight: 800;
+		color: var(--gold);
+	}
+
+	.group-name .closed {
+		font-family: var(--body);
+		font-size: 0.8rem;
+		font-weight: 700;
+		color: var(--ink-3);
+	}
+
+	.sections-list a.dim {
+		color: var(--ink-3);
 	}
 
 	.earn {

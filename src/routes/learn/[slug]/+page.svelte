@@ -12,7 +12,7 @@
 </svelte:head>
 
 {#key data.meta.id}
-	<ArticleShell meta={data.meta} toc={data.toc}>
+	<ArticleShell meta={data.meta} toc={data.toc} quizInfo={data.quizzes}>
 		<Body />
 	</ArticleShell>
 {/key}

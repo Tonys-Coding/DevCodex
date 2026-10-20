@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { levels } from '../../content/levels';
+	import { depths } from '../../content/levels';
 	import { progress } from '../../progress/progress.svelte';
 
 	/** Shown until the first real progress: how DevCodex works, and where the path should start. */
@@ -9,7 +9,7 @@
 		{ title: 'Keep them sharp', body: 'Swipe through the trivia deck. Cards you miss come back first.' },
 		{ title: 'Practice in code', body: 'Solve interview-style problems in Python or JavaScript, right here.' }
 	];
-	const chosen = $derived(progress.data.profile?.level);
+	const chosen = $derived(progress.data.profile?.depth);
 </script>
 
 <section class="onboard" aria-labelledby="onboard-title">
@@ -25,16 +25,16 @@
 	</ol>
 
 	<fieldset class="level">
-		<legend>Where should your path start?</legend>
+		<legend>How deep do you want to go?</legend>
 		<div class="options">
-			{#each levels as l (l.id)}
-				<label class="lv-{l.id}" class:on={chosen === l.id}>
+			{#each depths as l (l.id)}
+				<label class="depth" class:on={chosen === l.id}>
 					<input
 						type="radio"
-						name="start-level"
+						name="start-depth"
 						class="visually-hidden"
 						checked={chosen === l.id}
-						onchange={() => progress.setLevel(l.id)}
+						onchange={() => progress.setDepth(l.id)}
 					/>
 					<span class="pips" aria-hidden="true">
 						{#each [1, 2, 3] as n (n)}<i class:on={n <= l.pips}></i>{/each}
@@ -44,7 +44,7 @@
 				</label>
 			{/each}
 		</div>
-		<p class="hint">{chosen ? 'Your featured lesson now starts at this level. Change it any time on the You page.' : 'Pick one and the featured lesson starts there. Every lesson stays open to you.'}</p>
+		<p class="hint">{chosen ? 'Lessons now open to this depth. Every layer stays one tap away, and you can change this on the You page.' : 'Every lesson has these three layers. Pick how many open by default; the rest stay one tap away.'}</p>
 	</fieldset>
 </section>
 
@@ -118,7 +118,7 @@
 	}
 
 	label.on {
-		border-bottom-color: var(--lv);
+		border-bottom-color: var(--gold);
 	}
 
 	label:has(:focus-visible) {
@@ -130,7 +130,7 @@
 		display: inline-flex;
 		align-items: flex-end;
 		gap: 2px;
-		color: var(--lv);
+		color: var(--gold);
 	}
 
 	.pips i {
@@ -156,7 +156,7 @@
 
 	.name {
 		font-weight: 800;
-		color: var(--lv);
+		color: var(--ink);
 	}
 
 	.blurb {

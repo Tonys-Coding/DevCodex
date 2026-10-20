@@ -1,6 +1,6 @@
 import { get, set, del } from 'idb-keyval';
 import { cards } from '../content/cards';
-import type { ConceptCard, Language, Level } from '../content/types';
+import type { ConceptCard, Depth, Language } from '../content/types';
 
 /**
  * Everything DevCodex remembers about a learner. Stored on this device only
@@ -20,6 +20,8 @@ export type ProgressData = {
 	days: string[];
 	/** articleId → where the reader got to. Optional fields were added later; version 1 files without them still load. */
 	reading?: Record<string, Reading>;
+	/** articleId → deeper layers finished (each unlocks its bonus card) */
+	layers?: Record<string, Exclude<Depth, 'core'>[]>;
 	/** `${articleId}:${quizTitle}` → best quick-check result */
 	quizzes?: Record<string, { best: number; total: number; at: string }>;
 	/** Personal settings. Never leaves the device. */
@@ -33,8 +35,8 @@ export type ProgressData = {
 export type Profile = {
 	/** What the dashboard greets the learner as. */
 	name?: string;
-	/** Where their path starts: lessons at this level and above are featured first. */
-	level?: Level;
+	/** How deep lessons open by default: Core only, Core and Going deeper, or everything. */
+	depth?: Depth;
 	/** Lessons per week they aim for. */
 	weeklyGoal?: number;
 };
@@ -64,6 +66,7 @@ const empty = (): ProgressData => ({
 	days: [],
 	reading: {},
 	quizzes: {},
+	layers: {},
 	profile: {},
 	backup: {}
 });
@@ -73,12 +76,14 @@ const isRecord = (value: unknown): value is Record<string, unknown> => typeof va
 /** Accept only data with the expected shape; anything else is rejected, never half-loaded. */
 function parse(value: unknown): ProgressData | null {
 	if (!isRecord(value) || value.version !== 1) return null;
-	const { completed, cards: c, solved, drafts, days, reading, quizzes, profile, seen, backup } = value;
+	const { completed, cards: c, solved, drafts, days, reading, quizzes, profile, seen, backup, layers } = value;
 	if (![completed, c, solved, drafts].every(isRecord) || !Array.isArray(days)) return null;
 	const p = isRecord(profile) ? profile : {};
 	const clean: Profile = {};
 	if (typeof p.name === 'string' && p.name.trim()) clean.name = p.name.slice(0, 40);
-	if (p.level === 'entry' || p.level === 'experienced' || p.level === 'senior') clean.level = p.level;
+	if (p.depth === 'core' || p.depth === 'deeper' || p.depth === 'hood') clean.depth = p.depth;
+	// Earlier versions stored a starting level; it maps onto the matching depth.
+	else if (typeof p.level === 'string') clean.depth = ({ entry: 'core', experienced: 'deeper', senior: 'hood' } as Record<string, Depth>)[p.level];
 	if (typeof p.weeklyGoal === 'number' && p.weeklyGoal >= 1 && p.weeklyGoal <= 7) clean.weeklyGoal = Math.round(p.weeklyGoal);
 	const strings = (x: unknown) => (Array.isArray(x) ? x.filter((v): v is string => typeof v === 'string') : []);
 	return {
@@ -90,6 +95,11 @@ function parse(value: unknown): ProgressData | null {
 		days: days.filter((d) => typeof d === 'string'),
 		reading: isRecord(reading) ? reading : {},
 		quizzes: isRecord(quizzes) ? quizzes : {},
+		layers: isRecord(layers)
+			? Object.fromEntries(
+					Object.entries(layers).map(([id, list]) => [id, strings(list).filter((d) => d === 'deeper' || d === 'hood')])
+				)
+			: {},
 		profile: clean,
 		seen: isRecord(seen) ? { lessons: strings(seen.lessons), medals: strings(seen.medals) } : undefined,
 		backup: isRecord(backup)
@@ -113,7 +123,11 @@ class Progress {
 	/** False when the browser refuses storage (e.g. some private modes). */
 	persistent = $state(true);
 
-	isUnlocked = (card: ConceptCard) => !card.unlockedBy || card.unlockedBy in this.data.completed;
+	/** Core cards unlock with the lesson's pack; bonus cards also need their layer finished. */
+	isUnlocked = (card: ConceptCard) =>
+		!card.unlockedBy ||
+		(card.unlockedBy in this.data.completed && (!card.layer || !!this.data.layers?.[card.unlockedBy]?.includes(card.layer)));
+	layerDone = (articleId: string, depth: Exclude<Depth, 'core'>) => !!this.data.layers?.[articleId]?.includes(depth);
 	isNew = (card: ConceptCard) => this.isUnlocked(card) && !this.data.cards[card.id];
 	isDone = (articleId: string) => articleId in this.data.completed;
 
@@ -189,9 +203,21 @@ class Progress {
 		if (!this.data.days.includes(day)) this.data.days = [...this.data.days, day].slice(-400);
 	}
 
-	/** Marks an article finished and returns the cards it unlocked. */
+	/** Records a finished deeper layer and returns the bonus cards it unlocked. */
+	finishLayer(articleId: string, depth: Exclude<Depth, 'core'>) {
+		this.data.layers ??= {};
+		const done = this.data.layers[articleId] ?? [];
+		if (!done.includes(depth)) {
+			this.data.layers[articleId] = [...done, depth];
+			this.#touch();
+			this.#save();
+		}
+		return cards.filter((card) => card.unlockedBy === articleId && card.layer === depth);
+	}
+
+	/** Marks an article's Core finished and returns the pack's cards. */
 	finish(articleId: string) {
-		const opened = cards.filter((card) => card.unlockedBy === articleId);
+		const opened = cards.filter((card) => card.unlockedBy === articleId && !card.layer);
 		if (!this.isDone(articleId)) {
 			this.data.completed[articleId] = new Date().toISOString();
 			this.#touch();
@@ -268,8 +294,8 @@ class Progress {
 		this.#save();
 	}
 
-	setLevel(level: Level | undefined) {
-		this.data.profile = { ...this.data.profile, level };
+	setDepth(depth: Depth | undefined) {
+		this.data.profile = { ...this.data.profile, depth };
 		this.#save();
 	}
 

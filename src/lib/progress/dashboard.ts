@@ -1,19 +1,13 @@
 import { liveArticles } from '../content/catalog';
-import type { ArticleMeta, ConceptCard, Level } from '../content/types';
+import type { ArticleMeta, ConceptCard } from '../content/types';
 import type { ProgressData, Reading } from './progress.svelte';
 
 /** Small, pure helpers behind the Binder dashboard. Dates are the learner's local dates. */
 
 export const dayKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-const levelRank: Record<Level, number> = { entry: 0, experienced: 1, senior: 2 };
-
-/** The reading path, starting at the learner's chosen level: that level and above first, easier lessons after. */
-export function path(level: Level | undefined): ArticleMeta[] {
-	if (!level) return liveArticles;
-	const from = levelRank[level];
-	return [...liveArticles.filter((a) => levelRank[a.level] >= from), ...liveArticles.filter((a) => levelRank[a.level] < from)];
-}
+/** The reading path: easiest concepts first, keeping each track's prerequisite order. */
+export const path = (): ArticleMeta[] => liveArticles;
 
 export type Hero =
 	| { mode: 'resume'; article: ArticleMeta; reading: Reading }
@@ -27,7 +21,7 @@ export function hero(data: ProgressData, inProgress: { id: string; reading: Read
 	const recent = inProgress.find(({ reading }) => now.getTime() - Date.parse(reading.last) < RESUME_WITHIN_DAYS * 86_400_000);
 	const article = recent && liveArticles.find((a) => a.id === recent.id);
 	if (recent && article) return { mode: 'resume', article, reading: recent.reading };
-	const order = path(data.profile?.level);
+	const order = path();
 	const next =
 		order.find((a) => !(a.id in data.completed) && !data.reading?.[a.id]) ?? order.find((a) => !(a.id in data.completed));
 	return next ? { mode: 'next', article: next } : { mode: 'done' };

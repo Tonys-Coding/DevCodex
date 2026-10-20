@@ -3,7 +3,7 @@
 	import type { ArticleMeta } from '../../content/types';
 	import type { TocEntry } from '../../content/article-markup';
 	import { articleById } from '../../content/catalog';
-	import { cardsUnlockedBy } from '../../content/cards';
+	import { bonusCards, cardsUnlockedBy } from '../../content/cards';
 	import { progress } from '../../progress/progress.svelte';
 	import { requirements, type QuizInfo } from '../../progress/requirements';
 	import { cardArt } from '../cardArt';
@@ -27,11 +27,14 @@
 	const reading = $derived(progress.data.reading?.[article.id]);
 	const steps = $derived(
 		index && reading && !done
-			? requirements(progress.data, article, index.sections.map((s) => s.id), index.quizzes).filter((r) => r.met).length
+			? requirements(progress.data, article, index.sections, index.quizzes).filter((r) => r.met).length
 			: 0
 	);
+	const bonus = $derived(bonusCards(article.id, 'deeper').length + bonusCards(article.id, 'hood').length);
 	const collect = $derived(pack.slice(0, 3).map((c) => c.term));
 	const builds = $derived((article.builds ?? []).map((id) => articleById(id)).filter((a) => !!a));
+	/** Which deeper layers this lesson has, from the build-time index. */
+	const layers = $derived((['deeper', 'hood'] as const).filter((d) => index?.sections.some((s) => s.depth === d)));
 </script>
 
 {#snippet face()}
@@ -56,6 +59,14 @@
 		{#if builds.length}
 			<span class="builds"><strong>Builds on:</strong> {builds.map((b) => b.title).join('; ')}</span>
 		{/if}
+		{#if layers.length}
+			<span class="layers">
+				<span class:ok={done}>{#if done}<Icon name="check" size={13} stroke={3} />{/if}Core</span>
+				{#each layers as d (d)}
+					<span class:ok={progress.layerDone(article.id, d)}>{#if progress.layerDone(article.id, d)}<Icon name="check" size={13} stroke={3} />{/if}{d === 'deeper' ? 'Going deeper' : 'Under the hood'}</span>
+				{/each}
+			</span>
+		{/if}
 		{#if reading && !done}
 			<span class="line" aria-hidden="true"><i style="transform: scaleX({reading.percent})"></i></span>
 		{/if}
@@ -70,7 +81,7 @@
 				<span>Pack: {steps} of 3 steps</span>
 			{:else}
 				<span><Icon name="clock" size={15} stroke={2} /> {article.minutes} min</span>
-				<span class="gold"><Icon name="cards" size={15} stroke={2} /> {pack.length} cards</span>
+				<span class="gold"><Icon name="cards" size={15} stroke={2} /> {pack.length} cards{bonus ? ` + ${bonus} bonus` : ''}</span>
 			{/if}
 		</span>
 	</span>
@@ -193,6 +204,25 @@
 	.collect strong,
 	.builds strong {
 		color: var(--ink);
+	}
+
+	.layers {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.15rem 0.9rem;
+		font-size: 0.88rem;
+		font-weight: 700;
+		color: var(--ink-3);
+	}
+
+	.layers span {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.2rem;
+	}
+
+	.layers .ok {
+		color: var(--structures);
 	}
 
 	.line {

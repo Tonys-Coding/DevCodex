@@ -135,10 +135,10 @@
 
 	/* Same colours as article levels: Easy = entry green, Medium = experienced blue. */
 	.diff.easy {
-		color: var(--entry);
+		color: var(--easy);
 	}
 
 	.diff.medium {
-		color: var(--experienced);
+		color: var(--medium);
 	}
 </style>

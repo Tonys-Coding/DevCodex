@@ -6,7 +6,7 @@ export const tracks: Track[] = [
 	{ id: 'structures', title: 'Data Structures', short: 'Data', blurb: 'How to hold data, and what each choice costs you later.' }
 ];
 
-const levelRank: Record<Level, number> = { entry: 0, experienced: 1, senior: 2 };
+const levelRank: Record<Level, number> = { easy: 0, medium: 1, hard: 2 };
 
 /**
  * Every article, grouped by track and ranked easiest first inside each track.
@@ -16,117 +16,117 @@ export const articles: ArticleMeta[] = [
 	{
 		id: 'load-a-page',
 		track: 'web',
-		level: 'entry',
+		level: 'easy',
 		status: 'live',
 		title: 'What happens when you load a web page',
 		summary: 'Follow one visit from the address bar to the words on your screen.',
 		dek: 'You type an address, press Enter, and a page appears in about a second. In that second your browser finds a computer on the other side of the world, makes a private line to it, asks for the page and draws it. Here is each step, in plain words.',
 		assumes: 'Nothing beyond everyday use of a web browser.',
-		minutes: 12
+		minutes: 11
 	},
 	{
 		id: 'cookies-sessions',
 		builds: ['load-a-page'],
 		track: 'web',
-		level: 'experienced',
+		level: 'medium',
 		status: 'live',
 		title: 'Cookies, sessions and staying signed in',
 		summary: 'How a stateless protocol remembers who you are.',
-		dek: 'HTTP forgets you between requests. Cookies carry a little state back, and sessions turn that into “signed in”. Scope, SameSite and prefixes attribute by attribute, a session store that fits on one screen, signed tokens, and the attacks each design has to survive.',
-		assumes: 'You read JavaScript and know what HTTP requests, responses and headers are.',
-		minutes: 16
+		dek: 'HTTP forgets you between requests. A cookie is a small note the browser hands back every time, and a session turns that note into “signed in”. See how signing in really works, and the three settings that keep it safe.',
+		assumes: 'You know what a request and a response are. “What happens when you load a web page” covers both.',
+		minutes: 6
 	},
 	{
 		id: 'http-caching',
 		builds: ['load-a-page'],
 		track: 'web',
-		level: 'experienced',
+		level: 'medium',
 		status: 'live',
 		title: 'Caching: the fastest request is no request',
-		summary: 'Freshness, validators, Cache-Control and the CDN in between.',
-		dek: 'Most bytes a returning visitor needs are already on their device or at a CDN edge nearby. HTTP caching is the contract that decides which copies may be reused, for how long, and how to check them cheaply once they go stale.',
-		assumes: 'You know what an HTTP request and response are, and have opened the Network tab once or twice.',
-		minutes: 15
+		summary: 'Saved copies, how long they stay fresh, and how to ship an update.',
+		dek: 'Most of what a returning visitor needs is already on their device. Caching decides which saved copies can be reused, for how long, and how to check a stale one cheaply. Follow one file through two caches and learn the four instructions you will see most.',
+		assumes: 'You know what a request and a response are. “What happens when you load a web page” covers both.',
+		minutes: 6
 	},
 	{
 		id: 'cors',
 		builds: ['load-a-page', 'cookies-sessions'],
 		track: 'web',
-		level: 'senior',
+		level: 'medium',
 		status: 'live',
 		title: 'CORS without the panic',
 		summary: 'Why the browser blocks some requests, and what the server must say.',
-		dek: 'The same-origin policy blocks reading, not sending, and CORS is how a server grants read access. The exact safelist, preflight and cache rules from the Fetch Standard, credentials, redirects and opaque responses, a correct server, and the misconfigurations that become vulnerabilities.',
-		assumes: 'Fluent with HTTP, fetch() and browser security basics such as origins and cookies.',
-		minutes: 18
+		dek: 'A page on one site can’t read another site’s answers unless that site says yes, and CORS is how it says yes. Learn what the browser actually stops, the one header that grants access, why some requests ask first, and how to read the red error in the console.',
+		assumes: 'You know what a request, a response and a header are, and what a cookie does.',
+		minutes: 6
 	},
 	{
 		id: 'values-references',
 		track: 'programming',
-		level: 'entry',
+		level: 'easy',
 		status: 'live',
 		title: 'Values and references',
 		summary: 'Why changing one variable sometimes changes another.',
 		dek: 'You change one variable and a different one changes too. It feels like a bug, but it follows one simple rule about what a variable actually holds. Learn the rule once and this surprise stops happening to you.',
 		assumes: 'You have seen a few lines of code, in any language.',
-		minutes: 12
+		minutes: 8
 	},
 	{
 		id: 'recursion',
 		builds: ['stacks-queues'],
 		track: 'programming',
-		level: 'entry',
+		level: 'easy',
 		status: 'live',
 		title: 'Recursion, one frame at a time',
 		summary: 'A function that calls itself, traced on the call stack.',
 		dek: 'A function that calls itself sounds like a loop with no way out. It isn’t: each call gets its own note on a pile called the call stack, and one simple rule stops the pile from growing. Here is how it works, one call at a time.',
 		assumes: 'You have seen a function in any language, even if you have not written one yet.',
-		minutes: 13
+		minutes: 14
 	},
 	{
 		id: 'js-event-loop',
 		builds: ['values-references'],
 		track: 'programming',
-		level: 'senior',
+		level: 'medium',
 		status: 'live',
 		title: 'The event loop',
-		summary: 'Tasks, microtasks, rendering steps and the Node.js phases, as specified.',
-		dek: 'One thread, one call stack, and a scheduler defined by the HTML Standard. Exact ordering of tasks, microtasks and rendering, why promises can starve a frame, how Node.js differs, and how to keep interactions under budget.',
-		assumes: 'Fluent JavaScript, including promises and async/await.',
-		minutes: 17
+		summary: 'How one thread juggles clicks, timers and promises without freezing.',
+		dek: 'JavaScript does one thing at a time, yet a page stays responsive while it waits on the network. Watch the call stack, the queues and the loop that connects them, and learn the one rule that keeps a page from freezing.',
+		assumes: 'You have written a little JavaScript, including a function and a callback.',
+		minutes: 6
 	},
 	{
 		id: 'stacks-queues',
 		track: 'structures',
-		level: 'entry',
+		level: 'easy',
 		status: 'live',
 		title: 'Stacks and queues',
 		summary: 'Last in first out, first in first out, and where each shows up.',
 		dek: 'A stack gives back the newest item; a queue gives back the one that has waited longest. That one rule decides how undo, print lines and bracket checks work. Try both side by side, then build them in JavaScript and Python.',
 		assumes: 'You know what a list or array is, in any language.',
-		minutes: 13
-	},
-	{
-		id: 'two-pointer-pattern',
-		track: 'structures',
-		level: 'experienced',
-		status: 'live',
-		title: 'The two-pointer pattern',
-		summary: 'Use sorted order to turn O(n²) pair searches into one pass.',
-		dek: 'Pair searches look quadratic: every element against every other. When the input is sorted, two indices moving under a simple invariant discard a candidate on every step, so the whole search finishes in linear time with constant extra memory.',
-		assumes: 'You can read Python or JavaScript loops and know what O(n) means.',
-		minutes: 12
+		minutes: 15
 	},
 	{
 		id: 'hash-maps',
 		track: 'structures',
-		level: 'senior',
+		level: 'easy',
 		status: 'live',
 		title: 'Hash maps',
-		summary: 'Hashing, collision schemes, resizing, attacks and real implementations.',
-		dek: 'Expected O(1) is a probabilistic promise resting on a hash function, a load-factor policy and a collision scheme. How each choice behaves under load, what CPython, V8, Java and SwissTable actually do, and how the promise breaks under attack.',
-		assumes: 'Comfort with arrays, Big-O, bit operations and at least one language’s built-in map.',
-		minutes: 17
+		summary: 'Find anything by its key in about one step, and why that works.',
+		dek: 'A hash map finds a value by its key in about one step, however much it holds, like a coat check that knows exactly which hook your coat is on. See it work, use one in Python and JavaScript, and learn when a set is the better fit.',
+		assumes: 'You know what a list or array is, in any language.',
+		minutes: 7
+	},
+	{
+		id: 'two-pointer-pattern',
+		track: 'structures',
+		level: 'easy',
+		status: 'live',
+		title: 'The two-pointer pattern',
+		summary: 'Use sorted order to turn O(n²) pair searches into one pass.',
+		dek: 'Finding a pair in a list usually means checking every pair, which gets slow fast. When the list is sorted, two fingers walking in from the ends find it in one pass. Play it, then write it.',
+		assumes: 'You can read a simple loop in Python or JavaScript.',
+		minutes: 6
 	}
 ];
 

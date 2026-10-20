@@ -11,7 +11,7 @@
 	<span class="pips" aria-hidden="true">
 		{#each [1, 2, 3] as n (n)}<span class:on={n <= info.pips}></span>{/each}
 	</span>
-	{info.label}<span class="grade"> · {info.grade}</span>
+	{info.label}
 </span>
 
 <style>
@@ -29,11 +29,6 @@
 
 	.level.solid {
 		color: var(--t-ink);
-	}
-
-	.grade {
-		font-weight: 600;
-		opacity: 0.85;
 	}
 
 	.pips {

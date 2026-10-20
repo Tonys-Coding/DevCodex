@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { tracks, articlesInTrack, practiceFor } from '#lib/content/catalog.js';
-	import { cards } from '#lib/content/cards.js';
+	import { cards, unlockHint } from '#lib/content/cards.js';
 	import { problemById } from '#lib/content/problems.js';
 	import { shorts } from '#lib/content/shorts.js';
 	import { levels } from '#lib/content/levels.js';
@@ -143,7 +143,7 @@
 							{card}
 							face={open ? 'front' : 'locked'}
 							fresh={progress.isNew(card)}
-							lockedHint={open ? undefined : `Finish “${lessons.find((a) => a.id === card.unlockedBy)?.title ?? 'its lesson'}”`}
+							lockedHint={open ? undefined : unlockHint(card, lessons.find((a) => a.id === card.unlockedBy)?.title ?? 'its lesson')}
 						/>
 					</div>
 				{/each}
@@ -593,12 +593,12 @@
 	}
 
 	.easy {
-		color: var(--entry);
+		color: var(--easy);
 		font-weight: 700;
 	}
 
 	.medium {
-		color: var(--experienced);
+		color: var(--medium);
 		font-weight: 700;
 	}
 

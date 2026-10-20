@@ -1,4 +1,5 @@
 import type { ConceptCard } from './types';
+import { depthById } from './levels';
 
 /** The full card set. Order is the collector number (#001 …). */
 export const cards: ConceptCard[] = [
@@ -150,7 +151,7 @@ export const cards: ConceptCard[] = [
 		answer: 'The new build gets a new file name',
 		detail: 'Content-hashed names let files be cached forever. A change produces a new hash, so the HTML points to a URL no cache has seen.',
 		unlockedBy: 'http-caching',
-		level: 3
+		level: 2
 	},
 
 	// Values and references ----------------------------------------------------
@@ -182,7 +183,7 @@ export const cards: ConceptCard[] = [
 		answer: 'Yes. The inner arrays are still shared',
 		detail: 'Spread copies one level. Use structuredClone(a) for a deep copy when nested objects must be independent.',
 		unlockedBy: 'values-references',
-		level: 3
+		level: 2
 	},
 	{
 		id: 'reference-equality',
@@ -234,7 +235,7 @@ export const cards: ConceptCard[] = [
 		answer: 'The promise callback',
 		detail: 'Microtasks (promise callbacks) drain completely after each task, before the loop picks the next timer or event.',
 		unlockedBy: 'js-event-loop',
-		level: 3
+		level: 2
 	},
 	{
 		id: 'blocking',
@@ -286,7 +287,7 @@ export const cards: ConceptCard[] = [
 		answer: 'To keep buckets short and lookups fast',
 		detail: 'When entries ÷ buckets passes a threshold (often 0.75), the map allocates more buckets and re-hashes every key.',
 		unlockedBy: 'hash-maps',
-		level: 3
+		level: 2
 	},
 	{
 		id: 'set',
@@ -328,7 +329,8 @@ export const cards: ConceptCard[] = [
 		answer: 'A sliding window',
 		detail: 'The right pointer grows the window, the left pointer shrinks it. It finds the best run of consecutive items in one pass.',
 		unlockedBy: 'two-pointer-pattern',
-		level: 3
+		layer: 'deeper',
+		level: 2
 	},
 
 	// Recursion ---------------------------------------------------------------
@@ -444,6 +446,7 @@ export const cards: ConceptCard[] = [
 		answer: 'Secure, Path=/ and no Domain',
 		detail: 'That makes it host-only and HTTPS-only, so no sibling subdomain can set or shadow it.',
 		unlockedBy: 'cookies-sessions',
+		layer: 'deeper',
 		level: 2
 	},
 	{
@@ -454,7 +457,8 @@ export const cards: ConceptCard[] = [
 		answer: 'So an ID the attacker planted beforehand never becomes authenticated',
 		detail: 'Rotate the ID at sign-in and whenever privileges change. In express-session, call req.session.regenerate().',
 		unlockedBy: 'cookies-sessions',
-		level: 2
+		layer: 'hood',
+		level: 3
 	},
 	{
 		id: 'same-site',
@@ -464,7 +468,8 @@ export const cards: ConceptCard[] = [
 		answer: 'Yes, though they are different origins',
 		detail: 'A site is the scheme plus the registrable domain. Ports and subdomains don’t matter, so every subdomain is same-site with every other.',
 		unlockedBy: 'cookies-sessions',
-		level: 2
+		layer: 'hood',
+		level: 3
 	},
 
 	// CORS --------------------------------------------------------------------
@@ -476,7 +481,7 @@ export const cards: ConceptCard[] = [
 		answer: 'No. It stops the page reading the response',
 		detail: 'Requests a form could send go straight through. CORS only decides whether script may read what comes back, so it is not CSRF protection.',
 		unlockedBy: 'cors',
-		level: 3
+		level: 2
 	},
 	{
 		id: 'preflight',
@@ -486,7 +491,7 @@ export const cards: ConceptCard[] = [
 		answer: 'The GET with Authorization',
 		detail: 'Authorization and application/json are never safelisted. Preflights carry no cookies, need a 2xx response and are never redirected.',
 		unlockedBy: 'cors',
-		level: 3
+		level: 2
 	},
 	{
 		id: 'cors-credentials',
@@ -496,7 +501,8 @@ export const cards: ConceptCard[] = [
 		answer: 'No',
 		detail: 'With credentials, every * is invalid. The server must echo the exact origin and send Access-Control-Allow-Credentials: true, on the preflight too.',
 		unlockedBy: 'cors',
-		level: 3
+		layer: 'deeper',
+		level: 2
 	},
 	{
 		id: 'preflight-cache',
@@ -506,11 +512,186 @@ export const cards: ConceptCard[] = [
 		answer: 'One result per exact URL, for at most two hours',
 		detail: 'Chromium clamps Max-Age to 7,200 seconds, Firefox to 86,400. PUT /items/1 and /items/2 each need their own preflight.',
 		unlockedBy: 'cors',
+		layer: 'hood',
+		level: 3
+	},
+
+	// Bonus cards: earned by finishing a lesson's Going deeper (2) or Under the hood (3, rare) layer.
+	{
+		id: 'round-trips',
+		term: 'Round trips',
+		track: 'web',
+		question: 'A new HTTPS connection over TCP and TLS 1.3: how many round trips before the first request byte is sent?',
+		answer: 'Two: one for TCP, one for TLS',
+		detail: 'At 80 ms a round trip that is 160 ms of set-up before the server hears anything. HTTP/3 on QUIC folds both into one.',
+		unlockedBy: 'load-a-page',
+		layer: 'deeper',
+		level: 2
+	},
+	{
+		id: 'quic',
+		term: 'QUIC',
+		track: 'web',
+		question: 'One packet is lost. Over HTTP/2 on TCP, what stalls? Over HTTP/3 on QUIC?',
+		answer: 'Every stream on TCP; only that stream on QUIC',
+		detail: 'TCP delivers bytes strictly in order, so a gap holds up everything behind it. QUIC streams are independent and run over UDP.',
+		unlockedBy: 'load-a-page',
+		layer: 'hood',
+		level: 3
+	},
+	{
+		id: 'immutable',
+		term: 'immutable',
+		track: 'web',
+		question: 'What does Cache-Control: max-age=31536000, immutable add over max-age alone?',
+		answer: 'Don’t revalidate while fresh, even when the user reloads',
+		detail: 'Safe only on content-hashed URLs, where a change always means a new URL. On an HTML page it would pin an old version.',
+		unlockedBy: 'http-caching',
+		layer: 'deeper',
+		level: 2
+	},
+	{
+		id: 'vary',
+		term: 'Vary',
+		track: 'web',
+		question: 'A CDN caches /home, which is served in English or French by Accept-Language. Which response header keeps readers from getting the wrong one?',
+		answer: 'Vary: Accept-Language',
+		detail: 'Vary adds the listed request headers to the cache key. Every header listed multiplies the copies stored and lowers the hit rate.',
+		unlockedBy: 'http-caching',
+		layer: 'hood',
+		level: 3
+	},
+	{
+		id: 'pass-by-sharing',
+		term: 'Pass by sharing',
+		track: 'programming',
+		question: 'A function does items.push(4), then items = []. Which change does the caller see?',
+		answer: 'Only the push',
+		detail: 'The function gets a copy of the reference. Mutating through it is shared; pointing the local name at something new is not.',
+		unlockedBy: 'values-references',
+		layer: 'deeper',
+		level: 2
+	},
+	{
+		id: 'small-int-cache',
+		term: 'Small int cache',
+		track: 'programming',
+		question: 'In CPython, 256 is int("256") is True. What is 257 is int("257")?',
+		answer: 'False',
+		detail: 'CPython creates −5 to 256 once and reuses them. Anything else is a fresh object, so use == for values and keep is for None.',
+		unlockedBy: 'values-references',
+		layer: 'hood',
+		level: 3
+	},
+	{
+		id: 'timer-clamp',
+		term: 'Timer clamping',
+		track: 'programming',
+		question: 'A chain of setTimeout(f, 0) calls, each scheduling the next. Roughly how far apart do they settle?',
+		answer: 'About 4 ms',
+		detail: 'Once timers nest more than five levels deep, the HTML Standard raises delays below 4 ms to 4 ms. A delay is always a minimum.',
+		unlockedBy: 'js-event-loop',
+		layer: 'deeper',
+		level: 2
+	},
+	{
+		id: 'layout-thrashing',
+		term: 'Layout thrashing',
+		track: 'programming',
+		question: 'A loop sets an element’s width, then reads offsetHeight, on every pass. Why is it slow?',
+		answer: 'Each read forces a fresh layout',
+		detail: 'Reading geometry after a write makes the browser lay out the page right away. Batch all the reads, then all the writes.',
+		unlockedBy: 'js-event-loop',
+		layer: 'hood',
+		level: 3
+	},
+	{
+		id: 'eq-hash-contract',
+		term: 'Equality and hash',
+		track: 'structures',
+		question: 'Two keys are equal. What must be true of their hashes?',
+		answer: 'They must be equal too',
+		detail: 'Break that rule and a lookup searches the wrong bucket. It is also why mutable lists can’t be dict keys: their hash would change.',
+		unlockedBy: 'hash-maps',
+		layer: 'deeper',
+		level: 2
+	},
+	{
+		id: 'hash-flooding',
+		term: 'Hash flooding',
+		track: 'structures',
+		question: 'An attacker sends thousands of keys that all land in one bucket. What happens to each lookup, and what stops it?',
+		answer: 'It decays to O(n); a keyed hash with a random seed stops it',
+		detail: 'Python, Ruby and Rust use SipHash with a per-process seed, so collisions can’t be worked out in advance.',
+		unlockedBy: 'hash-maps',
+		layer: 'hood',
+		level: 3
+	},
+	{
+		id: 'three-sum',
+		term: '3Sum',
+		track: 'structures',
+		question: 'Find every triple that sums to zero. What does sorting plus two pointers bring the cost down to?',
+		answer: 'O(n²), from O(n³)',
+		detail: 'Fix each number in turn, then run the two-pointer search on the rest. Skip equal neighbours to avoid duplicate triples.',
+		unlockedBy: 'two-pointer-pattern',
+		layer: 'hood',
+		level: 3
+	},
+	{
+		id: 'backtracking',
+		term: 'Backtracking',
+		track: 'programming',
+		question: 'Name the three steps a backtracking function repeats for each choice.',
+		answer: 'Try it, recurse, undo it',
+		detail: 'Undoing the choice puts the shared state back, so the next choice starts clean. Permutations, subsets and Sudoku all work this way.',
+		unlockedBy: 'recursion',
+		layer: 'deeper',
+		level: 2
+	},
+	{
+		id: 'tail-call',
+		term: 'Tail call',
+		track: 'programming',
+		question: 'return n * fact(n - 1). Is the recursive call a tail call?',
+		answer: 'No. The multiply happens after it returns',
+		detail: 'A tail call is the very last thing a function does, so its frame can be reused. Only Safari implements this in JavaScript; Python never does.',
+		unlockedBy: 'recursion',
+		layer: 'hood',
+		level: 3
+	},
+	{
+		id: 'monotonic-stack',
+		term: 'Monotonic stack',
+		track: 'structures',
+		question: 'Finding the next bigger value for every item: how long does a monotonic stack take?',
+		answer: 'O(n): each index is pushed and popped at most once',
+		detail: 'Indexes wait on the stack until a bigger value arrives and settles them, so the stack’s values are always in order.',
+		unlockedBy: 'stacks-queues',
+		layer: 'deeper',
+		level: 2
+	},
+	{
+		id: 'ring-buffer',
+		term: 'Ring buffer',
+		track: 'structures',
+		question: 'Capacity 4, head at index 3, 2 items stored. Where does the next item go?',
+		answer: 'Index 1: (3 + 2) % 4',
+		detail: 'A fixed array plus a head and a count. Positions wrap around, so nothing ever shifts and nothing is reallocated.',
+		unlockedBy: 'stacks-queues',
+		layer: 'hood',
 		level: 3
 	}
 ];
 
 export const cardById = (id: string) => cards.find((c) => c.id === id);
-export const cardsUnlockedBy = (articleId: string) => cards.filter((c) => c.unlockedBy === articleId);
+/** The Core pack: cards a lesson unlocks when its Core is finished. */
+export const cardsUnlockedBy = (articleId: string) => cards.filter((c) => c.unlockedBy === articleId && !c.layer);
+/** Bonus cards for finishing one of a lesson's deeper layers. */
+export const bonusCards = (articleId: string, layer: 'deeper' | 'hood') =>
+	cards.filter((c) => c.unlockedBy === articleId && c.layer === layer);
 export const collectorNumber = (card: ConceptCard) => String(cards.indexOf(card) + 1).padStart(3, '0');
 export const collectorTotal = String(cards.length).padStart(3, '0');
+/** What a locked card asks for: its lesson, or one of that lesson's deeper layers. */
+export const unlockHint = (card: ConceptCard, lessonTitle: string) =>
+	card.layer ? `Finish ${depthById(card.layer).label} in “${lessonTitle}”` : `Finish “${lessonTitle}”`;

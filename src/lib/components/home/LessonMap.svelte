@@ -6,15 +6,15 @@
 	import { progress } from '../../progress/progress.svelte';
 
 	/**
-	 * Every lesson as a star: tracks run across, levels run left to right from Entry to
-	 * Senior. Finished stars glow in their track colour, started ones show how far they
+	 * Every lesson as a star: tracks run across, difficulty runs left to right from Easy to
+	 * Hard. Finished stars glow in their track colour, started ones show how far they
 	 * were read, and the next lesson pulses. Each star links to its lesson.
 	 */
 	let { next }: { next?: string } = $props();
 
 	const W = 560;
 	const H = 270;
-	const col: Record<Level, number> = { entry: 150, experienced: 310, senior: 470 };
+	const col: Record<Level, number> = { easy: 150, medium: 310, hard: 470 };
 	const laneY = [52, 132, 212];
 
 	type Star = { a: ArticleMeta; x: number; y: number; track: string };

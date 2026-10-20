@@ -2,7 +2,7 @@
 	import { resolve } from '$app/paths';
 	import { prefersReducedMotion } from 'svelte/motion';
 	import { articleById, trackById } from '#lib/content/catalog.js';
-	import { cardById } from '#lib/content/cards.js';
+	import { cardById, unlockHint } from '#lib/content/cards.js';
 	import { progress } from '#lib/progress/progress.svelte.js';
 	import Icon from '#lib/components/Icon.svelte';
 	import CollectCard from '#lib/components/CollectCard.svelte';
@@ -90,7 +90,7 @@
 	const lockedSoonest = $derived(
 		progress.lockedCards
 			.map((c) => ({ card: c, from: articleById(c.unlockedBy!)! }))
-			.sort((a, b) => Number(a.from.status === 'soon') - Number(b.from.status === 'soon'))
+			.sort((a, b) => Number(a.from.status === 'soon') - Number(b.from.status === 'soon') || Number(!!a.card.layer) - Number(!!b.card.layer))
 	);
 </script>
 
@@ -166,12 +166,12 @@
 	<section class="locked" aria-labelledby="locked-title">
 		<h2 id="locked-title">Still sealed</h2>
 		{#if lockedSoonest.length}
-			<p class="sub">{lockedSoonest.length} cards unlock as you finish articles.</p>
+			<p class="sub">{lockedSoonest.length} cards unlock as you finish lessons and their deeper layers.</p>
 			<div class="rows">
 				{#each lockedSoonest as { card: c, from } (c.id)}
 					{#if from.status === 'live'}
 						<a class="sealed" href={resolve('/learn/[slug]', { slug: from.id })}>
-							<CollectCard card={c} face="locked" tilt={false} lockedHint="Finish “{from.title}”" />
+							<CollectCard card={c} face="locked" tilt={false} lockedHint={unlockHint(c, from.title)} />
 						</a>
 					{:else}
 						<div class="sealed"><CollectCard card={c} face="locked" tilt={false} lockedHint="“{from.title}” is coming soon" /></div>

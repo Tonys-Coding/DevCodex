@@ -224,11 +224,11 @@
 	}
 
 	.badges .easy {
-		color: var(--entry);
+		color: var(--easy);
 	}
 
 	.badges .medium {
-		color: var(--experienced);
+		color: var(--medium);
 	}
 
 	.statement {

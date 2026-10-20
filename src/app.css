@@ -18,10 +18,10 @@
 	--miss: #ff6b81;
 	--miss-ink: #2a0710;
 
-	/* Article levels: green, blue, red, like ski-slope and LeetCode difficulty. */
-	--entry: #86e06f;
-	--experienced: #59b0ff;
-	--senior: #ff4b62;
+	/* Concept difficulty: green, blue, red, like ski slopes and LeetCode. */
+	--easy: #86e06f;
+	--medium: #59b0ff;
+	--hard: #ff4b62;
 
 	--display: 'Bricolage Grotesque Variable', 'Avenir Next', system-ui, sans-serif;
 	--body: 'Atkinson Hyperlegible Next Variable', system-ui, sans-serif;
@@ -45,16 +45,16 @@
 	--t-ink: #032a21;
 }
 
-.lv-entry {
-	--lv: var(--entry);
+.lv-easy {
+	--lv: var(--easy);
 	--lv-ink: #0c2405;
 }
-.lv-experienced {
-	--lv: var(--experienced);
+.lv-medium {
+	--lv: var(--medium);
 	--lv-ink: #04203d;
 }
-.lv-senior {
-	--lv: var(--senior);
+.lv-hard {
+	--lv: var(--hard);
 	--lv-ink: #2e040c;
 }
 

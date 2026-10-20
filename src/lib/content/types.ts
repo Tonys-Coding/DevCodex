@@ -7,8 +7,14 @@ export type Track = {
 	blurb: string;
 };
 
-/** Article difficulty. Each level has its own writing register (see PRODUCT.md, "Article levels"). */
-export type Level = 'entry' | 'experienced' | 'senior';
+/** How hard the concept is, judged by the rubric in PRODUCT.md ("Difficulty and depth"). Not how deep the article goes. */
+export type Level = 'easy' | 'medium' | 'hard';
+
+/**
+ * The layers inside every lesson. Core is plain words and earns the pack; Going deeper and
+ * Under the hood are optional, each with its own check and a bonus card.
+ */
+export type Depth = 'core' | 'deeper' | 'hood';
 
 export type ArticleMeta = {
 	id: string;
@@ -35,6 +41,8 @@ export type ConceptCard = {
 	detail: string;
 	/** Article that unlocks the card. Missing = in the deck from the start. */
 	unlockedBy?: string;
+	/** A bonus card for finishing one of the article's deeper layers. Missing = part of the Core pack. */
+	layer?: Exclude<Depth, 'core'>;
 	level: 1 | 2 | 3;
 };
 

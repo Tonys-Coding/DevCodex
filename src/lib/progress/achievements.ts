@@ -1,7 +1,6 @@
 import { liveArticles, tracks, articlesInTrack } from '../content/catalog';
 import { cards } from '../content/cards';
 import { problems } from '../content/problems';
-import type { Level } from '../content/types';
 import type { ProgressData } from './progress.svelte';
 
 export type Achievement = {
@@ -24,7 +23,9 @@ type Stats = { data: ProgressData; unlockedCards: number; bestStreak: number };
 export function achievements({ data, unlockedCards, bestStreak }: Stats): Achievement[] {
 	const done = (id: string) => id in data.completed;
 	const finished = liveArticles.filter((a) => done(a.id));
-	const levelsDone = new Set<Level>(finished.map((a) => a.level));
+	const layerLists = Object.values(data.layers ?? {});
+	const deeperDone = layerLists.filter((l) => l.includes('deeper')).length;
+	const hoodDone = layerLists.filter((l) => l.includes('hood')).length;
 	const solved = Object.values(data.solved);
 	const knew = Object.values(data.cards).reduce((n, c) => n + c.knew, 0);
 	const perfect = Object.values(data.quizzes ?? {}).filter((q) => q.best === q.total).length;
@@ -47,8 +48,9 @@ export function achievements({ data, unlockedCards, bestStreak }: Stats): Achiev
 		{ id: 'halfway', title: 'Halfway There', goal: `Finish ${half} lessons.`, icon: 'map', have: finished.length, need: half },
 		{ id: 'every-lesson', title: 'Completionist', goal: 'Finish every lesson.', icon: 'trophy', have: finished.length, need: liveArticles.length },
 		...trackBadges,
-		{ id: 'senior', title: 'Senior Reader', goal: 'Finish a Senior lesson.', icon: 'bolt', have: levelsDone.has('senior') ? 1 : 0, need: 1 },
-		{ id: 'all-levels', title: 'Level Climber', goal: 'Finish a lesson at every level.', icon: 'stack', have: levelsDone.size, need: 3 },
+		{ id: 'deeper', title: 'Going Deeper', goal: 'Finish a Going deeper layer.', icon: 'stack', have: Math.min(deeperDone, 1), need: 1 },
+		{ id: 'hood', title: 'Under the Hood', goal: 'Finish an Under the hood layer.', icon: 'bolt', have: Math.min(hoodDone, 1), need: 1 },
+		{ id: 'all-hoods', title: 'Bottom of the Stack', goal: 'Finish every Under the hood layer.', icon: 'layers', have: hoodDone, need: liveArticles.length },
 		{ id: 'perfect-check', title: 'Sharpshooter', goal: 'Get every question right in a quick check.', icon: 'target', have: Math.min(perfect, 1), need: 1 },
 		{ id: 'collector', title: 'Collector', goal: 'Collect 25 concept cards.', icon: 'cards', have: unlockedCards, need: 25 },
 		{ id: 'full-binder', title: 'Full Binder', goal: `Collect all ${cards.length} cards.`, icon: 'grid', have: unlockedCards, need: cards.length },
