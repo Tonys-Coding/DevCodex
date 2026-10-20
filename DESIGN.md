@@ -296,12 +296,18 @@ StepFlow, CodeTrace, EventLoopSim, HashMapLab, TwoPointerGame and Choice share o
 
 Lit elements fill with the track colour, and message chips are ink pills with dark mono text.
 
+Hands-on games use the same sleeve panel, with a heading and a quiet counter, the interactive row, a message box (rose ring for a wrong move, gold for a win) and outlined pill buttons:
+- **TwoPointerGame**
+- **BinarySearchLab:** the reader keeps the left or right half; "lo", "mid" and "hi" tags, ruled-out numbers fade
+- **LinkedListLab:** nodes as value and next-slot boxes with arrows to `null`; walks light each node in turn
+- **TreeLab:** an SVG search tree laid out by in-order position and depth; traversals light nodes in order and build a mono visit line
+
 ### Article blocks
 - **Level Tag:** boxless: 1–3 pips and "Easy", "Medium" or "Hard" in the level colour (in the surface's ink when it sits on a track-coloured panel). It appears on lesson cards, the article cover, the home quest and "Up next".
 - **Layer** (`teach/Layer.svelte`): Going deeper and Under the hood. A layer starts at a full-width 2px rule (a 4px double rule for Under the hood), never a box: gold depth pips, the layer name as an h2-sized title, a one-line summary, "n sections · about n min" and the bonus card count in gold, then an outlined "Open …"/"Close …" button whose chevron turns. Closed, the body is `hidden`. Open, it reads like the rest of the article and ends at a hairline with "Finish Going deeper": the checklist (sections read, checks passed) and a gold "Collect the bonus card" button, locked until the Core pack is open. Collected cards deal in below.
 - **Core pack** (`teach/CorePack.svelte`): marks where the Core ends. The article's "Earn your pack" checklist renders there, so the pack sits between the Core and the first layer rather than at the very bottom.
 - **Quick check:** one question at a time with a progress bar of segments (teal right, rose wrong). Picking an answer locks it and shows the explanation as plain text, then "Next question"; the last step shows the score and "Try again".
-- **Code sample** (`teach/Code.svelte`): an editor-ground block (18px) with a title bar and an optional caption. Highlighting comes from `teach/highlight.ts` with the editor palette (`.tk-*` in app.css).
+- **Code sample** (`teach/Code.svelte`): an editor-ground block (18px) with a title bar and an optional caption. Highlighting comes from `teach/highlight.ts` with the editor palette (`.tk-*` in app.css). Code text never uses font ligatures, so learners see the characters they will type.
 - **Notes:** `tip` (gold), `warn` (miss rose, for real pitfalls), `plain` (sleeve, for everyday comparisons and precision asides).
 - **Tables:** under 560px each row becomes a labelled card (labels are added at build time by `src/lib/content/article-markup.ts`).
 - **Diagrams** (`teach/Diagram.svelte`): sysketch SVGs in the midnight theme on a matching #070b16 frame, with a caption and an "Open full size" link. On phones a wide diagram scrolls sideways at a minimum of 40rem so its labels stay legible.

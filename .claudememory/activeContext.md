@@ -46,6 +46,7 @@ Phase 2 is built and verified. **Binder (direction C)** is the app. On 2026-10-1
 - Requirements: `requirements()` is Core-only. `layerRequirements()` needs the layer's sections read and checks passed, and the Core finished. `progress.finishLayer()` stores `layers[id]`; bonus cards (`layer` on ConceptCard) unlock from it. There are 21 bonus cards: deeper ones are level 2, hood ones level 3 (rare). `unlockHint()` names the layer.
 - The depth preference (`profile.depth`, migrated from the old start level) decides which layers open by default. Links and hashes into a closed layer open it.
 - Achievements: Going Deeper, Under the Hood and Bottom of the Stack replace the old senior and all-levels medals.
+- 2026-10-19: Data Structures grew to six lessons. Binary search (easy), linked lists (easy) and binary trees (medium) each have a lab (`teach/BinarySearchLab`, `LinkedListLab`, `TreeLab`), both layers, 4 Core cards plus a deeper and a hood bonus card (cards #065–#082, appended so older collector numbers stay put), and a practice problem: find-sorted, reverse-list, tree-depth. Linked-list and tree problems pass nested objects (`{value, next}`, `{value, left, right}`; dicts in Python). The runner's `canonical()` now sorts object keys, so key order never fails an answer. LessonMap squeezes busy columns to fit their band.
 
 ## Wide layout and diagrams (2026-10-18)
 

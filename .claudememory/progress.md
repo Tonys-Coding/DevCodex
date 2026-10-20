@@ -56,6 +56,10 @@
 
 - 2026-10-19: `npm run content:check` added: structure, cards and briefs checks plus running every JS/Python code sample. Fixed the two content bugs it found (js-event-loop checkpoint titles, two-pointer-pattern Sources).
 
+- 2026-10-19: Three Data Structures lessons added: binary search, linked lists and binary trees, each with a lab, both layers, 6 cards and a practice problem. `npm run content:check` passes on all 13 lessons.
+
+- 2026-10-20: Eight more TL;DR reads from current news (dated 2026-10-19): AI agent break-ins (NorForge), the UK data-centre power wall (Microsoft and Nscale), Python 3.15 lazy imports, TypeScript 7 in Go, AI agents on Wikipedia (Wikimedia report), OAuth with the Personal Agent Protocol, prompt injection, and tokens. Facts come from primary sources where possible; content:check passes. Code ligatures are now off sitewide.
+
 ## Next checkpoint
 
 The user commits and pushes the layers work by feature (from the commands given), then tests installs on devices.
