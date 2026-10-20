@@ -1,0 +1,169 @@
+/*
+ * The "clay" look for isometric banners (see geometry.ts). Global, so the contact sheet
+ * (npm run art:sheet) uses the very same rules. Colours mix the track colour (--t) into
+ * the banner ground (--art-ground). Strokes keep the same width at any banner size.
+ */
+
+.iso {
+	--ground-mix: var(--art-ground, #1c1823);
+	display: block;
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+	stroke-linejoin: round;
+	stroke-linecap: round;
+}
+
+.iso .face,
+.iso .line {
+	vector-effect: non-scaling-stroke;
+}
+
+/* Lit from above: the top lightest, the left face mid, the right face darkest. */
+.iso .top {
+	fill: color-mix(in srgb, var(--t) 30%, var(--ground-mix));
+	/* A faint lighter rim on top faces separates stacked pieces. */
+	stroke: color-mix(in srgb, var(--t) 46%, var(--ground-mix));
+	stroke-width: 0.9;
+}
+
+.iso .left {
+	fill: color-mix(in srgb, var(--t) 18%, var(--ground-mix));
+	stroke: color-mix(in srgb, var(--t) 10%, var(--ground-mix));
+	stroke-width: 0.7;
+}
+
+.iso .right {
+	fill: color-mix(in srgb, var(--t) 11%, var(--ground-mix));
+	stroke: color-mix(in srgb, var(--t) 7%, var(--ground-mix));
+	stroke-width: 0.7;
+}
+
+/* The subject of the scene, in full colour. */
+.iso .top.accent {
+	fill: color-mix(in srgb, var(--t) 78%, var(--ground-mix));
+	stroke: color-mix(in srgb, var(--t) 92%, white);
+}
+
+.iso .left.accent {
+	fill: color-mix(in srgb, var(--t) 55%, var(--ground-mix));
+	stroke: color-mix(in srgb, var(--t) 40%, var(--ground-mix));
+}
+
+.iso .right.accent {
+	fill: color-mix(in srgb, var(--t) 38%, var(--ground-mix));
+	stroke: color-mix(in srgb, var(--t) 28%, var(--ground-mix));
+}
+
+.iso .dim {
+	opacity: 0.45;
+}
+
+.iso .line {
+	fill: none;
+	stroke: color-mix(in srgb, var(--t) 52%, var(--ground-mix));
+	stroke-width: 1.8;
+}
+
+.iso .line.accent {
+	stroke: color-mix(in srgb, var(--t) 85%, var(--ground-mix));
+}
+
+.iso .dashed {
+	stroke-dasharray: 3 4;
+}
+
+/* Soft contact shadows under each object; fainter under things that float. */
+.iso .shadow {
+	fill: #000;
+	opacity: 0.38;
+}
+
+.iso .shadow.far {
+	opacity: 0.18;
+}
+
+/* Spheres: a radial gradient, lit from the upper left, with a faint rim. */
+.iso .ball {
+	stroke: color-mix(in srgb, var(--t) 14%, var(--ground-mix));
+	stroke-width: 0.7;
+	vector-effect: non-scaling-stroke;
+}
+
+.iso .ball-hi {
+	stop-color: color-mix(in srgb, var(--t) 40%, var(--ground-mix));
+}
+
+.iso .ball-lo {
+	stop-color: color-mix(in srgb, var(--t) 12%, var(--ground-mix));
+}
+
+.iso .ball-hi.accent {
+	stop-color: color-mix(in srgb, var(--t) 88%, white);
+}
+
+.iso .ball-lo.accent {
+	stop-color: color-mix(in srgb, var(--t) 45%, var(--ground-mix));
+}
+
+/* Cables and tracks: a thick tube with a lighter core. */
+.iso .pipe,
+.iso .pipe-hi {
+	fill: none;
+	vector-effect: non-scaling-stroke;
+}
+
+.iso .pipe {
+	stroke: color-mix(in srgb, var(--t) 20%, var(--ground-mix));
+	stroke-width: 5;
+}
+
+.iso .pipe-hi {
+	stroke: color-mix(in srgb, var(--t) 38%, var(--ground-mix));
+	stroke-width: 1.6;
+}
+
+.iso .pipe.accent {
+	stroke: color-mix(in srgb, var(--t) 50%, var(--ground-mix));
+}
+
+.iso .pipe-hi.accent {
+	stroke: color-mix(in srgb, var(--t) 85%, var(--ground-mix));
+}
+
+/* Surface detail: code lines, tabs, chips, hands, meridians. */
+.iso .mark {
+	fill: none;
+	stroke: color-mix(in srgb, var(--t) 58%, var(--ground-mix));
+	stroke-width: 1.1;
+	vector-effect: non-scaling-stroke;
+}
+
+.iso .mark.accent {
+	stroke: color-mix(in srgb, var(--t) 35%, #120e16);
+}
+
+.iso .mark.ink {
+	stroke: color-mix(in srgb, var(--t) 8%, #0d0b10);
+}
+
+.iso .mark.light {
+	stroke: color-mix(in srgb, var(--t) 70%, white);
+}
+
+.iso .mark.fill {
+	fill: color-mix(in srgb, var(--t) 58%, var(--ground-mix));
+	stroke: none;
+}
+
+.iso .mark.fill.ink {
+	fill: color-mix(in srgb, var(--t) 8%, #0d0b10);
+}
+
+.iso .mark.fill.light {
+	fill: color-mix(in srgb, var(--t) 70%, white);
+}
+
+.iso .mark.fill.accent {
+	fill: color-mix(in srgb, var(--t) 35%, #120e16);
+}
