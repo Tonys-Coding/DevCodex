@@ -17,6 +17,7 @@
   1. Add a meta entry in `src/lib/content/catalog.ts` with status `live`.
   2. Write `src/lib/content/articles/<id>.svelte`. The body only: the shell adds the title, pack and next link.
   3. Add cards with `unlockedBy: <id>` in `cards.ts`, each with art in `components/cardArt.ts`.
+  - Give the lesson a banner scene in `components/isoScenes.ts` (keyed by its id).
   4. Optionally map practice problems in `practiceFor`.
 - **Add a problem:** add it to `problems.ts` with a starter, a solution and tests. Verify the solutions in Node and Python before shipping (no starter may pass).
 - **Imports:** use `#lib/...` with explicit `.js` extensions for TS modules (package.json subpath imports). Kit 3 has no `$lib`.

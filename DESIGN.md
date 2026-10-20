@@ -302,6 +302,19 @@ Hands-on games use the same sleeve panel, with a heading and a quiet counter, th
 - **LinkedListLab:** nodes as value and next-slot boxes with arrows to `null`; walks light each node in turn
 - **TreeLab:** an SVG search tree laid out by in-order position and depth; traversals light nodes in order and build a mono visit line
 
+### Banner art (isometric clay)
+Topic cards, lesson cards and the topic page header carry a faint isometric model of their idea. `IsoArt.svelte` draws scenes from `isoScenes.ts`, using `iso/geometry.ts` and the global `iso/iso.css`.
+- **Scenes are built, not drawn.** Boxes, cylinders and lines are placed by their centre along the screen's horizontal (`s`) and depth (`d`), snapped to a quarter unit, using layout helpers (row, stack, laptop, server). Arrows are links between named objects: they leave one surface and enter the other with a small gap, and their heads lie flat on the floor.
+- **Shapes.** Boxes, cylinders, shaded spheres, prisms with any convex footprint (hexagons, tags, walls at any angle; gears use their outline), pyramids (roofs, funnels), thick pipes (cables, tracks), and surface marks drawn as part of their object (tabs, code lines, chips, clock hands, meridians, status lights).
+- **One vocabulary per topic, so topics never look alike.** How the Web Works is infrastructure: browser windows, globes, servers, cables, envelopes, houses with roofs, cookies, clocks, a gate. Programming Concepts is abstract and flat: code documents, gears, name tags, a looping track, curly braces drawn on the floor. Data Structures is geometric: flat tiles, sphere nodes, open buckets, a funnel, flag pins, rails. A new topic gets its own small set of shapes before its scenes are drawn.
+- **True depth order.** Faces and line pieces are sorted back to front by a topological "is behind" test, so arrows pass correctly in front of or behind objects.
+- **One scale per kind of banner.** Lesson cards, topic cards and the topic header each have one shared frame, so a cube is the same size on every banner of a kind. Strokes keep the same width at any size (`vector-effect: non-scaling-stroke`).
+- **Clay style.** Solid blocks lit from above. The top face is a 30% mix of the track colour into the banner ground, the left face 18% and the right face 11%, with a faint lighter rim on top faces so stacked pieces read separately. The subject uses 78/55/38% mixes, so it is the one thing in full colour. Context can be dimmed to 45% opacity. Lines are a 52% mix.
+- **Grounding.** A soft, blurred contact shadow under each object, fainter under things that float. There is no floor tile.
+- **Banner ground.** A 6% mix of the track colour into the page ground, with a soft radial glow of the track colour. The picture sits absolutely inside a banner with a fixed aspect ratio, so it never stretches the card.
+- **Checked and reviewed.** `npm run content:check` fails when a scene has objects passing through each other, an arrow that misses or is too short, an arrowhead hidden behind something, or a scene that doesn't fit its frame. `npm run art:sheet` writes a page of every banner at large size for a close look after any change.
+- **Same output everywhere.** Coordinates are rounded before sorting, so the build (Node) and the browser draw identical SVG and hydration never differs.
+
 ### Article blocks
 - **Level Tag:** boxless: 1–3 pips and "Easy", "Medium" or "Hard" in the level colour (in the surface's ink when it sits on a track-coloured panel). It appears on lesson cards, the article cover, the home quest and "Up next".
 - **Layer** (`teach/Layer.svelte`): Going deeper and Under the hood. A layer starts at a full-width 2px rule (a 4px double rule for Under the hood), never a box: gold depth pips, the layer name as an h2-sized title, a one-line summary, "n sections · about n min" and the bonus card count in gold, then an outlined "Open …"/"Close …" button whose chevron turns. Closed, the body is `hidden`. Open, it reads like the rest of the article and ends at a hairline with "Finish Going deeper": the checklist (sections read, checks passed) and a gold "Collect the bonus card" button, locked until the Core pack is open. Collected cards deal in below.
@@ -314,16 +327,17 @@ Hands-on games use the same sleeve panel, with a heading and a quiet counter, th
 
 ### Learn page
 - **Built to scale:** a grid of topic cards (as many columns as fit, each at least 22rem), each linking to that topic's own page. Above it sits one "Continue …" line for the most recently read lesson. Old `/learn#topic-<id>` links redirect to the topic page.
-- **Topic card:** a quiet landscape binder card linking to its topic page: track art, title, blurb, one segment per lesson (filled in its level colour once finished, striped once started), "4 lessons · about 61 min", finished count, and "Open topic", "Continue" or "Review topic". A topic with a lesson under way gets a muted frame in its colour. Its accessible name is just the title and lesson count.
+- **Topic card:** a quiet binder card linking to its topic page: an isometric banner across the top (16:7, 5:2 on phones), then title, blurb, one segment per lesson (filled in its level colour once finished, striped once started), "4 lessons · about 61 min", finished count, and "Open topic", "Continue" or "Review topic". A topic with a lesson under way gets a muted frame in its colour. Its accessible name is just the title and lesson count.
 - **Search:** lesson titles and summaries, section headings, key terms inside sections (indexed at build time) and concept cards, in one flat list under the search box.
 - **Level without a search:** lists every lesson at that level across topics, each labelled with its topic, and the topic cards show how many lessons each has at that level.
 
 ### Topic page (`/learn/topic/<id>`)
 - **Header:** a panel framed in a muted mix of the topic colour, with large art (hidden on phones), title, blurb and lesson counts per level; then the numbers (lessons finished, cards collected, problems solved, minutes left); then a segment per lesson; then the one next step (resume the most recently read lesson, or the next unfinished one) with a track-coloured button. On phones the next step comes right after the title.
 - **The path:** the topic's lessons as lesson cards, easiest first.
+- **Lesson card:** kept short. A 5:2 isometric banner (3:1 on phones) with "Lesson n" and its state (Finished, n% read) on the banner, then the Level Tag, title, a two-line summary, one "Builds on" line, the read line while in progress, and minutes and cards (with bonus count) at the foot. Framed in its level colour. No concept list and no layer list on the card; those live in the lesson.
 - **Concept cards:** the topic's cards in a binder sleeve (six, then "Show all"), collected faces or locked hints, and a link to review them in Trivia.
 - **Side column:** the topic's achievement medal with progress, related practice problems with difficulty and solved state, and how many shorts come from the topic.
-- **Adding a topic:** add it to `tracks` in the catalog and to the `TrackId` type, give it a `.t-<id>` colour pair in app.css and line art in `trackArt` (cardArt.ts), and an achievement title in achievements.ts. Without its own colour, a topic falls back to gold.
+- **Adding a topic:** add it to `tracks` in the catalog and to the `TrackId` type, give it a `.t-<id>` colour pair in app.css and a banner scene in `isoScenes.ts`, and an achievement title in achievements.ts. Without its own colour, a topic falls back to gold.
 
 ### TL;DR (`/learn/tldr`)
 - **Paths · TL;DR switch** (`app/LearnSwitch.svelte`): two display-font text tabs under the Learn header, the current one underlined in gold, with "n unread" in gold beside TL;DR. TL;DR is a view of Learn, not a nav tab.
@@ -372,7 +386,7 @@ Pill-shaped fields on binder felt with a 2px sleeve edge, which turns gold or tr
 
 ### Do:
 - **Do** fill whole regions with a track colour and put its paired ink on top.
-- **Do** give every new concept card its own line drawing in `cardArt.ts`.
+- **Do** give every new concept card its own line drawing in `cardArt.ts`, and every new lesson and topic an isometric banner scene in `isoScenes.ts`.
 - **Do** keep article prose in Atkinson Hyperlegible at about 1.12rem, max 42rem wide.
 - **Do** honour reduced motion: no flips, no travelling packets, no autoplay.
 - **Do** label anything that is a demo or a preview, and show progress only from real activity.

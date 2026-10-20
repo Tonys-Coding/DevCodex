@@ -17,5 +17,6 @@ Update `activeContext.md` and `progress.md` whenever a decision or milestone cha
   - `npm run check` must pass
   - `npm run build` writes static output to `build/` with base `/DevCodex`
   - `npm run diagrams` renders sysketch specs in `src/lib/content/diagrams/` (see the README there)
+  - `npm run art:sheet` writes a page of every isometric banner scene at large size, for review after art changes
   - `npm run content:check` checks lessons, TL;DR reads and cards, and runs every JS/Python code sample; it must pass before content ships. Mark a fragment `run={false}` on its `<Code>`, or `run="fails"` if it is meant to error
 - Do not push to GitHub or enable Pages without the user's explicit OK.

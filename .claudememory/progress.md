@@ -60,6 +60,8 @@
 
 - 2026-10-20: Eight more TL;DR reads from current news (dated 2026-10-19): AI agent break-ins (NorForge), the UK data-centre power wall (Microsoft and Nscale), Python 3.15 lazy imports, TypeScript 7 in Go, AI agents on Wikipedia (Wikimedia report), OAuth with the Personal Agent Protocol, prompt injection, and tokens. Facts come from primary sources where possible; content:check passes. Code ligatures are now off sitewide.
 
+- 2026-10-20: Card redesign: topic and lesson cards got isometric clay banners on top (chosen from three prototypes), and lesson cards were condensed (no concept or layer lists). The topic page header uses the same art. Then the renderer was rebuilt for precision: surface-to-surface arrows, true depth order, one scale per banner kind, contact shadows, a scene geometry lint in content:check, and `npm run art:sheet`. Then each topic got its own shape vocabulary (new prisms, pyramids, spheres, pipes and surface marks), and all 16 scenes were recomposed.
+
 ## Next checkpoint
 
 The user commits and pushes the layers work by feature (from the commands given), then tests installs on devices.

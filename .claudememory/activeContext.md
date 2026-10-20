@@ -57,7 +57,7 @@ Phase 2 is built and verified. **Binder (direction C)** is the app. On 2026-10-1
 
 ## Learn revamp (2026-10-19)
 
-- Learn (`src/routes/learn/+page.svelte`) shows the three tracks as landscape topic cards (`app/TopicCard.svelte`, art in `trackArt` in cardArt.ts). Opening one deals its lessons as portrait `app/LessonCard.svelte` cards; the tagline is "Your path to expertise."; search is underlined and the level filter is text tabs.
+- Learn (`src/routes/learn/+page.svelte`) shows the three tracks as topic cards (`app/TopicCard.svelte`, isometric banner scenes in `components/isoScenes.ts`). Opening one deals its lessons as portrait `app/LessonCard.svelte` cards; the tagline is "Your path to expertise."; search is underlined and the level filter is text tabs.
 - No pills for facts anywhere: `.meta-row` in app.css replaces the chips (article cover, practice badges and score, header card count), and LevelTag is boxless.
 - Quiz is a one-question-at-a-time stepper with locked answers, Next question, and a final score with Try again.
 
@@ -84,7 +84,7 @@ Phase 2 is built and verified. **Binder (direction C)** is the app. On 2026-10-1
 
 - Learn (`/learn`) is a scalable grid of TopicCard links, plus a Continue line, search, and a level list when a level is picked without a search. Each topic has `/learn/topic/[track]` (prerendered via `entries`, with this topic's slice of the article index from `+page.server.ts`): header with the next step, the path, concept cards, the achievement, practice and shorts.
 - Article back links and the dashboard binder's track headings point at topic pages. `/learn#topic-x` redirects.
-- Adding a topic means: tracks plus TrackId, a `.t-<id>` colour, `trackArt`, and an achievement title. A topic without a colour falls back to gold.
+- Adding a topic means: tracks plus TrackId, a `.t-<id>` colour, a scene in `isoScenes.ts`, and an achievement title. A topic without a colour falls back to gold.
 
 ## TL;DR (2026-10-19, approved)
 
@@ -97,6 +97,14 @@ Phase 2 is built and verified. **Binder (direction C)** is the app. On 2026-10-1
 ## Content check (2026-10-19)
 
 - `npm run content:check` (see techContext.md) checks lesson and TL;DR structure, card wiring, and runs every JS/Python sample. 12 fragments are marked `run={false}` and 2 error demos `run="fails"`. It found two content bugs, now fixed: js-event-loop’s Going deeper checks were titled “Going deeper checkpoint” and “Predict it” (now checkpoint 1 and 2, which resets those two quiz records), and two-pointer-pattern had no Sources section.
+
+## Card banners (2026-10-20)
+
+- Topic cards, lesson cards and the topic page header use isometric "clay" banners. The user chose Clay over Blueprint and Glass from prototypes. Lesson cards no longer list concepts or layers and are about half as tall. `trackArt` is gone.
+- The geometry lives in `components/iso/geometry.ts` (plain TS: projection, link clipping, topological depth sort, contact shadows, `frameFor` shared frames, `renderSvg`, `lintScene`). The look is in `components/iso/iso.css` (global). `IsoArt.svelte` just renders `renderSvg` output with `{@html}`. Scenes are in `components/isoScenes.ts` (`topicScenes`, `lessonScenes`, `frames.lesson/topic/header`), placed with `H(s, d)` helpers; arrows are `link(from, to)` between named objects.
+- Shapes: box, cyl, sphere (radial gradient), prism (convex footprint; non-convex like gears use their hull for clipping and overlap), pyramid, pipe lines, and `marks` on solids. Each topic has its own vocabulary of helpers in isoScenes.ts (web: browser/server/globe/envelope/house/cookie/clock/book/gate; programming: doc/gear/tag/brace/track; data: tile/node/bucket/funnel/pin/hex/rails), so topics never look alike.
+- `content:check` lints every scene: objects passing through each other, links that miss or are too short, hidden arrowheads, and frame fit. `npm run art:sheet` writes a large review page of every banner.
+- Gotcha: coordinates (and the filter-id hash input) are rounded to 1e-4 because Math.sin and Math.cos differ in the last bit between Node and Chrome, which otherwise changed the depth order and caused hydration_html_changed warnings.
 
 ## Known quirks
 
