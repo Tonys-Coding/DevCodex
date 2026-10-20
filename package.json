@@ -11,7 +11,8 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"diagrams": "node scripts/diagrams.mjs",
-		"content:check": "node scripts/content-check.mjs"
+		"content:check": "node scripts/content-check.mjs",
+		"art:sheet": "node scripts/art-sheet.mjs"
 	},
 	"devDependencies": {
 		"@fontsource-variable/atkinson-hyperlegible-next": "^5.3.0",

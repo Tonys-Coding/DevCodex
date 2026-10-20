@@ -25,10 +25,12 @@ registerHooks({
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const content = join(root, 'src/lib/content');
-const { articles } = await import('../src/lib/content/catalog.ts');
+const { articles, tracks } = await import('../src/lib/content/catalog.ts');
 const { cards } = await import('../src/lib/content/cards.ts');
 const { briefs } = await import('../src/lib/content/briefs.ts');
 const { cardArt } = await import('../src/lib/components/cardArt.ts');
+const { isoScenes, lessonScenes, topicScenes, frames } = await import('../src/lib/components/isoScenes.ts');
+const { lintScene } = await import('../src/lib/components/iso/geometry.ts');
 const { sectionsOf, quizzesOf, wordCount } = await import('../src/lib/content/article-markup.ts');
 
 /** Soft and hard word limits for a TL;DR body. */
@@ -171,7 +173,20 @@ for (const a of articles) {
 		if (!articleIds.has(b)) error(files.catalog, entryLine(sourceOf.catalog, a.id), `“${a.id}” builds on “${b}”, which is not in the catalog.`);
 	if (a.status === 'live' && !articleFiles.includes(`${a.id}.svelte`))
 		error(files.catalog, entryLine(sourceOf.catalog, a.id), `“${a.id}” is live but has no body file articles/${a.id}.svelte.`);
+	// Lesson cards fall back to the topic's scene, so a missing one is only a warning.
+	if (a.status === 'live' && !isoScenes[a.id])
+		warn(files.catalog, entryLine(sourceOf.catalog, a.id), `Lesson “${a.id}” has no banner scene in components/isoScenes.ts; its card uses the topic’s.`);
 }
+for (const t of tracks)
+	if (!isoScenes[t.id]) error(files.catalog, entryLine(sourceOf.catalog, t.id), `Topic “${t.id}” has no banner scene in components/isoScenes.ts.`);
+
+// Banner art: every scene's geometry (no objects passing through each other, arrows that
+// start and end at surfaces with their heads in view) and its fit in the shared frame.
+const scenesFile = join(root, 'src/lib/components/isoScenes.ts');
+const scenesSrc = await readFile(scenesFile, 'utf8');
+for (const [group, frame] of [[lessonScenes, frames.lesson], [topicScenes, frames.topic]])
+	for (const [id, scene] of Object.entries(group))
+		for (const f of lintScene(scene, frame)) report(f.level, scenesFile, entryLine(scenesSrc, id), `Scene “${id}”: ${f.message}`);
 
 for (const f of articleFiles) {
 	const file = join(articleDir, f);
