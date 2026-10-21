@@ -106,6 +106,22 @@ Phase 2 is built and verified. **Binder (direction C)** is the app. On 2026-10-1
 - `content:check` lints every scene: objects passing through each other, links that miss or are too short, hidden arrowheads, and frame fit. `npm run art:sheet` writes a large review page of every banner.
 - Gotcha: coordinates (and the filter-id hash input) are rounded to 1e-4 because Math.sin and Math.cos differ in the last bit between Node and Chrome, which otherwise changed the depth order and caused hydration_html_changed warnings.
 
+## Curriculum and lesson writing (2026-10-20)
+
+- `CURRICULUM.md` maps 51 lessons across the three topics (13 live, 38 planned), with each planned lesson's Core, deeper and hood scope, a lab idea and practice, plus a suggested writing order in waves. Wave 1: big-o-arrays, http-requests, types, functions-scope, sliding-window, sorting.
+- The `lesson-writer` skill (`.claude/skills/lesson-writer/`: SKILL.md, reference/lesson-skeleton.md, templates/lesson-brief.md and handoff.md) lets a cheaper model write a full lesson. It returns a claims ledger, code-run table, lab spec and check results. The reviewer verifies the ledger and builds the lab from the `<!-- LAB: … -->` placeholder. The skeleton was tested: content:check and svelte-check pass.
+
+## Web-written lessons (2026-10-20)
+
+- `.claude/skills/lesson-writer/web-edition.md` is a self-contained prompt for web AIs. They write one Markdown file per lesson:
+  - front matter
+  - Core blocks, then `=== CORE PACK ===`, `=== GOING DEEPER: … ===`, `=== UNDER THE HOOD: … ===`, `=== CARDS ===` and `=== HANDOFF ===`
+  - ```quiz blocks, :::note and :::glossary, `[[term|def]]`, and `[[LAB: …]]`
+- `scripts/lesson-format.mjs` converts that format to Svelte and back (it uses the Svelte compiler's parser), and has a canonical form for comparison.
+- `npm run lesson:import -- <file|folder>` writes the lesson, the catalog entry (placed with `place: after|before <id>`, minutes auto from Core words), the cards (appended) and the practice links. Re-importing replaces in place, and `--out <dir>` writes elsewhere.
+- `npm run lesson:roundtrip` passes for all 13 lessons, and 933 of 960 blocks use the plain format. Raw blocks are labs, StepFlow, Diagram, Choice, CodeTrace and six one-off layouts. Seven deliberate changes were all caught by the comparison.
+- The reviewer still draws the card art and banner scene, and builds the lab.
+
 ## Known quirks
 
 - CI runs `npm ci` from scratch. A stale local `.svelte-kit/` can hide type errors, so clear it before trusting a local `npm run check`. `@types/node` is a direct dev dependency for vite.config.ts.

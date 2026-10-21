@@ -25,3 +25,4 @@
 ## Design workflow
 
 Impeccable lives at `.claude/skills/impeccable/`. `PRODUCT.md` is product truth. `DESIGN.md` gets rewritten from the built world once a direction ships (the Impeccable documenter step).
+- New lessons: write a brief from CURRICULUM.md, run the `lesson-writer` skill (ideally in a session on a cheaper model), then verify its claims ledger, build the lab, and review the banner with `npm run art:sheet`.

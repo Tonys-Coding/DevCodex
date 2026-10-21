@@ -62,6 +62,10 @@
 
 - 2026-10-20: Card redesign: topic and lesson cards got isometric clay banners on top (chosen from three prototypes), and lesson cards were condensed (no concept or layer lists). The topic page header uses the same art. Then the renderer was rebuilt for precision: surface-to-surface arrows, true depth order, one scale per banner kind, contact shadows, a scene geometry lint in content:check, and `npm run art:sheet`. Then each topic got its own shape vocabulary (new prisms, pyramids, spheres, pipes and surface marks), and all 16 scenes were recomposed.
 
+- 2026-10-20: CURRICULUM.md roadmap (51 lessons) and the lesson-writer skill, so lessons can be drafted by a cheaper model and reviewed for accuracy here.
+
+- 2026-10-20: Web-AI lesson pipeline: web-edition prompt, Markdown lesson format, `lesson:import` / `lesson:export` / `lesson:roundtrip` (all 13 lessons round-trip exactly), an end-to-end test (a web-format lesson imported, code run, type-checked), and `incoming/`.
+
 ## Next checkpoint
 
 The user commits and pushes the layers work by feature (from the commands given), then tests installs on devices.
