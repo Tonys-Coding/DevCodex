@@ -15,6 +15,8 @@
 	let view: EditorView | undefined;
 	let langSlot: Compartment | undefined;
 	let langFor: ((l: Language) => import('@codemirror/state').Extension) | undefined;
+	let labelSlot: Compartment | undefined;
+	let labelFor: ((text: string) => import('@codemirror/state').Extension) | undefined;
 	let ready = $state(false);
 
 	onMount(() => {
@@ -36,6 +38,8 @@
 
 			langFor = (l) => (l === 'python' ? [python(), indentUnit.of('    ')] : [javascript(), indentUnit.of('  ')]);
 			langSlot = new Compartment();
+			labelFor = (text) => EditorView.contentAttributes.of({ 'aria-label': text });
+			labelSlot = new Compartment();
 
 			const binder = EditorView.theme(
 				{
@@ -85,7 +89,7 @@
 						langSlot.of(langFor(language)),
 						binder,
 						syntaxHighlighting(highlight),
-						EditorView.contentAttributes.of({ 'aria-label': label }),
+						labelSlot.of(labelFor(label)),
 						EditorView.updateListener.of((update) => {
 							if (update.docChanged) value = update.state.doc.toString();
 						})
@@ -112,6 +116,12 @@
 	$effect(() => {
 		const l = language;
 		if (view && langSlot && langFor) view.dispatch({ effects: langSlot.reconfigure(langFor(l)) });
+	});
+
+	// The label names the language, so it changes with it.
+	$effect(() => {
+		const text = label;
+		if (view && labelSlot && labelFor) view.dispatch({ effects: labelSlot.reconfigure(labelFor(text)) });
 	});
 </script>
 
