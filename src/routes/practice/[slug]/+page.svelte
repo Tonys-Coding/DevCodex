@@ -84,7 +84,7 @@
 
 	const allPassed = $derived(result?.kind === 'done' && result.passed === result.cases.length);
 	const colour = $derived(
-		({ 'Arrays & Hashing': 't-structures', 'Two Pointers': 't-web', 'Sliding Window': 't-programming', Stack: 't-structures', 'Binary Search': 't-web', 'Linked List': 't-programming', Trees: 't-structures' } as const)[problem.pattern]
+		({ 'Arrays & Hashing': 't-structures', 'Two Pointers': 't-web', 'Sliding Window': 't-programming', Stack: 't-structures', 'Binary Search': 't-web', 'Linked List': 't-programming', Trees: 't-structures', Strings: 't-web' } as const)[problem.pattern]
 	);
 </script>
 

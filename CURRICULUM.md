@@ -41,7 +41,7 @@ What happens between typing an address and reading a page, and how sites stay fa
 - **Going deeper:** safe and idempotent methods and why retries depend on them; content negotiation (`Accept`, `Content-Type`); redirects (301, 302, 307, 308); query strings and encoding.
 - **Under the hood:** HTTP semantics (RFC 9110) vs. message syntax; HTTP/1.1 framing (`Content-Length`, chunked) vs. HTTP/2 frames; header compression (HPACK, QPACK).
 - **Lab:** a request builder. Pick a method, path and headers, then see the exact request text and a plausible response.
-- **Practice:** "Parse a query string" (new, Easy).
+- **Practice:** "Read a query string" (`parse-query`), built.
 
 ### 3. How data crosses the internet: IP, TCP and UDP (Easy)
 - **Core:** packets; IP addresses and ports; routers forward hop by hop; TCP makes a reliable, ordered stream; UDP sends and forgets; when each is right.

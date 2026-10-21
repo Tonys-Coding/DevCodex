@@ -96,7 +96,7 @@ export type TestCase = { args: unknown[]; expected: unknown };
 export type Problem = {
 	id: string;
 	title: string;
-	pattern: 'Arrays & Hashing' | 'Two Pointers' | 'Sliding Window' | 'Stack' | 'Binary Search' | 'Linked List' | 'Trees';
+	pattern: 'Arrays & Hashing' | 'Two Pointers' | 'Sliding Window' | 'Stack' | 'Binary Search' | 'Linked List' | 'Trees' | 'Strings';
 	difficulty: 'Easy' | 'Medium';
 	statement: string;
 	examples: { input: string; output: string; note?: string }[];

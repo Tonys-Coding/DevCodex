@@ -34,7 +34,7 @@ export const articles: ArticleMeta[] = [
 		summary: 'Learn what web requests ask for and how servers reply',
 		dek: 'Every time an app loads data or saves a change, it may exchange HTTP messages with a server. Learn how to read these messages and recognise what went right or wrong.',
 		assumes: 'You know what a browser, a website and a URL are.',
-		minutes: 14
+		minutes: 11
 	},
 	{
 		id: 'cookies-sessions',
@@ -200,5 +200,6 @@ export const practiceFor: Record<string, string[]> = {
 	'stacks-queues': ['valid-brackets', 'warmer-days'],
 	'binary-search': ['find-sorted', 'sorted-pair-sum'],
 	'linked-lists': ['reverse-list'],
-	'binary-trees': ['tree-depth']
+	'binary-trees': ['tree-depth'],
+	'http-requests': ['parse-query']
 };

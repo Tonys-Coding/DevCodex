@@ -12,7 +12,8 @@
 		Stack: 't-structures',
 		'Binary Search': 't-web',
 		'Linked List': 't-programming',
-		Trees: 't-structures'
+		Trees: 't-structures',
+		Strings: 't-web'
 	};
 </script>
 

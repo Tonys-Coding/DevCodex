@@ -483,6 +483,43 @@ export const problems: Problem[] = [
 			{ args: [tree(1, tree(2, tree(4)), tree(3))], expected: 3 }
 		],
 		external: { label: "Maximum Depth of Binary Tree on LeetCode", url: 'https://leetcode.com/problems/maximum-depth-of-binary-tree/' }
+	},
+	{
+		id: 'parse-query',
+		title: 'Read a query string',
+		pattern: 'Strings',
+		difficulty: 'Easy',
+		statement:
+			'Given the query part of a URL (the text after ?, without the ?), return its name–value pairs in order, as a list of [name, value] pairs. Follow the rules browsers use: split on &, skip empty pieces, and split each piece at its first = (a piece with no = has an empty value). Then turn every + into a space and decode the percent escapes, such as %20 or %C3%A9. You may use decodeURIComponent in JavaScript or urllib.parse.unquote in Python for that last step.',
+		examples: [
+			{ input: 'query = "q=dune&page=2"', output: '[["q", "dune"], ["page", "2"]]' },
+			{ input: 'query = "q=caf%C3%A9+au+lait&tag=new&tag=sale"', output: '[["q", "café au lait"], ["tag", "new"], ["tag", "sale"]]' },
+			{ input: 'query = "math=1%2B1"', output: '[["math", "1+1"]]', note: '%2B is an encoded plus sign, so it stays a plus.' }
+		],
+		hint: 'Order matters: replace + with a space before decoding. If you decode first, %2B turns into + and then wrongly into a space.',
+		compare: 'exact',
+		fn: { python: 'parse_query', javascript: 'parseQuery' },
+		starter: {
+			python: 'from urllib.parse import unquote\n\n\n' + py('def parse_query(query: str) -> list[list[str]]:', 'Return [name, value] pairs, in order.'),
+			javascript: js('function parseQuery(query)', 'Return [name, value] pairs, in order.')
+		},
+		solution: {
+			python:
+				'from urllib.parse import unquote\n\n\ndef parse_query(query: str) -> list[list[str]]:\n    pairs = []\n    for piece in query.split("&"):\n        if not piece:\n            continue\n        name, _, value = piece.partition("=")\n        pairs.append([unquote(name.replace("+", " ")), unquote(value.replace("+", " "))])\n    return pairs\n',
+			javascript:
+				'function parseQuery(query) {\n  const decode = (text) => decodeURIComponent(text.replaceAll("+", " "));\n  const pairs = [];\n  for (const piece of query.split("&")) {\n    if (piece === "") continue;\n    const at = piece.indexOf("=");\n    const name = at < 0 ? piece : piece.slice(0, at);\n    const value = at < 0 ? "" : piece.slice(at + 1);\n    pairs.push([decode(name), decode(value)]);\n  }\n  return pairs;\n}\n'
+		},
+		tests: [
+			{ args: ['q=dune&page=2'], expected: [['q', 'dune'], ['page', '2']] },
+			{ args: ['q=caf%C3%A9+au+lait'], expected: [['q', 'café au lait']] },
+			{ args: ['tag=new&tag=sale'], expected: [['tag', 'new'], ['tag', 'sale']] },
+			{ args: ['math=1%2B1'], expected: [['math', '1+1']] },
+			{ args: ['flag&empty=&=x'], expected: [['flag', ''], ['empty', ''], ['', 'x']] },
+			{ args: ['a=1&&b=2&'], expected: [['a', '1'], ['b', '2']] },
+			{ args: [''], expected: [] },
+			{ args: ['eq=a=b'], expected: [['eq', 'a=b']] }
+		],
+		external: { label: 'The query parser in the URL Standard', url: 'https://url.spec.whatwg.org/#urlencoded-parsing' }
 	}
 ];
 
