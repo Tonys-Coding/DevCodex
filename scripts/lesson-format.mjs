@@ -326,6 +326,16 @@ function codeSvelte(lang, a, code, pad) {
 	return `${pad}<Code\n${props.join('\n')}\n${pad}/>`;
 }
 
+/**
+ * Quiz and card text is shown as plain text, so Markdown marks a writer adds out of habit
+ * (`code`, **bold**, *italic*) are taken out rather than shown literally.
+ */
+export const plain = (s) =>
+	s
+		.replace(/`([^`]*)`/g, '$1')
+		.replace(/\*\*([^*]+)\*\*/g, '$1')
+		.replace(/(^|[\s(])\*([^*\s][^*]*)\*(?=[\s).,:;!?]|$)/g, '$1$2');
+
 /** Parses a ```quiz block: optional title:/variant: lines, then Q:, options (- wrong, * right), Why:. */
 export function parseQuiz(lines) {
 	const quiz = { questions: [] };
@@ -336,12 +346,12 @@ export function parseQuiz(lines) {
 		let m;
 		if (!q && (m = l.match(/^title:\s*(.*)$/))) quiz.title = m[1];
 		else if (!q && (m = l.match(/^variant:\s*(.*)$/))) quiz.variant = m[1];
-		else if ((m = l.match(/^Q:\s*(.*)$/))) quiz.questions.push((q = { prompt: m[1], options: [], answer: -1, explain: '' }));
+		else if ((m = l.match(/^Q:\s*(.*)$/))) quiz.questions.push((q = { prompt: plain(m[1]), options: [], answer: -1, explain: '' }));
 		else if (q && (m = l.match(/^([-*])\s+(.*)$/))) {
 			if (m[1] === '*') q.answer = q.options.length;
-			q.options.push(m[2]);
-		} else if (q && (m = l.match(/^Why:\s*(.*)$/))) q.explain = m[1];
-		else if (q && q.explain) q.explain += ' ' + l;
+			q.options.push(plain(m[2]));
+		} else if (q && (m = l.match(/^Why:\s*(.*)$/))) q.explain = plain(m[1]);
+		else if (q && q.explain) q.explain += ' ' + plain(l);
 		else throw new Error(`Unexpected line in quiz: ${l}`);
 	}
 	for (const x of quiz.questions) if (x.answer < 0) throw new Error(`Question has no * correct option: ${x.prompt}`);
@@ -375,6 +385,7 @@ export function frontMatter(text) {
 				.map((x) => x.trim().replace(/^['"]|['"]$/g, ''))
 				.filter(Boolean);
 		else if (/^".*"$/.test(v)) v = v.slice(1, -1).replace(/\\"/g, '"');
+		else if (/^'.*'$/.test(v)) v = v.slice(1, -1).replace(/''/g, "'");
 		out[m[1]] = v;
 	}
 	return out;
@@ -392,9 +403,9 @@ export function parseCards(lines) {
 			const [id, term, level, layer] = m[1].split('|').map((x) => x.trim());
 			c = { id, term, level: Number(level.replace(/\D/g, '')), ...(layer ? { layer } : {}) };
 			cards.push(c);
-		} else if (c && (m = l.match(/^Q:\s*(.*)$/))) c.question = m[1];
-		else if (c && (m = l.match(/^A:\s*(.*)$/))) c.answer = m[1];
-		else if (c && (m = l.match(/^Detail:\s*(.*)$/))) c.detail = m[1];
+		} else if (c && (m = l.match(/^Q:\s*(.*)$/))) c.question = plain(m[1]);
+		else if (c && (m = l.match(/^A:\s*(.*)$/))) c.answer = plain(m[1]);
+		else if (c && (m = l.match(/^Detail:\s*(.*)$/))) c.detail = plain(m[1]);
 		else throw new Error(`Unexpected line in cards: ${l}`);
 	}
 	return cards;

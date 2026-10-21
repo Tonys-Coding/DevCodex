@@ -26,7 +26,7 @@ const LEVELS = ['easy', 'medium', 'hard'];
 
 /** Reads every .md lesson file at the target (a file or a folder). */
 async function files(path) {
-	if ((await stat(path)).isDirectory()) return (await readdir(path)).filter((f) => f.endsWith('.md')).map((f) => join(path, f));
+	if ((await stat(path)).isDirectory()) return (await readdir(path)).filter((f) => f.endsWith('.md') && !/^readme/i.test(f)).map((f) => join(path, f));
 	return [path];
 }
 

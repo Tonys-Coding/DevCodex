@@ -80,7 +80,7 @@ Each card's question must be answerable from its own layer of the lesson. The te
 
 ### Front matter
 
-The file starts with this block. Use the values from the brief.
+The file starts with this block. Use the values from the brief. Write values plainly, without quotes.
 
 ```
 ---
@@ -162,7 +162,7 @@ def binary_search(items, target):
 - If a sample is only a fragment that can't run on its own, add `run=false`, and say why in the handoff.
 - If a sample is meant to end in an error, add `run=fails`.
 
-**Quiz:**
+**Quiz:** questions, options and explanations are shown as **plain text**, so don't use backticks, bold or other Markdown in them; write `GET`, not `` `GET` ``.
 - `title:` and `variant: checkpoint` lines come first for checkpoints.
 - The final Core quiz has neither line.
 - The "Under the hood check" has `title:` but no `variant:`.
@@ -191,7 +191,7 @@ Why: 30 is smaller than 45, and everything right of 45 is bigger still, so only 
 
 - `**bold**`, `*italic*`, `` `code` ``.
 - Links: `[text](https://…)`.
-- **Glossary term**, on its first use in the text: `[[index|An item’s position in a list, counting from 0.]]`. The definition is the same one used in the glossary. It combines with bold: `**[[stack|A collection where you only add to, or take from, the top.]]**`.
+- **Glossary term**, on its first use in the text: `[[index|An item’s position in a list, counting from 0.]]`. The part before `|` is **the words the reader sees in the sentence**, written normally (`[[HTTP request|…]]`, never a slug like `http-request`). The definition is the same one used in the glossary. It combines with bold: `**[[stack|A collection where you only add to, or take from, the top.]]**`.
 - To write a literal `*`, `` ` ``, `[`, `]`, `|` or `<` in prose, put a backslash before it: `\*`. Inside `` `code` `` no escaping is needed, except `\|` for a pipe inside a table cell.
 - Don't write HTML, Svelte, imports or styling. The format covers everything a lesson needs.
 
@@ -213,7 +213,7 @@ A: A yes/no check that flips once as the value grows
 Detail: “Smallest capacity that ships in 5 days” works: bigger always works too.
 ```
 
-The fourth field is `deeper` or `hood` for the two bonus cards, and absent for Core cards.
+The fourth field is `deeper` or `hood` for the two bonus cards, and absent for Core cards. Card text is plain text too: no backticks or bold.
 
 ### Handoff
 
