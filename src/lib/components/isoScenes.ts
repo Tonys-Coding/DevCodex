@@ -368,6 +368,18 @@ export const lessonScenes: Record<string, Scene> = {
 		link('dns', 'srv', { level: 0.3, pipe: true }),
 		envelope('pkt', 8.25, { z: 0.6, d: 1.2, tone: 'accent' })
 	],
+	'http-requests': [
+		browser('win', 0),
+		server('srv', 11.5, 2.4),
+		path([[1.75, -0.9, 0.06], [10.25, -0.9, 0.06]], { arrow: true, tone: 'dim' }),
+		path([[10.25, 0.9, 0.06], [1.75, 0.9, 0.06]], { arrow: true }),
+		envelope('req', 5, { z: 0.6, d: -0.9 }),
+		block('res', 7, [0.95, 0.75, 0.14], { z: 0.6, d: 0.9, tone: 'accent' }, (f) => [
+			seg(f.top(0.2, 0.25), f.top(0.8, 0.25), 'ink'),
+			seg(f.top(0.2, 0.5), f.top(0.65, 0.5), 'ink'),
+			seg(f.top(0.2, 0.75), f.top(0.72, 0.75), 'ink')
+		])
+	],
 	'cookies-sessions': [
 		server('srv', 0, 2.4),
 		cookie('ck', 5.25, 0.9, { tone: 'accent' }),

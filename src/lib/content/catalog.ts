@@ -25,6 +25,18 @@ export const articles: ArticleMeta[] = [
 		minutes: 11
 	},
 	{
+		id: 'http-requests',
+		builds: ['load-a-page'],
+		track: 'web',
+		level: 'easy',
+		status: 'live',
+		title: 'HTTP requests: methods, headers and status codes',
+		summary: 'Learn what web requests ask for and how servers reply',
+		dek: 'Every time an app loads data or saves a change, it may exchange HTTP messages with a server. Learn how to read these messages and recognise what went right or wrong.',
+		assumes: 'You know what a browser, a website and a URL are.',
+		minutes: 14
+	},
+	{
 		id: 'cookies-sessions',
 		builds: ['load-a-page'],
 		track: 'web',

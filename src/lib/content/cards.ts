@@ -869,6 +869,69 @@ export const cards: ConceptCard[] = [
 		unlockedBy: 'binary-trees',
 		layer: 'hood',
 		level: 3
+	},
+
+	{
+		id: 'http-request-response',
+		term: 'Request and response',
+		track: 'web',
+		question: 'What travels back from a server after a client sends an HTTP request?',
+		answer: 'An HTTP response',
+		detail: 'It reports an outcome and may contain headers and content. A response is different from a network failure that prevents any response.',
+		unlockedBy: 'http-requests',
+		level: 1
+	},
+	{
+		id: 'common-http-methods',
+		term: 'Common HTTP methods',
+		track: 'web',
+		question: 'Which HTTP method normally reads a resource without requesting a change?',
+		answer: 'GET',
+		detail: 'Methods express intent. POST submits data, while PUT, PATCH and DELETE normally request changes.',
+		unlockedBy: 'http-requests',
+		level: 1
+	},
+	{
+		id: 'accept-content-type',
+		term: 'Accept versus Content-Type',
+		track: 'web',
+		question: 'Which header identifies the media type of content being sent?',
+		answer: 'Content-Type',
+		detail: 'Accept describes desired response media types. Content-Type describes content included in the current message.',
+		unlockedBy: 'http-requests',
+		level: 2
+	},
+	{
+		id: 'http-401-vs-403',
+		term: '401 versus 403',
+		track: 'web',
+		question: 'A request arrives with no valid credentials. Which status fits: 401 or 403?',
+		answer: '401 Unauthorized',
+		detail: '401 means valid authentication is missing and comes with a WWW-Authenticate challenge. 403 means the server understood the request and refuses it, even if you are signed in.',
+		unlockedBy: 'http-requests',
+		level: 2
+	},
+	{
+		id: 'http-idempotent-methods',
+		term: 'Idempotent HTTP methods',
+		track: 'web',
+		question: 'What does idempotent mean for repeated identical requests?',
+		answer: 'Same intended server-state effect as one request',
+		detail: 'PUT and DELETE have idempotent semantics. Repeating requests can still produce different responses or incidental logs.',
+		unlockedBy: 'http-requests',
+		layer: 'deeper',
+		level: 2
+	},
+	{
+		id: 'head-no-content',
+		term: 'HEAD response content',
+		track: 'web',
+		question: 'What response content does a successful HEAD request return?',
+		answer: 'No response body',
+		detail: 'HEAD provides metadata for a resource without transferring the representation content returned by GET.',
+		unlockedBy: 'http-requests',
+		layer: 'hood',
+		level: 3
 	}
 ];
 

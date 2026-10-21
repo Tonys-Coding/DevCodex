@@ -4,7 +4,7 @@ The full path for each topic: what is live, and what comes next, in reading orde
 
 Each planned lesson lists what each layer covers, a lab idea (the interactive piece, built separately), and practice problems where they fit. Lesson ids are final once a lesson ships, because progress is stored by id.
 
-**Status:** 13 live, 38 planned, 51 in all.
+**Status:** 14 live, 37 planned, 51 in all.
 
 How to use this file:
 - To write a planned lesson, turn its entry into a brief (`.claude/skills/lesson-writer/templates/lesson-brief.md`) and follow the lesson-writer skill.
@@ -20,7 +20,7 @@ What happens between typing an address and reading a page, and how sites stay fa
 | # | Id | Lesson | Level | Builds on | Status |
 |---|---|---|---|---|---|
 | 1 | `load-a-page` | What happens when you load a web page | Easy | | Live |
-| 2 | `http-requests` | HTTP requests: methods, headers and status codes | Easy | load-a-page | Planned |
+| 2 | `http-requests` | HTTP requests: methods, headers and status codes | Easy | load-a-page | Live |
 | 3 | `packets-tcp-udp` | How data crosses the internet: IP, TCP and UDP | Easy | load-a-page | Planned |
 | 4 | `dns` | DNS: the internet's address book | Medium | packets-tcp-udp | Planned |
 | 5 | `https-tls` | HTTPS and certificates | Medium | packets-tcp-udp | Planned |
