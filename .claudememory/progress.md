@@ -66,6 +66,8 @@
 
 - 2026-10-20: Web-AI lesson pipeline: web-edition prompt, Markdown lesson format, `lesson:import` / `lesson:export` / `lesson:roundtrip` (all 13 lessons round-trip exactly), an end-to-end test (a web-format lesson imported, code run, type-checked), and `incoming/`.
 
+- 2026-10-20: First web-AI lesson shipped through the pipeline: `http-requests` (Web, Easy, after load-a-page) with 6 cards, card art and a banner (request and response lanes). content:check, check, build and roundtrip pass on 14 lessons. Its HttpRequestLab was built the same day and tested on every status it can return, at 375 and desktop widths. The Core still runs long.
+
 ## Next checkpoint
 
 The user commits and pushes the layers work by feature (from the commands given), then tests installs on devices.

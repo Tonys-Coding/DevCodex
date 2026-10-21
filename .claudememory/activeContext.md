@@ -119,8 +119,9 @@ Phase 2 is built and verified. **Binder (direction C)** is the app. On 2026-10-1
   - ```quiz blocks, :::note and :::glossary, `[[term|def]]`, and `[[LAB: …]]`
 - `scripts/lesson-format.mjs` converts that format to Svelte and back (it uses the Svelte compiler's parser), and has a canonical form for comparison.
 - `npm run lesson:import -- <file|folder>` writes the lesson, the catalog entry (placed with `place: after|before <id>`, minutes auto from Core words), the cards (appended) and the practice links. Re-importing replaces in place, and `--out <dir>` writes elsewhere.
-- `npm run lesson:roundtrip` passes for all 13 lessons, and 933 of 960 blocks use the plain format. Raw blocks are labs, StepFlow, Diagram, Choice, CodeTrace and six one-off layouts. Seven deliberate changes were all caught by the comparison.
+- `npm run lesson:roundtrip` passes for all 14 lessons, and 1,024 of 1,052 blocks use the plain format. Raw blocks are labs, StepFlow, Diagram, Choice, CodeTrace and six one-off layouts. Seven deliberate changes were all caught by the comparison.
 - The reviewer still draws the card art and banner scene, and builds the lab.
+- First real test (2026-10-20): `http-requests`, drafted by a web AI. Its facts checked out against RFC 9110, RFC 6585, MDN and the Python docs, and every code sample ran. The fixes were format slips (quoted front matter, slugs as Term text, backticks in quiz and card text), missing `builds`/`place`, one duplicate card, and house style. The importer now strips single quotes, plain-texts quiz and card fields, and skips README files; web-edition.md spells out those rules. The Core came out long (about 2,190 words against 1,300–1,800 for Easy, so 14 min), and `HttpRequestLab` was then built from the draft's lab spec: a pretend reading-list API at example.test (GET/HEAD/POST on /books, GET/HEAD/PUT/DELETE on /books/:id) giving 200, 201 with Location, 204, 400, 404, 405 with Allow, 406 and 415, with HEAD never carrying content. `.prose pre code` in app.css now resets the inline-code pill inside lab code blocks (it leaked into five labs).
 
 ## Known quirks
 
