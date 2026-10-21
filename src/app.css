@@ -294,6 +294,14 @@ a {
 	font-size: 0.86em;
 }
 
+/* Code blocks inside labs and diagrams take their look from the block, not the inline pill. */
+.prose pre code {
+	padding: 0;
+	border-radius: 0;
+	background: none;
+	font-size: inherit;
+}
+
 .prose strong {
 	font-weight: 700;
 }
